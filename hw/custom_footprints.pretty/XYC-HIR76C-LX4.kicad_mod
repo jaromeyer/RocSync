@@ -1,0 +1,235 @@
+(footprint "XYC-HIR76C-LX4"
+	(version 20240108)
+	(generator "pcbnew")
+	(generator_version "8.0")
+	(layer "F.Cu")
+	(descr "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2204151015_NEWOPTO-XYC-HIR76C-LX4_C2988728.pdf")
+	(tags "LED")
+	(property "Reference" "REF**"
+		(at 0 -2.4 0)
+		(layer "F.SilkS")
+		(uuid "23cfe823-1c05-4754-8495-d27ff5fa113f")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "XYC-HIR76C-LX4"
+		(at 0 2.475 0)
+		(layer "F.Fab")
+		(uuid "549dcdf2-30e9-49b0-a807-814e9949ae56")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Footprint" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "4f649a1c-cc2e-43d0-b8c6-ccd21670fb76")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "ad521d25-dc75-4abe-9127-356d95c350b8")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(unlocked yes)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a49e4541-df33-43bc-8aac-7cd9a8f6ed26")
+		(effects
+			(font
+				(size 1.27 1.27)
+				(thickness 0.15)
+			)
+		)
+	)
+	(attr smd)
+	(fp_line
+		(start -1.4 -1.6)
+		(end 2.2 -1.6)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "ddac87c4-980b-4c6c-92b7-37e6eefb0d61")
+	)
+	(fp_line
+		(start -1.4 1.6)
+		(end 2.2 1.6)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "5c675c12-74cd-4141-baac-26804e4ebf44")
+	)
+	(fp_line
+		(start 2.2 1.6)
+		(end 2.2 -1.6)
+		(stroke
+			(width 0.12)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d7cbbcc6-5163-4def-b4a2-f9335f795b67")
+	)
+	(fp_line
+		(start -2.25 -1.65)
+		(end 2.25 -1.65)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "a5d17762-7b91-46f5-8a2f-849291f3bd95")
+	)
+	(fp_line
+		(start -2.25 1.65)
+		(end -2.25 -1.65)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "8b9fe1f9-3e70-4f72-965c-db66aa53c770")
+	)
+	(fp_line
+		(start 2.25 -1.65)
+		(end 2.25 1.65)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "74eed3ce-d3e9-4e61-9e96-5d939a03f05d")
+	)
+	(fp_line
+		(start 2.25 1.65)
+		(end -2.25 1.65)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(layer "F.CrtYd")
+		(uuid "8c174767-587c-4c17-a1f6-6195f64715b1")
+	)
+	(fp_line
+		(start -1.75 1.4)
+		(end -1.75 -0.7)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "d3cddaf4-9eec-4291-a299-7479007b03a1")
+	)
+	(fp_line
+		(start -1.05 -1.4)
+		(end -1.75 -0.7)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "c2802cab-2f57-455a-8031-7ee520e7d015")
+	)
+	(fp_line
+		(start -1.05 -1.4)
+		(end 1.75 -1.4)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "23ac48d2-f361-40d6-8701-f2e12e690ae3")
+	)
+	(fp_line
+		(start 1.75 -1.4)
+		(end 1.75 1.4)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "b6803ee7-03c3-4892-b996-11e4255297a1")
+	)
+	(fp_line
+		(start 1.75 1.4)
+		(end -1.75 1.4)
+		(stroke
+			(width 0.1)
+			(type solid)
+		)
+		(layer "F.Fab")
+		(uuid "520f2645-1117-49d3-b005-86a849896b22")
+	)
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "8d8b0509-69c6-4315-884a-f105f212ca97")
+		(effects
+			(font
+				(size 0.9 0.9)
+				(thickness 0.135)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at 1.25 0)
+		(size 1.5 2.2)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "0f92cede-73bb-403b-8f67-855871880cf2")
+	)
+	(pad "2" smd rect
+		(at -1 0)
+		(size 2 2.2)
+		(layers "F.Cu" "F.Paste" "F.Mask")
+		(uuid "f27b831f-46e7-4d40-bf6e-c86d81803aec")
+	)
+	(model "${KICAD8_3DMODEL_DIR}/LED_SMD.3dshapes/LED_PLCC_2835.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+	(model "${KICAD8_3DMODEL_DIR}/LED_SMD.3dshapes/LED_RGB_Wuerth-PLCC4_3.2x2.8mm_150141M173100.wrl"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
