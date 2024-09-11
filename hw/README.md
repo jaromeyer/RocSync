@@ -1,0 +1,2 @@
+# RocSync hardware
+This folder contains the KiCad project for the RocSync device. It was designed with manufacturing and assembly by JLCPCB in mind. The following [plugin](https://github.com/Bouni/kicad-jlcpcb-tools) was used to generate fabrication files for JLCPCB.
