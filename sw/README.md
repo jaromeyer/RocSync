@@ -1,13 +1,15 @@
 # RocSync decoding software
-This folder contains the computer vision software for detecting and decoding videos/images showing the RocSync PCB.
+
+This folder contains the Python application for detecting and decoding the RocSync device in videos and images where it is visible.
 
 ### Pipeline:
-1. Find ArUco marker
-2. Use marker corners to perform coarse homographic reprojection
-3. Find corner LEDs in the reprojected image
-4. Use LED coordinates to perform accurate reprojection
-5. Read circle and binary counter by thresholding given areas
-6. Fit robust linear model to all extracted timestamps and reject outliers
+
+1. **Find ArUco marker**: Detect the ArUco marker to determine the approximate position and orientation.
+2. **Coarse homographic reprojection**: Use the detected marker's corners to perform a coarse homographic reprojection of the image.
+3. **Locate corner LEDs**: Identify the corner LEDs in the reprojected image.
+4. **Accurate reprojection**: Use the corner LEDs to refine the reprojection for higher accuracy.
+5. **Decode LEDs**: Decode the circle and binary counter LEDs by thresholding their general areas to obtain an exact timestamp.
+6. **Timestamp fitting**: If the input was a video, perform robust linear regression on all extracted timestamps to reject outliers and estimate timestamps for all frames.
 
 ## Usage
 ```
