@@ -12,17 +12,11 @@ How to build PlatformIO based project
 4. Run these commands:
 
 ```shell
-# Change directory to example
-$ cd platform-ch32v/examples/blinky-arduino-ch32v003
-
 # Build project
 $ pio run
 
 # Upload firmware
 $ pio run --target upload
-
-# Upload firmware for the specific environment
-$ pio run -e ch32v003f4p6_evt_r0 --target upload
 
 # Clean build files
 $ pio run --target clean
