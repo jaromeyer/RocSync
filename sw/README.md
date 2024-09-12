@@ -33,11 +33,11 @@ options:
   --debug DIRECTORY     directory to store debug images (very slow)
 ```
 
-## Example output
+## Example
 ```
-python ./rocsync.py ./examples/h10.MP4 ./examples
+$ python ./rocsync.py ./examples/h10.MP4 ./examples
 Working on ./examples/h10.MP4
-Analyzing frames: 100%|███████████████████████████████████████████████████████████| 6520/6520 [02:21<00:00, 45.93it/s] 
+Analyzing frames: 100%|████████████████████| 6520/6520 [02:21<00:00, 45.93it/s]
 Number of considered frames:                             1888
 Number of rejected outliers:                                0
 R2 score:                                              1.0000
@@ -49,10 +49,10 @@ Actual duration (fps):                27191.7 ms (239.74 fps)
 Delta (actual - expected)              2.08 ms (0.010% speed)
 Exposure time (mean/min/max):               3.97/3.00/5.00 ms
 -------------------------------------------------------------
-Processing files: 100%|████████████████████████████████████████████████████████████████| 1/1 [02:22<00:00, 142.04s/it] 
+Processing files: 100%|█████████████████████████| 1/1 [02:22<00:00, 142.04s/it]
 ```
 
-## FFmpeg
+### FFmpeg
 To visually inspect the synchronization you can use FFmpeg to combine the aligned videos side-by-side:
 ```bash
 ffmpeg \
