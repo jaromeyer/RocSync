@@ -8,3 +8,8 @@ This repository is organized into three main sections. See the respective README
 - `hw/`: KiCad files for the PCB design & CAD models
 - `fw/`: PlatformIO project for the microcontroller firmware
 - `sw/`: Python source code for computer vision processing
+
+## TODO
+- [ ] Write debug images in separate thread
+- [ ] Kill all threads on exit
+- [ ] More filters for IR (e.g., uniform corner distance)

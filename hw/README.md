@@ -2,10 +2,10 @@
 This folder contains the KiCad project for the RocSync device. It was designed with manufacturing and assembly by JLCPCB in mind. The following [plugin](https://github.com/Bouni/kicad-jlcpcb-tools) was used to generate fabrication files for JLCPCB. The folder `3d_models` contains the STEP and STL files for the cover and handle.
 
 ## TODO
-- Use TCXO for better accuracy (e.g. [TX0283D](https://jlcpcb.com/partdetail/Tst-TX0283D/C499191))
-- Decouple IR and visible LED brightness
-- Fix decreasing brightness when battery voltage is low
-- Verify that handle fits the battery
+- [ ] Use TCXO for better accuracy (e.g. [TX0283D](https://jlcpcb.com/partdetail/Tst-TX0283D/C499191))
+- [ ] Decouple IR and visible LED brightness
+- [ ] Fix decreasing brightness when battery voltage is low
+- [ ] Verify that handle fits the battery
 
 ## Mechanical BOM
 | Part                        | Quantity | Source                                                              |
