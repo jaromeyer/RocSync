@@ -64,3 +64,8 @@ ffmpeg \
 	-r 30 \
 	synchronized.mp4
 ```
+
+## TODO
+- [ ] Write debug images in separate thread
+- [ ] Kill all threads on exit
+- [ ] More filters for IR (e.g., uniform corner distance)
