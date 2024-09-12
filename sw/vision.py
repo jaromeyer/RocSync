@@ -99,8 +99,7 @@ def read_ring(extracted_board, camera_type, draw_result=False):
         # Create mask and sample image
         led_mask = np.zeros((board_size, board_size), dtype=np.uint8)
         cv2.circle(led_mask, (x, y), led_size, (255), -1)
-        mean_intensity = cv2.mean(extracted_board, led_mask)[0]
-        # mean_intensity = np.mean(extracted_board[led_mask > 0])
+        mean_intensity = np.mean(extracted_board[led_mask > 0])
         leds[i] = mean_intensity > 20  # TODO make param
 
         if draw_result:
@@ -129,7 +128,7 @@ def read_counter(extracted_board, camera_type, draw_result=False):
         # Create mask and sample image
         led_mask = np.zeros((board_size, board_size), dtype=np.uint8)
         cv2.circle(led_mask, (x, y), led_size, (255), -1)
-        mean_intensity = cv2.mean(extracted_board, led_mask)[0]
+        mean_intensity = np.mean(extracted_board[led_mask > 0])
         enabled = mean_intensity > 20  # TODO make param
         if enabled:
             counter += 2 ** (15 - i)
@@ -226,9 +225,8 @@ def process_frame(image, camera_type, debug_dir=None):
             if aruco_corners is None:
                 return
             red_channel = image[:, :, 2]
-            _, mask = cv2.threshold(red_channel, 220, 255, cv2.THRESH_BINARY)  # + cv2.THRESH_OTSU)
+            _, mask = cv2.threshold(red_channel, 220, 255, cv2.THRESH_BINARY)
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-            # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
 
             # Use course PCB to accurately extract corner
             rough_transformation_matrix = cv2.getPerspectiveTransform(
@@ -249,7 +247,6 @@ def process_frame(image, camera_type, debug_dir=None):
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             _, mask = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-            # mask = cv2.cvtColor(mask, cv2.COLOR_GRAY2BGR)
             corners = find_corners_convexhull(mask, debug_dir)
             if corners is None:
                 return
@@ -262,6 +259,9 @@ def process_frame(image, camera_type, debug_dir=None):
                     pcb = cv2.rotate(pcb, cv2.ROTATE_90_CLOCKWISE)
             if read_counter(pcb, CameraType.INFRARED) == 0:
                 return  # Counter was actually 0, can't determine orientation
+
+    if debug_dir:  # For RGB debug output
+        pcb = cv2.cvtColor(pcb, cv2.COLOR_GRAY2BGR)
 
     counter = read_counter(pcb, camera_type, draw_result=True)
     ring = read_ring(pcb, camera_type, draw_result=True)

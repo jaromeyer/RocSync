@@ -20,6 +20,19 @@ def process_image(path, camera_type, debug_dir=None):
         errprint("Error: Unable to decode timestamp.")
 
 
+def mkdir_unique(name, parent_dir):
+    existing_dirs = os.listdir(parent_dir)
+    if name not in existing_dirs:
+        debug_dir = f"{parent_dir}/{name}"
+    else:
+        counter = 2
+        while f"{name} ({counter})" in existing_dirs:
+            counter += 1
+        debug_dir = f"{parent_dir}/{name} ({counter})"
+    os.makedirs(debug_dir)
+    return debug_dir
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Extract timestamps from images and videos showing the RocSync device."
@@ -99,8 +112,12 @@ def main():
                 print("Please enter 'y' or 'n'.")
 
     if args.debug:
-        os.makedirs(os.path.dirname(args.debug), exist_ok=True)
-        print(f"Debug output enabled, writing debug images to {args.debug}")
+        os.makedirs(args.debug, exist_ok=True)
+        warnprint(f"Debug images will be stored in {args.debug}")
+
+    if args.export_frames:
+        os.makedirs(args.export_frames, exist_ok=True)
+        warnprint(f"Exported frames will be stored in {args.export_frames}")
 
     result = {}
     for file in tqdm(videos + images, desc="Processing files", position=0):
@@ -108,20 +125,17 @@ def main():
 
         debug_dir = None
         if args.debug:
-            existing_dirs = os.listdir(args.debug)
-            file_name, _ = os.path.splitext(os.path.basename(file))
-            if file_name not in existing_dirs:
-                debug_dir = f"{args.debug}/{file_name}"
-            else:
-                counter = 2
-                while f"{file_name} ({counter})" in existing_dirs:
-                    counter += 1
-                debug_dir = f"{args.debug}/{file_name} ({counter})"
-            os.makedirs(debug_dir)
+            name, _ = os.path.splitext(os.path.basename(file))
+            debug_dir = mkdir_unique(name, args.debug)
+
+        export_dir = None
+        if args.export_frames:
+            name, _ = os.path.splitext(os.path.basename(file))
+            export_dir = mkdir_unique(name, args.export_frames)
 
         if file in videos:
             result[file] = process_video(
-                file, CameraType(args.camera_type), args.export_frames, args.stride, debug_dir
+                file, CameraType(args.camera_type), export_dir, args.stride, debug_dir
             )
         elif file in images:
             result[file] = process_image(file, CameraType(args.camera_type), debug_dir)
