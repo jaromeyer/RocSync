@@ -1,6 +1,5 @@
 import os
 import queue
-import shutil
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -53,18 +52,12 @@ def export_frames(cap, path, y_pred):
             future.result()
 
 
-def process_video(video_path, camera_type, export_frames=None, stride=None, debug_dir=None):
+def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None):
+    print(f"{export_dir} {debug_dir}")
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         errprint(f"Error: Could not open video: {video_path}")
         return
-
-    # name = os.path.splitext(os.path.basename(video_path))[-2]
-    # output_path = f"output/{name}"
-    # debug_path = f"{output_path}/debug"
-    # if os.path.exists(output_path):
-    #     shutil.rmtree(output_path)
-    # os.makedirs(debug_path)
 
     fps = cap.get(cv2.CAP_PROP_FPS)
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
@@ -81,7 +74,6 @@ def process_video(video_path, camera_type, export_frames=None, stride=None, debu
         stride = int(fps)
     for frame_number in tqdm(range(n_frames), desc="Analyzing frames", position=1):
         frame, frame_number = frame_queue.get()  # blocking wait
-        # ret, frame = cap.read()
         if frame is None:
             errprint("Error: Input stream ended unexpectedly.")
             return
@@ -112,9 +104,8 @@ def process_video(video_path, camera_type, export_frames=None, stride=None, debu
     }
 
     if export_frames:
-        export_dir = f"{debug_dir}/export"
-        os.makedirs(export_dir)
         export_frames(cap, export_dir, y_pred)
+
     cap.release()
 
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
@@ -125,7 +116,25 @@ def process_video(video_path, camera_type, export_frames=None, stride=None, debu
     measured_fps = (n_frames - 1) / measured_duration * 1000
     speed_factor = measured_duration / expected_duration
 
-    result = {
+    print_statistics(
+        timestamps,
+        model,
+        r2_score,
+        rmse,
+        y_pred,
+        expected_duration,
+        fps,
+        measured_duration,
+        measured_fps,
+        speed_factor,
+        exposure_times,
+    )
+
+    if debug_dir:
+        plot_timechart(x, y, x_range, y_pred, exposure_times, expected_duration, debug_dir)
+        plot_exposure_histogram(exposure_times, debug_dir)
+
+    return {
         "n_frames": n_frames,
         "r2": r2_score,
         "rmse": rmse,
@@ -141,7 +150,20 @@ def process_video(video_path, camera_type, export_frames=None, stride=None, debu
         "interpolated_timestamps": y_pred.tolist(),
     }
 
-    # Print result
+
+def print_statistics(
+    timestamps,
+    model,
+    r2_score,
+    rmse,
+    y_pred,
+    expected_duration,
+    fps,
+    measured_duration,
+    measured_fps,
+    speed_factor,
+    exposure_times,
+):
     format_str = "{:<30} {:>30}"
     printresult("Number of considered frames", len(timestamps), len(timestamps) > 10)
     printresult(
@@ -169,87 +191,46 @@ def process_video(video_path, camera_type, export_frames=None, stride=None, debu
     )
     print(
         format_str.format(
-            "Exposure time (mean/min/max):",
-            f"{np.mean(exposure_times):.2f}/{np.min(exposure_times):.2f}/{np.max(exposure_times):.2f} ms",
+            "Exposure time (mean/min/max/std):",
+            f"{np.mean(exposure_times):.2f}/{np.min(exposure_times):.2f}/{np.max(exposure_times):.2f}/{np.std(exposure_times):.2f} ms",
         )
     )
     print(61 * "-")
-
-    # print_statistics(result)
-    # if debug_dir:
-    #     plot_statistics(result, debug_dir)
-    return result
+    # print(f"ffmpeg settings: '-ss {-y_pred[0]/speed_factor/1000:.3f}' 'setpts=PTS*{speed_factor}'")
 
 
-# def print_statistics(result):
-#     format_str = "{:<30} {:>30}"
-#     printresult("Number of considered frames", len(timestamps), len(timestamps) > 10)
-#     printresult(
-#         "Number of rejected outliers",
-#         np.sum(~np.array(model.inlier_mask_)),
-#         np.all(model.inlier_mask_),
-#     )
-#     printresult("R2 score", f"{result["r2_score"]:.4f}", ["r2_score"] > 0.99)
-#     printresult("RMSE", f"{result["rmse"]:.2f} ms", result["rmse"] < 2)
-#     print(format_str.format("First frame:", f"{y_pred[0]:.1f} ms"))
-#     print(format_str.format("Last frame:", f"{y_pred[-1]:.1f} ms"))
-#     print(
-#         format_str.format("Expected duration (fps):", f"{expected_duration:.1f} ms ({fps:.2f} fps)")
-#     )
-#     print(
-#         format_str.format(
-#             "Actual duration (fps):",
-#             f"{measured_duration:.1f} ms ({measured_fps:.2f} fps)",
-#         )
-#     )
-#     print(
-#         format_str.format(
-#             "Delta (actual - expected)",
-#             f"{measured_duration-expected_duration:.2f} ms ({speed_factor/100:.3f}% speed)",
-#         )
-#     )
-#     print(
-#         format_str.format(
-#             "Exposure time (mean/min/max):",
-#             f"{np.mean(exposure_times):.2f}/{np.min(exposure_times):.2f}/{np.max(exposure_times):.2f} ms",
-#         )
-#     )
-#     print(61 * "-")
-#     # print(f"ffmpeg settings: '-ss {-y_pred[0]/speed_factor/1000:.3f}' 'setpts=PTS*{speed_factor}'")
+def plot_timechart(x, y, x_range, y_pred, exposure_times, expected_duration, debug_dir):
+    plt.figure()
+    plt.scatter(x, y, color="blue", label="Measurements")
+    plt.plot(x_range, y_pred, color="blue", label="Measured frametime")
+    plt.plot(
+        x_range,
+        np.linspace(y_pred[0], y_pred[0] + expected_duration, len(x_range)),
+        color="red",
+        label="Calculated frametime",
+    )
+    plt.xlabel("Frame number")
+    plt.ylabel("Time relative to RocSync [ms]")
+    plt.title("Frame timing")
+    plt.gca().ticklabel_format(style="plain", useOffset=False)
+    plt.legend()
+    plt.grid(True)
+    ax2 = plt.gca().twinx()
+    ax2.scatter(x, exposure_times, color="green", label="Exposure time [ms]")
+    ax2.set_ylabel("Exposure time [ms]")
+    ax2.ticklabel_format(style="plain", useOffset=False)
+    ax2.yaxis.set_major_locator(MaxNLocator(integer=True))
+    ax2.legend(loc="upper right")
+    plt.savefig(f"{debug_dir}/timestamps.png")
 
 
-# def plot_statistics(result, debug_dir):
-#     # Plot timechart
-#     plt.figure()
-#     plt.scatter(x, y, color="blue", label="Measurements")
-#     plt.plot(x_range, y_pred, color="blue", label="Measured frametime")
-#     plt.plot(
-#         x_range,
-#         np.linspace(y_pred[0], y_pred[0] + expected_duration, n_frames),
-#         color="red",
-#         label="Calculated frametime",
-#     )
-#     plt.xlabel("Frame number")
-#     plt.ylabel("Time relative to RocSync [ms]")
-#     plt.title("Frame timing")
-#     plt.gca().ticklabel_format(style="plain", useOffset=False)
-#     plt.legend()
-#     plt.grid(True)
-#     ax2 = plt.gca().twinx()
-#     ax2.scatter(x, exposure_times, color="green", label="Exposure time [ms]")
-#     ax2.set_ylabel("Exposure time [ms]")
-#     ax2.ticklabel_format(style="plain", useOffset=False)
-#     ax2.yaxis.set_major_locator(MaxNLocator(integer=True))
-#     ax2.legend(loc="upper right")
-#     plt.savefig(f"{debug_dir}/timestamps.png")
-
-#     # Plot exposure time histogram
-#     plt.figure()
-#     unique_values, counts = np.unique(exposure_times, return_counts=True)
-#     bar = plt.bar(unique_values, counts)
-#     plt.bar_label(bar, counts)
-#     plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
-#     plt.xlabel("Exposure time [ms]")
-#     plt.ylabel("Number of measured frames")
-#     plt.title("Exposure time histogram")
-#     plt.savefig(f"{debug_dir}/exposure.png")
+def plot_exposure_histogram(exposure_times, debug_dir):
+    plt.figure()
+    unique_values, counts = np.unique(exposure_times, return_counts=True)
+    bar = plt.bar(unique_values, counts)
+    plt.bar_label(bar, counts)
+    plt.gca().xaxis.set_major_locator(MaxNLocator(integer=True))
+    plt.xlabel("Exposure time [ms]")
+    plt.ylabel("Number of measured frames")
+    plt.title("Exposure time histogram")
+    plt.savefig(f"{debug_dir}/exposure.png")
