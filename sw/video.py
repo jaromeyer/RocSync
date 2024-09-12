@@ -39,7 +39,9 @@ def export_frames(cap, path, y_pred):
     os.makedirs(path, exist_ok=True)
     # Read frames in separate thread
     frame_queue = queue.Queue(maxsize=100)
-    threading.Thread(target=read_frames_async, args=(cap, frame_queue)).start()
+    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue))
+    thread.daemon = True
+    thread.start()
 
     # Export frames concurrently using multiple threads
     with ThreadPoolExecutor(max_workers=100) as executor:
@@ -65,7 +67,9 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
     # Read frames in separate thread
     frame_queue = queue.Queue(maxsize=100)
-    threading.Thread(target=read_frames_async, args=(cap, frame_queue)).start()
+    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue))
+    thread.daemon = True
+    thread.start()
 
     # Analyze frames
     timestamps = {}
