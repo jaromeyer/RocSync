@@ -63,7 +63,7 @@ def main():
         "--export_frames",
         type=str,
         metavar="DIRECTORY",
-        help="export all raw frames as PNGs with timestamp (only applies to videos)",
+        help="directory to store all raw frames as PNGs with timestamp (only applies to videos)",
     )
     parser.add_argument(
         "-o",

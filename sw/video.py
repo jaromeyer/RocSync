@@ -55,7 +55,6 @@ def export_frames(cap, path, y_pred):
 
 
 def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None):
-    print(f"{export_dir} {debug_dir}")
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
         errprint(f"Error: Could not open video: {video_path}")
@@ -82,7 +81,7 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
             errprint("Error: Input stream ended unexpectedly.")
             return
         if scan_window > 0 or frame_number % stride == 0:
-            timestamp = process_frame(frame, camera_type, debug_dir)
+            timestamp = process_frame(frame, camera_type, frame_number, debug_dir)
             scan_window -= 1
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
@@ -107,7 +106,7 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         k: v for (k, v), keep in zip(list(timestamps.items()), model.inlier_mask_) if keep
     }
 
-    if export_frames:
+    if export_dir:
         export_frames(cap, export_dir, y_pred)
 
     cap.release()
@@ -144,14 +143,17 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         "rmse": rmse,
         "expected_duration": expected_duration,
         "measured_duration": measured_duration,
+        "expected_fps": fps,
+        "measured_fps": measured_fps,
         "speed_factor": speed_factor,
         "start": y_pred[0],
         "end": y_pred[-1],
         "mean_exposure_time": np.mean(exposure_times),
-        "min_exposure_time": float(np.min(exposure_times)),
-        "max_exposure_time": float(np.max(exposure_times)),
+        "min_exposure_time": np.min(exposure_times),
+        "max_exposure_time": np.max(exposure_times),
+        "std_exposure_time": np.std(exposure_times),
         "measured_timestamps": timestamps,
-        "interpolated_timestamps": y_pred.tolist(),
+        "estimated_timestamps": y_pred.tolist(),
     }
 
 
