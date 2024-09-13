@@ -67,5 +67,4 @@ ffmpeg \
 
 ## TODO
 - [ ] Write debug images in separate thread
-- [ ] Kill all threads on exit
 - [ ] More filters for IR (e.g., uniform corner distance)
