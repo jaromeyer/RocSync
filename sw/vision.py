@@ -72,10 +72,6 @@ aruco_corners_coords = np.array(
     dtype=np.float32,
 )
 
-# Global variables
-frame_number = 0
-prev_corners = np.zeros((4, 2))
-
 
 def draw_polygon(points, image, color):
     for i in range(len(points)):
@@ -138,7 +134,7 @@ def read_counter(extracted_board, camera_type, draw_result=False):
     return counter
 
 
-def find_corners_convexhull(mask, debug_dir=None):
+def find_corners_convexhull(mask, frame_number, debug_dir=None):
     points = blob_detector.detect(mask)
 
     # Draw detected blobs as red circles
@@ -179,7 +175,7 @@ def find_corners_convexhull(mask, debug_dir=None):
         return corners
 
 
-def find_corners_dots(mask, debug_dir=None):
+def find_corners_dots(mask, frame_number, debug_dir=None):
     points = blob_detector.detect(mask)
     if not points:
         return
@@ -203,7 +199,7 @@ def find_corners_dots(mask, debug_dir=None):
     return np.array(closest_points, dtype=np.float32)
 
 
-def find_corners_aruco(mask, debug_dir=None):
+def find_corners_aruco(mask, frame_number, debug_dir=None):
     markers, marker_ids, _ = aruco_detector.detectMarkers(mask)
     if debug_dir:
         debug_image = mask.copy()
@@ -217,11 +213,11 @@ def find_corners_aruco(mask, debug_dir=None):
         return marker_dict[aruco_marker_id]
 
 
-def process_frame(image, camera_type, debug_dir=None):
+def process_frame(image, camera_type, frame_number, debug_dir=None):
     match camera_type:
         case CameraType.RGB:
             # First extract course PCB using ArUco marker
-            aruco_corners = find_corners_aruco(image, debug_dir)
+            aruco_corners = find_corners_aruco(image, frame_number, debug_dir)
             if aruco_corners is None:
                 return
             red_channel = image[:, :, 2]
@@ -235,7 +231,7 @@ def process_frame(image, camera_type, debug_dir=None):
             rough_pcb = cv2.warpPerspective(
                 mask, rough_transformation_matrix, (board_size, board_size)
             )
-            corners = find_corners_dots(rough_pcb, debug_dir)
+            corners = find_corners_dots(rough_pcb, frame_number, debug_dir)
             if corners is None:
                 return
             transformation_matrix = np.dot(
@@ -247,7 +243,7 @@ def process_frame(image, camera_type, debug_dir=None):
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             _, mask = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
-            corners = find_corners_convexhull(mask, debug_dir)
+            corners = find_corners_convexhull(mask, frame_number, debug_dir)
             if corners is None:
                 return
             transformation_matrix = cv2.getPerspectiveTransform(corners, ir_corners)
