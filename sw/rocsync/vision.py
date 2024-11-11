@@ -118,7 +118,7 @@ def read_ring(extracted_board, camera_type, draw_result=False):
 def read_counter(extracted_board, camera_type, draw_result=False):
     y = int(53 / 250 * 640) if camera_type == CameraType.RGB else int(48 / 250 * 640)
     counter = 0
-    for i in range(1, 16):
+    for i in range(0, 16):
         x = int((65 + i * 8) / 250 * 640)
 
         # Create mask and sample image
