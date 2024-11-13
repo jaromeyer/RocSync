@@ -3,11 +3,25 @@ import json
 import os
 
 import cv2
+import numpy as np
 from tqdm import tqdm
 
 from printer import *
 from video import process_video
 from vision import CameraType, process_frame
+
+
+class NpEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):
+            return int(obj)
+        elif isinstance(obj, np.floating):
+            return float(obj)
+        elif isinstance(obj, np.ndarray):
+            return obj.tolist()
+        elif isinstance(obj, (np.bool_, bool)):
+            return bool(obj)
+        return super().default(obj)
 
 
 def process_image(path, camera_type, debug_dir=None):
@@ -56,7 +70,7 @@ def main():
         "--stride",
         type=int,
         metavar="N",
-        help="scan every N-th frame only (default: framerate, only applies to videos)",
+        help="scan every N-th frame only (default: same as framerate, only applies to videos)",
     )
     parser.add_argument(
         "-e",
@@ -143,7 +157,7 @@ def main():
     if args.output:
         os.makedirs(os.path.dirname(args.output), exist_ok=True)
         with open(args.output, "w") as file:
-            json.dump(result, file, indent=4)
+            json.dump(result, file, indent=4, cls=NpEncoder)
         print(f"Result written to {args.output}")
 
 
