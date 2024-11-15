@@ -150,10 +150,11 @@ def main():
         if file in videos:
             result[file] = process_video(
                 file, CameraType(args.camera_type), export_dir, args.stride, debug_dir
-            )
+            ).to_dict()
         elif file in images:
             result[file] = process_image(file, CameraType(args.camera_type), debug_dir)
 
+    # TODO: fix missing parent dir path
     if args.output:
         os.makedirs(os.path.dirname(args.output), exist_ok=True)
         with open(args.output, "w") as file:
