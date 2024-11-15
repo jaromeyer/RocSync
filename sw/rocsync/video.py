@@ -12,6 +12,7 @@ from sklearn.metrics import root_mean_squared_error
 from tqdm import tqdm
 
 from rocsync.printer import *
+from rocsync.video_statistics import VideoStatistics
 from rocsync.vision import process_frame
 
 
@@ -34,9 +35,14 @@ def export_frame_async(frame_queue, y_pred, path):
     cv2.imwrite(f"{path}/f{frame_number}_s{y_pred[frame_number]:.0f}.png", frame)
 
 
-def export_frames(cap, path, y_pred):
-    n_frames = len(y_pred)
-    os.makedirs(path, exist_ok=True)
+def export_frames(video_path, output_path, y_pred):
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        errprint(f"Error: Could not open video: {video_path}")
+        return
+    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    os.makedirs(output_path, exist_ok=True)
+
     # Read frames in separate thread
     frame_queue = queue.Queue(maxsize=100)
     thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue))
@@ -47,11 +53,12 @@ def export_frames(cap, path, y_pred):
     with ThreadPoolExecutor(max_workers=100) as executor:
         futures = []
         for _ in range(n_frames):
-            futures.append(executor.submit(export_frame_async, frame_queue, y_pred, path))
+            futures.append(executor.submit(export_frame_async, frame_queue, y_pred, output_path))
         for future in tqdm(
             as_completed(futures), total=n_frames, desc="Exporting frames", position=1
         ):
             future.result()
+    cap.release()
 
 
 def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None):
@@ -86,123 +93,126 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
                 scan_window = 5
+    cap.release()
 
     if len(timestamps) == 0:
         errprint("Error: Unable to timestamp any frames.")
         return
 
-    # Assuming constant frame rate, fit linear model
+    # Assuming constant frame rate, fit robust linear model
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
     y = np.array([start for start, _ in timestamps.values()])
-    model = RANSACRegressor(residual_threshold=20)  # max accepted distance to linear model in ms
+    model = RANSACRegressor(residual_threshold=1000 / fps)  # max one frame deviation
     model.fit(x, y)
-    r2_score = model.score(x, y)
-    rmse = root_mean_squared_error(y, model.predict(x))
+
+    # Predict timestamps for all frames
     x_range = np.arange(0, n_frames).reshape(-1, 1)
     y_pred = model.predict(x_range)
 
-    # remove outliers
-    timestamps = {
-        k: v for (k, v), keep in zip(list(timestamps.items()), model.inlier_mask_) if keep
+    # errors = np.abs(y - model.predict(x))
+    # e_max = np.max(errors)
+    # e_max_frame = list(timestamps.keys())[np.argmax(errors)]
+    # print(f"Max error: {np.max(errors)} (frame {e_max_frame})")
+
+    # Remove outliers
+    filtered_timestamps = {
+        k: v for i, (k, v) in enumerate(timestamps.items()) if model.inlier_mask_[i]
     }
+    filtered_x = np.array(list(filtered_timestamps.keys())).reshape(-1, 1)
+    filtered_y = np.array([start for start, _ in filtered_timestamps.values()])
 
-    if export_dir:
-        export_frames(cap, export_dir, y_pred)
-
-    cap.release()
-
-    x = np.array(list(timestamps.keys())).reshape(-1, 1)
-    y = np.array([start for start, _ in timestamps.values()])
-
-    exposure_times = [end - start for start, end in timestamps.values()]
+    # Calculate statistics
+    exposure_times = [end - start for start, end in filtered_timestamps.values()]
     measured_duration = y_pred[-1] - y_pred[0]
-    measured_fps = (n_frames - 1) / measured_duration * 1000
-    speed_factor = measured_duration / expected_duration
-
-    print_statistics(
-        timestamps,
-        model,
-        r2_score,
-        rmse,
-        y_pred,
-        expected_duration,
-        fps,
-        measured_duration,
-        measured_fps,
-        speed_factor,
-        exposure_times,
+    statistics = VideoStatistics(
+        n_frames=n_frames,
+        n_considered_frames=len(filtered_timestamps),
+        n_rejected_frames=len(timestamps) - len(filtered_timestamps),
+        r2_before=model.score(x, y),
+        rmse_before=root_mean_squared_error(y, model.predict(x)),
+        r2_after=model.score(filtered_x, filtered_y),
+        rmse_after=root_mean_squared_error(filtered_y, model.predict(filtered_x)),
+        expected_duration=expected_duration,
+        measured_duration=measured_duration,
+        expected_fps=fps,
+        measured_fps=(n_frames - 1) / measured_duration * 1000,
+        speed_factor=measured_duration / expected_duration,
+        first_frame=y_pred[0],
+        last_frame=y_pred[-1],
+        mean_exposure_time=np.mean(exposure_times),
+        min_exposure_time=np.min(exposure_times),
+        max_exposure_time=np.max(exposure_times),
+        std_exposure_time=np.std(exposure_times),
+        measured_timestamps=filtered_timestamps,
+        interpolated_timestamps=y_pred.tolist(),
     )
+
+    print_statistics(statistics)
 
     if debug_dir:
-        plot_timechart(x, y, x_range, y_pred, exposure_times, expected_duration, debug_dir)
+        plot_timechart(
+            filtered_x, filtered_y, x_range, y_pred, exposure_times, expected_duration, debug_dir
+        )
         plot_exposure_histogram(exposure_times, debug_dir)
 
-    return {
-        "n_frames": n_frames,
-        "r2": r2_score,
-        "rmse": rmse,
-        "expected_duration": expected_duration,
-        "measured_duration": measured_duration,
-        "expected_fps": fps,
-        "measured_fps": measured_fps,
-        "speed_factor": speed_factor,
-        "start": y_pred[0],
-        "end": y_pred[-1],
-        "mean_exposure_time": np.mean(exposure_times),
-        "min_exposure_time": np.min(exposure_times),
-        "max_exposure_time": np.max(exposure_times),
-        "std_exposure_time": np.std(exposure_times),
-        "measured_timestamps": timestamps,
-        "estimated_timestamps": y_pred.tolist(),
-    }
+    if export_dir:
+        export_frames(video_path, export_dir, y_pred)
+
+    return statistics
 
 
-def print_statistics(
-    timestamps,
-    model,
-    r2_score,
-    rmse,
-    y_pred,
-    expected_duration,
-    fps,
-    measured_duration,
-    measured_fps,
-    speed_factor,
-    exposure_times,
-):
-    format_str = "{:<30} {:>30}"
-    printresult("Number of considered frames", len(timestamps), len(timestamps) > 10)
+def print_statistics(statistics: VideoStatistics):
+    format_str = "{:<40} {:>30}"
+    print(61 * "-")
+    # TODO: find proper thesholds
+    printresult(
+        "Number of considered frames",
+        statistics.n_considered_frames,
+        statistics.n_considered_frames > 10,
+    )
     printresult(
         "Number of rejected outliers",
-        np.sum(~np.array(model.inlier_mask_)),
-        np.all(model.inlier_mask_),
+        statistics.n_rejected_frames,
+        statistics.n_rejected_frames == 0,
     )
-    printresult("R2 score", f"{r2_score:.4f}", r2_score > 0.99)
-    printresult("RMSE", f"{rmse:.2f} ms", rmse < 2)
-    print(format_str.format("First frame:", f"{y_pred[0]:.1f} ms"))
-    print(format_str.format("Last frame:", f"{y_pred[-1]:.1f} ms"))
-    print(
-        format_str.format("Expected duration (fps):", f"{expected_duration:.1f} ms ({fps:.2f} fps)")
+    printresult(
+        "R2 score (before/after outlier rejection)",
+        f"{statistics.r2_before:.4f}/{statistics.r2_after:.4f}",
+        statistics.r2_after > 0.99,
     )
+    printresult(
+        "RMSE (before/after outlier rejection)",
+        f"{statistics.rmse_before:.2f}/{statistics.rmse_after:.2f} ms",
+        statistics.rmse_after < 2,
+    )
+    print(61 * "-")
+    print(format_str.format("First frame:", f"{statistics.first_frame:.1f} ms"))
+    print(format_str.format("Last frame:", f"{statistics.last_frame:.1f} ms"))
     print(
         format_str.format(
-            "Actual duration (fps):", f"{measured_duration:.1f} ms ({measured_fps:.2f} fps)"
+            "Expected duration (fps):",
+            f"{statistics.expected_duration:.1f} ms ({statistics.expected_fps:.2f} fps)",
         )
     )
     print(
         format_str.format(
-            "Delta (actual - expected)",
-            f"{measured_duration-expected_duration:.2f} ms ({speed_factor/100:.3f}% speed)",
+            "Measured duration (fps):",
+            f"{statistics.measured_duration:.1f} ms ({statistics.measured_fps:.2f} fps)",
+        )
+    )
+    print(
+        format_str.format(
+            "Delta (measured - expected)",
+            f"{statistics.measured_duration-statistics.expected_duration:.2f} ms ({statistics.speed_factor:.6f}x speed)",
         )
     )
     print(
         format_str.format(
             "Exposure time (mean/min/max/std):",
-            f"{np.mean(exposure_times):.2f}/{np.min(exposure_times):.2f}/{np.max(exposure_times):.2f}/{np.std(exposure_times):.2f} ms",
+            f"{statistics.mean_exposure_time:.2f}/{statistics.min_exposure_time:.2f}/{statistics.max_exposure_time:.2f}/{statistics.std_exposure_time:.2f} ms",
         )
     )
     print(61 * "-")
-    # print(f"ffmpeg settings: '-ss {-y_pred[0]/speed_factor/1000:.3f}' 'setpts=PTS*{speed_factor}'")
 
 
 def plot_timechart(x, y, x_range, y_pred, exposure_times, expected_duration, debug_dir):
