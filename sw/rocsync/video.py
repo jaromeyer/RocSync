@@ -78,8 +78,8 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     for frame_number in tqdm(range(n_frames), desc="Analyzing frames", position=1):
         frame, frame_number = frame_queue.get()  # blocking wait
         if frame is None:
-            errprint("Error: Input stream ended unexpectedly.")
-            return
+            errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
+            break
         if scan_window > 0 or frame_number % stride == 0:
             timestamp = process_frame(frame, camera_type, frame_number, debug_dir)
             scan_window -= 1
