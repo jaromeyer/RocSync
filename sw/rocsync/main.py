@@ -6,9 +6,9 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from printer import *
-from video import process_video
-from vision import CameraType, process_frame
+from rocsync.printer import *
+from rocsync.video import process_video
+from rocsync.vision import CameraType, process_frame
 
 
 class NpEncoder(json.JSONEncoder):

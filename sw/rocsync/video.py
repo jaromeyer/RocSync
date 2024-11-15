@@ -11,8 +11,8 @@ from sklearn.linear_model import RANSACRegressor
 from sklearn.metrics import root_mean_squared_error
 from tqdm import tqdm
 
-from printer import *
-from vision import process_frame
+from rocsync.printer import *
+from rocsync.vision import process_frame
 
 
 def read_frames_async(cap, frame_queue):
