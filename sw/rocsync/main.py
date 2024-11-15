@@ -101,10 +101,9 @@ def main():
             # walk dir recursively
             for root, _, dir_files in os.walk(path):
                 for file in dir_files:
-                    file_path = os.path.join(root, file)
-                    files.add(file_path)
+                    files.add(os.path.abspath(os.path.join(root, file)))
         elif os.path.isfile(path):
-            files.add(path)
+            files.add(os.path.abspath(path))
         else:
             errprint(f"Invalid path: {path}")
             return
