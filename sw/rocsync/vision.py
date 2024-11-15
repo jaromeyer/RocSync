@@ -4,7 +4,7 @@ from enum import Enum
 import cv2
 import numpy as np
 
-from printer import *
+from rocsync.printer import *
 
 
 class CameraType(Enum):
