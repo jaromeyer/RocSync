@@ -118,6 +118,9 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     filtered_timestamps = {
         k: v for i, (k, v) in enumerate(timestamps.items()) if model.inlier_mask_[i]
     }
+    rejected_timestamps = {
+        k: v for i, (k, v) in enumerate(timestamps.items()) if not model.inlier_mask_[i]
+    }
     filtered_x = np.array(list(filtered_timestamps.keys())).reshape(-1, 1)
     filtered_y = np.array([start for start, _ in filtered_timestamps.values()])
 
@@ -143,7 +146,8 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         min_exposure_time=np.min(exposure_times),
         max_exposure_time=np.max(exposure_times),
         std_exposure_time=np.std(exposure_times),
-        measured_timestamps=filtered_timestamps,
+        considered_timestamps=filtered_timestamps,
+        rejected_timestamps=rejected_timestamps,
         interpolated_timestamps=y_pred.tolist(),
     )
 
