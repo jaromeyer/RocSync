@@ -102,7 +102,11 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     # Assuming constant frame rate, fit robust linear model
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
     y = np.array([start for start, _ in timestamps.values()])
-    model = RANSACRegressor(residual_threshold=1000 / fps)  # max one frame deviation
+    model = RANSACRegressor(
+        residual_threshold=1000 / fps,  # max one frame deviation
+        max_trials=1000,  # more trials for more consistent results
+        random_state=0,  # deterministic results
+    )
     model.fit(x, y)
 
     # Predict timestamps for all frames
