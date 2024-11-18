@@ -1,6 +1,8 @@
 import argparse
 import json
 import os
+import pathlib
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -35,16 +37,18 @@ def process_image(path, camera_type, debug_dir=None):
 
 
 def mkdir_unique(name, parent_dir):
-    existing_dirs = os.listdir(parent_dir)
-    if name not in existing_dirs:
-        debug_dir = f"{parent_dir}/{name}"
+    parent_path = Path(parent_dir)
+    debug_dir = parent_path / name
+    if not debug_dir.exists():
+        debug_dir.mkdir(parents=True)
     else:
         counter = 2
-        while f"{name} ({counter})" in existing_dirs:
+        debug_dir = parent_path / f"{name} ({counter})"
+        while debug_dir.exists():
             counter += 1
-        debug_dir = f"{parent_dir}/{name} ({counter})"
-    os.makedirs(debug_dir)
-    return debug_dir
+            debug_dir = parent_path / f"{name} ({counter})"
+        debug_dir.mkdir(parents=True)
+    return str(debug_dir)
 
 
 def main():
@@ -97,19 +101,20 @@ def main():
 
     files = set()
     for path in args.path:
-        if os.path.isdir(path):
+        path_obj = Path(path)
+        if path_obj.is_dir():
             # walk dir recursively
-            for root, _, dir_files in os.walk(path):
-                for file in dir_files:
-                    files.add(os.path.abspath(os.path.join(root, file)))
-        elif os.path.isfile(path):
-            files.add(os.path.abspath(path))
+            for file in path_obj.rglob("*"):
+                if file.is_file():
+                    files.add(file.resolve())
+        elif path_obj.is_file():
+            files.add(path_obj.resolve())
         else:
             errprint(f"Invalid path: {path}")
             return
 
-    videos = [f for f in files if f.lower().endswith((".mp4", ".avi", ".mov"))]
-    images = [f for f in files if f.lower().endswith((".png", ".jpg", ".jpeg"))]
+    videos = [f for f in files if f.suffix.lower() in [".mp4", ".avi", ".mov"]]
+    images = [f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]]
 
     if len(videos) + len(images) > 1:
         print(f"Found {len(videos)} videos and {len(images)} images:")
@@ -153,10 +158,10 @@ def main():
         elif file in images:
             result[file] = process_image(file, CameraType(args.camera_type), debug_dir)
 
-    # TODO: fix missing parent dir path
     if args.output:
-        os.makedirs(os.path.dirname(args.output), exist_ok=True)
-        with open(args.output, "w") as file:
+        output_path = pathlib.Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        with output_path.open("w") as file:
             json.dump(result, file, indent=4, cls=NpEncoder)
         print(f"Result written to {args.output}")
 
