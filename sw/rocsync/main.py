@@ -152,11 +152,11 @@ def main():
             export_dir = mkdir_unique(name, args.export_frames)
 
         if file in videos:
-            result[file] = process_video(
+            result[str(file)] = process_video(
                 file, CameraType(args.camera_type), export_dir, args.stride, debug_dir
             ).to_dict()
         elif file in images:
-            result[file] = process_image(file, CameraType(args.camera_type), debug_dir)
+            result[str(file)] = process_image(file, CameraType(args.camera_type), debug_dir)
 
     if args.output:
         output_path = pathlib.Path(args.output)
