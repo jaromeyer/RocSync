@@ -167,8 +167,8 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
 def print_statistics(statistics: VideoStatistics):
     format_str = "{:<40} {:>30}"
-    print(61 * "-")
-    # TODO: find proper thesholds
+    print(71 * "-")
+    # TODO: find proper thresholds
     printresult(
         "Number of considered frames",
         statistics.n_considered_frames,
@@ -177,10 +177,10 @@ def print_statistics(statistics: VideoStatistics):
     printresult(
         "Number of rejected outliers",
         statistics.n_rejected_frames,
-        statistics.n_rejected_frames == 0,
+        statistics.n_rejected_frames < 0.1 * statistics.n_frames,
     )
     printresult(
-        "R2 score (before/after outlier rejection)",
+        "R2 (before/after outlier rejection)",
         f"{statistics.r2_before:.4f}/{statistics.r2_after:.4f}",
         statistics.r2_after > 0.99,
     )
@@ -189,25 +189,18 @@ def print_statistics(statistics: VideoStatistics):
         f"{statistics.rmse_before:.2f}/{statistics.rmse_after:.2f} ms",
         statistics.rmse_after < 2,
     )
-    print(61 * "-")
-    print(format_str.format("First frame:", f"{statistics.first_frame:.1f} ms"))
-    print(format_str.format("Last frame:", f"{statistics.last_frame:.1f} ms"))
+    print(format_str.format("First frame:", f"{statistics.first_frame/1000:.3f} s"))
+    print(format_str.format("Last frame:", f"{statistics.last_frame/1000:.3f} s"))
     print(
         format_str.format(
-            "Expected duration (fps):",
-            f"{statistics.expected_duration:.1f} ms ({statistics.expected_fps:.2f} fps)",
+            "Framerate (expected/measured):",
+            f"{statistics.expected_fps:.3f}/{statistics.measured_fps:.3f} fps ({statistics.speed_factor:.6f}x)",
         )
     )
     print(
         format_str.format(
-            "Measured duration (fps):",
-            f"{statistics.measured_duration:.1f} ms ({statistics.measured_fps:.2f} fps)",
-        )
-    )
-    print(
-        format_str.format(
-            "Delta (measured - expected)",
-            f"{statistics.measured_duration-statistics.expected_duration:.2f} ms ({statistics.speed_factor:.6f}x speed)",
+            "Duration (expected/measured):",
+            f"{statistics.expected_duration/1000:.3f}/{statistics.measured_duration/1000:.3f} s (Δ={statistics.measured_duration-statistics.expected_duration:.2f} ms)",
         )
     )
     print(
@@ -216,7 +209,7 @@ def print_statistics(statistics: VideoStatistics):
             f"{statistics.mean_exposure_time:.2f}/{statistics.min_exposure_time:.2f}/{statistics.max_exposure_time:.2f}/{statistics.std_exposure_time:.2f} ms",
         )
     )
-    print(61 * "-")
+    print(71 * "-")
 
 
 def plot_timechart(x, y, x_range, y_pred, exposure_times, expected_duration, debug_dir):
