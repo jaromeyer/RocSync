@@ -109,10 +109,12 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     x_range = np.arange(0, n_frames).reshape(-1, 1)
     y_pred = model.predict(x_range)
 
-    # errors = np.abs(y - model.predict(x))
-    # e_max = np.max(errors)
-    # e_max_frame = list(timestamps.keys())[np.argmax(errors)]
-    # print(f"Max error: {np.max(errors)} (frame {e_max_frame})")
+    # Add error to timestamps
+    errors = model.predict(x) - y
+    timestamps = {
+        frame_number: (start, end, error)
+        for (frame_number, (start, end)), error in zip(timestamps.items(), errors)
+    }
 
     # Remove outliers
     filtered_timestamps = {
@@ -122,10 +124,10 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         k: v for i, (k, v) in enumerate(timestamps.items()) if not model.inlier_mask_[i]
     }
     filtered_x = np.array(list(filtered_timestamps.keys())).reshape(-1, 1)
-    filtered_y = np.array([start for start, _ in filtered_timestamps.values()])
+    filtered_y = np.array([start for start, _, _ in filtered_timestamps.values()])
 
     # Calculate statistics
-    exposure_times = [end - start for start, end in filtered_timestamps.values()]
+    exposure_times = [end - start for start, end, _ in filtered_timestamps.values()]
     measured_duration = y_pred[-1] - y_pred[0]
     statistics = VideoStatistics(
         n_frames=n_frames,
