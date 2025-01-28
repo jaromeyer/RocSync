@@ -145,12 +145,16 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
     y = np.array([start for start, _ in timestamps.values()])
     model = RANSACRegressor(
-        min_samples=0.8,  # at least 80% of the data should be inliers
         residual_threshold=1000 / fps,  # max one frame deviation
         max_trials=1000,  # more trials for more consistent results
         random_state=0,  # deterministic results
     )
     model.fit(x, y)
+
+    # Assert that we have at least 80% inliers
+    if np.sum(model.inlier_mask_) < 0.8 * len(timestamps):
+        errprint("Error: Not model with enough inliers found.")
+        return
 
     # Predict timestamps for all frames
     x_range = np.arange(0, n_frames).reshape(-1, 1)
