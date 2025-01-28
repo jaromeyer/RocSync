@@ -1,3 +1,4 @@
+import math
 import os
 import queue
 import threading
@@ -13,14 +14,14 @@ from tqdm import tqdm
 
 from rocsync.printer import *
 from rocsync.video_statistics import VideoStatistics
-from rocsync.vision import process_frame
+from rocsync.vision import CameraType, process_frame
 
 
-def read_frames_async(cap, frame_queue):
-    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+def read_frames_async(cap, frame_queue, start_frame=0, end_frame=None):
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
     while True:
         ret, frame = cap.read()
-        if not ret:
+        if not ret or (end_frame is not None and cap.get(cv2.CAP_PROP_POS_FRAMES) > end_frame):
             frame_queue.put((None, None))
             break
         frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES) - 1)
@@ -61,28 +62,25 @@ def export_frames(video_path, output_path, y_pred):
     cap.release()
 
 
-def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None):
+def process_video_window(video_path: str, camera_type: CameraType, window_start: int, window_end: int, stride=None, debug_dir: str = None):
     cap = cv2.VideoCapture(video_path)
-    if not cap.isOpened():
-        errprint(f"Error: Could not open video: {video_path}")
-        return
 
+    # Extract video metadata
     fps = cap.get(cv2.CAP_PROP_FPS)
-    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
-    expected_duration = (n_frames - 1) / fps * 1000
+    start_frame = max(0, math.floor(window_start * fps))
+    end_frame = min(math.ceil(window_end * fps), cap.get(cv2.CAP_PROP_FRAME_COUNT)) + 1 # end_frame is exclusive
 
     # Read frames in separate thread
     frame_queue = queue.Queue(maxsize=100)
-    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue))
-    thread.daemon = True
+    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue, start_frame, end_frame))
+    thread.daemon = False
     thread.start()
 
-    # Analyze frames
     timestamps = {}
     scan_window = 0
     if stride is None:
         stride = int(fps)
-    for frame_number in tqdm(range(n_frames), desc="Analyzing frames", position=1):
+    for frame_number in tqdm(range(start_frame, end_frame), desc=f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s]", position=1):
         frame, frame_number = frame_queue.get()  # blocking wait
         if frame is None:
             errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
@@ -93,7 +91,41 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
                 scan_window = 5
+
+    thread.join()
+    cap.release()            
+    return timestamps
+
+
+def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None, window1_start=None, window1_end=None, window2_start=None, window2_end=None):
+    # Get video metadata
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        errprint(f"Error: Could not open video: {video_path}")
+        return
+
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    expected_duration = (n_frames - 1) / fps * 1000
     cap.release()
+
+    if window1_start is None:
+        window1_start = 0
+    if window1_end is None:
+        window1_end = expected_duration / 1000
+    if window2_start is None:
+        window2_start = 0
+    if window2_end is None:
+        window2_end = expected_duration / 1000
+
+    # Analyze frames
+    timestamps = process_video_window(video_path, camera_type, window1_start, window1_end, stride, debug_dir)
+
+    if window2_start > window1_end or window2_end < window1_start: # check if window2 is not overlapping with window1
+        # TODO: better window checking
+        timestamps2 = process_video_window(video_path, camera_type, window2_start, window2_end, stride, debug_dir)
+        timestamps = {**timestamps, **timestamps2}
+    
 
     if len(timestamps) == 0:
         errprint("Error: Unable to timestamp any frames.")

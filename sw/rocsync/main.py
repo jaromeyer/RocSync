@@ -51,6 +51,26 @@ def mkdir_unique(name, parent_dir):
     return str(debug_dir)
 
 
+def parse_time(time_str:str) -> float:
+    """Expects a delta time string with format hh:mm:ss.ms"""
+    if time_str is None:
+        return None
+
+    time = time_str.split(":")
+    if len(time) != 3:
+        errprint(f"Invalid time format: {time_str}, expected hh:mm:ss.ms")
+        raise ValueError
+    try:
+        h = int(time[0])
+        m = int(time[1])
+        s = float(time[2])
+    except ValueError:
+        errprint(f"Invalid time format: {time_str}, expected hh:mm:ss.ms")
+        raise ValueError
+    
+    return h * 3600 + m * 60 + s
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Extract timestamps from images and videos showing the RocSync device."
@@ -97,7 +117,37 @@ def main():
         help="directory to store debug images (very slow)",
     )
 
+    # Specify time windows to search for ROCsync
+    parser.add_argument(
+        "--start1",
+        type=str,
+        default=None,
+        help="start time of first window to search, in hh:mm:ss.ms format",
+    )
+    parser.add_argument(
+        "--end1",
+        type=str,
+        default=None,
+        help="end time window of first window to search, in hh:mm:ss.ms format",
+    )
+    parser.add_argument(
+        "--start2",
+        type=str,
+        default=None,
+        help="start time window of second window to search, in hh:mm:ss.ms format",
+    )
+    parser.add_argument(
+        "--end2",
+        type=str,
+        default=None,
+        help="end time window of second window to search, in hh:mm:ss.ms format",
+    )
+
     args = parser.parse_args()
+
+    # Parse time arguments
+    start_time1, end_time1 = parse_time(args.start1), parse_time(args.end1)
+    start_time2, end_time2 = parse_time(args.start2), parse_time(args.end2)
 
     files = set()
     for path in args.path:
@@ -153,7 +203,7 @@ def main():
 
         if file in videos:
             result[str(file)] = process_video(
-                file, CameraType(args.camera_type), export_dir, args.stride, debug_dir
+                file, CameraType(args.camera_type), export_dir, args.stride, debug_dir, start_time1, end_time1, start_time2, end_time2
             ).to_dict()
         elif file in images:
             result[str(file)] = process_image(file, CameraType(args.camera_type), debug_dir)
