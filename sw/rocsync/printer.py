@@ -2,7 +2,7 @@ from tqdm import tqdm
 
 
 def print(string):
-    tqdm.write(string)
+    tqdm.write(str(string))
 
 
 def errprint(string):

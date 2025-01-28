@@ -21,10 +21,15 @@ def read_frames_async(cap, frame_queue, start_frame=0, end_frame=None):
     cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
     while True:
         ret, frame = cap.read()
-        if not ret or (end_frame is not None and cap.get(cv2.CAP_PROP_POS_FRAMES) > end_frame):
+        if not ret:
             frame_queue.put((None, None))
             break
+
         frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES) - 1)
+        if end_frame is not None and frame_number >= end_frame:
+            frame_queue.put((None, None))
+            break
+
         frame_queue.put((frame, frame_number))
 
 
@@ -67,8 +72,8 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
 
     # Extract video metadata
     fps = cap.get(cv2.CAP_PROP_FPS)
-    start_frame = max(0, math.floor(window_start * fps))
-    end_frame = min(math.ceil(window_end * fps), cap.get(cv2.CAP_PROP_FRAME_COUNT)) + 1 # end_frame is exclusive
+    start_frame = int(max(0, math.floor(window_start * fps)))
+    end_frame = int(min(math.ceil(window_end * fps) + 1, cap.get(cv2.CAP_PROP_FRAME_COUNT))) # end_frame is exclusive
 
     # Read frames in separate thread
     frame_queue = queue.Queue(maxsize=100)
@@ -80,7 +85,9 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
     scan_window = 0
     if stride is None:
         stride = int(fps)
-    for frame_number in tqdm(range(start_frame, end_frame), desc=f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s]", position=1):
+    
+    pbar = tqdm(range(start_frame, end_frame), desc=f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps", position=1)
+    for _ in pbar:
         frame, frame_number = frame_queue.get()  # blocking wait
         if frame is None:
             errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
@@ -91,9 +98,12 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
                 scan_window = 5
+                pbar.set_description(f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps")
+
 
     thread.join()
-    cap.release()            
+    cap.release()
+            
     return timestamps
 
 

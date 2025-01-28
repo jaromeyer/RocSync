@@ -202,12 +202,13 @@ def main():
             export_dir = mkdir_unique(name, args.export_frames)
 
         if file in videos:
-            result[str(file)] = process_video(
+            ret = process_video(
                 file, CameraType(args.camera_type), export_dir, args.stride, debug_dir, start_time1, end_time1, start_time2, end_time2
-            ).to_dict()
+            )
+            result[str(file)] = ret.to_dict() if ret is not None else {}
         elif file in images:
-            result[str(file)] = process_image(file, CameraType(args.camera_type), debug_dir)
-
+            ret = process_image(file, CameraType(args.camera_type), debug_dir)
+            result[str(file)] = ret if ret is not None else {}
     if args.output:
         output_path = pathlib.Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
