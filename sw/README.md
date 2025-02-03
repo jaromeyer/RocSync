@@ -36,8 +36,23 @@ options:
   -s, --stride N        scan every N-th frame only (default: same as framerate, only applies to videos)
   -e, --export_frames DIRECTORY
                         directory to store all raw frames as PNGs with timestamp (only applies to videos)
-  -o, --output FILE     JSON file to store results
+  -o, --output FILE     JSON file to store results (default: output.json)
   --debug DIRECTORY     directory to store debug images (very slow)
+
+  --start1 WINDOW1_START_TIME 
+                        specify optional start timestamp for first search window in format hh:mm:ss.ms (default: 00:00:00.0)
+  --end1 WINDOW1_END_TIME 
+                        specify optional end timestamp for first search window in format hh:mm:ss.ms (default: end of file)
+
+  --start2 WINDOW2_START_TIME 
+                        specify optional start timestamp for second search window in format hh:mm:ss.ms (default: none)
+  --end2 WINDOW2_END_TIME 
+                        specify optional end timestamp for second search window in format hh:mm:ss.ms (default:none)
+
+  --sync_video          automatically time-sync the videos using the estimated timestamps (requires ffmpeg)
+  --synced_folder FOLDER 
+                        output folder for time-synced videos
+  --fps FPS             desired FPS for time-synced videos (default: desired FPS determined from input videos)
   ```
 
 

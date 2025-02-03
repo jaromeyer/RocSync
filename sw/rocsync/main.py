@@ -12,6 +12,7 @@ from rocsync.printer import *
 from rocsync.video import process_video
 from rocsync.vision import CameraType, process_frame
 
+import subprocess
 
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
@@ -70,6 +71,42 @@ def parse_time(time_str:str) -> float:
     
     return h * 3600 + m * 60 + s
 
+def sync_video(video_path: str, stats: dict, offset: float = 0, output_folder: str = "synced", frame_rate: int = 30) -> subprocess.Popen:
+    cut_time = stats["first_frame"] * (-1 / 1000) + offset # in seconds
+    speed_factor = stats["speed_factor"]
+
+    video_name, _ = os.path.splitext(os.path.basename(video_path))
+    video_folder = os.path.dirname(video_path)
+    output_folder = os.path.join(video_folder, output_folder)
+    os.makedirs(output_folder, exist_ok=True)
+
+    ffmpeg_command = [
+        "ffmpeg",
+        "-ss",
+        str(cut_time),
+        "-i",
+        video_path,
+        "-filter_complex",
+        f"\"setpts=PTS*{speed_factor}\"",
+        "-c:v",
+        "h264",
+        "-r",
+        str(frame_rate),
+        "-y",
+        os.path.join(output_folder, f"{video_name}.mp4"),
+    ]
+
+    cmd = " ".join(ffmpeg_command)
+    # Optionally set the environment for subprocess to inherit
+    env = os.environ.copy()
+
+    process = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
+    size = os.get_terminal_size()
+    for line in process.stdout:
+        print(line.replace("\n", " ")[:size.columns], end="\r")
+
+    return process
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -106,9 +143,28 @@ def main():
     parser.add_argument(
         "-o",
         "--output",
+        default="output.json",
         type=str,
         metavar="FILE",
         help="JSON file to store results",
+    )
+    parser.add_argument(
+        "--sync_video",
+        action="store_true",
+        help="sync and cut video to predicted timestamps",
+
+    )
+    parser.add_argument(
+        "--synced_folder",
+        type=str,
+        default="synced",
+        help="folder to store synced videos (default: synced)",
+    )
+    parser.add_argument(
+        "--fps",
+        type=int,
+        default=None,
+        help="desired FPS for time-synced videos, if not provided the FPS will be determined from the videos",
     )
     parser.add_argument(
         "--debug",
@@ -209,6 +265,7 @@ def main():
         elif file in images:
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
             result[str(file)] = ret if ret is not None else {}
+
     if args.output:
         output_path = pathlib.Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -216,6 +273,21 @@ def main():
             json.dump(result, file, indent=4, cls=NpEncoder)
         print(f"Result written to {args.output}")
 
+    if args.sync_video:
+        output_path = pathlib.Path(args.output)
+        with open(output_path, "r") as file:
+            stats = json.load(file)
+        
+        expected_fps = int(round(list(stats.values())[0]["expected_fps"])) if args.fps is None else args.fps
+        print(f"Syncing all videos to {expected_fps} FPS")
+
+        processes = []
+        for file in stats:
+            if stats[file]:
+                processes.append(sync_video(file, stats[file], output_folder=args.synced_folder, frame_rate=expected_fps))
+
+        for p in processes:
+            p.wait()
 
 if __name__ == "__main__":
     main()
