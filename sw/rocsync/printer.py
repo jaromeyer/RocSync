@@ -1,8 +1,8 @@
 from tqdm import tqdm
 
 
-def print(string):
-    tqdm.write(str(string))
+def print(string, end="\n"):
+    tqdm.write(str(string), end=end)
 
 
 def errprint(string):
