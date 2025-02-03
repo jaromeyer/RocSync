@@ -149,6 +149,12 @@ def main():
         help="JSON file to store results",
     )
     parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="do not ask for confirmation when processing multiple files",
+    )
+    parser.add_argument(
         "--sync_video",
         action="store_true",
         help="sync and cut video to predicted timestamps",
@@ -226,7 +232,7 @@ def main():
         print(f"Found {len(videos)} videos and {len(images)} images:")
         for file in videos + images:
             print(f"    {file}")
-        while True:
+        while True and not args.yes:
             response = input("Do you want to continue (Y/n): ").strip().lower()
             if response in ["y", "yes", ""]:
                 break

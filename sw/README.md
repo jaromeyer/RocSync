@@ -37,6 +37,7 @@ options:
   -e, --export_frames DIRECTORY
                         directory to store all raw frames as PNGs with timestamp (only applies to videos)
   -o, --output FILE     JSON file to store results (default: output.json)
+  -y, --yes             automatically run yes for all prompts (potentially overwrites existing files)
   --debug DIRECTORY     directory to store debug images (very slow)
 
   --start1 WINDOW1_START_TIME 
