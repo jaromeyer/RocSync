@@ -273,3 +273,5 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
         start += counter * period
         end += counter * period
         return True, (start, end)
+
+    return True, None
