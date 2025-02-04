@@ -93,10 +93,11 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
             errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
             break
         if scan_window > 0 or frame_number % stride == 0:
-            timestamp = process_frame(frame, camera_type, frame_number, debug_dir)
+            rocsync_detected, timestamp = process_frame(frame, camera_type, frame_number, debug_dir)
             scan_window -= 1
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
+            if rocsync_detected:
                 scan_window = 5
                 pbar.set_description(f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps")
 
@@ -153,8 +154,7 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
     # Assert that we have at least 80% inliers
     if np.sum(model.inlier_mask_) < 0.8 * len(timestamps):
-        errprint("Error: Not model with enough inliers found.")
-        return
+        warnprint(f"WARNING: Estimated model has fewer than 80% inliers ({np.sum(model.inlier_mask_) / len(timestamps) * 100}%).")
 
     # Predict timestamps for all frames
     x_range = np.arange(0, n_frames).reshape(-1, 1)

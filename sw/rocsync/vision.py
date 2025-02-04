@@ -219,7 +219,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
             # First extract course PCB using ArUco marker
             aruco_corners = find_corners_aruco(image, frame_number, debug_dir)
             if aruco_corners is None:
-                return
+                return False, None
             red_channel = image[:, :, 2]
             _, mask = cv2.threshold(red_channel, 220, 255, cv2.THRESH_BINARY)
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
@@ -233,7 +233,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
             )
             corners = find_corners_dots(rough_pcb, frame_number, debug_dir)
             if corners is None:
-                return
+                return True, None
             transformation_matrix = np.dot(
                 cv2.getPerspectiveTransform(corners, corner_dots),
                 rough_transformation_matrix,
@@ -245,7 +245,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
             corners = find_corners_convexhull(mask, frame_number, debug_dir)
             if corners is None:
-                return
+                return False, None
             transformation_matrix = cv2.getPerspectiveTransform(corners, ir_corners)
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
 
@@ -254,7 +254,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
                 if read_counter(pcb, CameraType.INFRARED) == 0:
                     pcb = cv2.rotate(pcb, cv2.ROTATE_90_CLOCKWISE)
             if read_counter(pcb, CameraType.INFRARED) == 0:
-                return  # Counter was actually 0, can't determine orientation
+                return True, None  # Counter was actually 0, can't determine orientation
 
     if debug_dir:  # For RGB debug output
         pcb = cv2.cvtColor(pcb, cv2.COLOR_GRAY2BGR)
@@ -268,8 +268,8 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
     if ring is not None:
         start, end = ring
         if start > end or min(start, period - start) <= 2 or min(period, 100 - end) <= 2:
-            return  # Counter increment during exposure
+            return True, None # Counter increment during exposure
 
         start += counter * period
         end += counter * period
-        return start, end
+        return True, (start, end)
