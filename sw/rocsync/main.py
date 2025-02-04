@@ -71,7 +71,7 @@ def parse_time(time_str:str) -> float:
     
     return h * 3600 + m * 60 + s
 
-def sync_video(video_path: str, stats: dict, offset: float = 0, output_folder: str = "synced", frame_rate: int = 30) -> subprocess.Popen:
+def sync_video(video_path: str, stats: dict, offset: float = 0, output_folder: str = "synced", frame_rate: int = 30, compensate_drift: bool = True) -> subprocess.Popen:
     cut_time = stats["first_frame"] * (-1 / 1000) + offset # in seconds
     speed_factor = stats["speed_factor"]
 
@@ -80,31 +80,52 @@ def sync_video(video_path: str, stats: dict, offset: float = 0, output_folder: s
     output_folder = os.path.join(video_folder, output_folder)
     os.makedirs(output_folder, exist_ok=True)
 
+    # Check if nvenc is available for speed up
+    nvenc_available = False
+    if compensate_drift:
+        try:
+            cmd = "ffmpeg -hide_banner -encoders | grep h264_nvenc"
+            encoders = subprocess.check_output(cmd, shell=True).decode("utf-8")
+            if "h264_nvenc" not in encoders:
+                raise subprocess.CalledProcessError(1, cmd)
+            else:
+                nvenc_available = True
+        except subprocess.CalledProcessError:
+            warnprint("h264_nvenc not available, encoding will be very slow. Install NVIDIA drivers and ffmpeg with nvenc support or disable drift compensation.")
+
     ffmpeg_command = [
         "ffmpeg",
         "-ss",
         str(cut_time),
         "-i",
         video_path,
+    ]
+
+    if compensate_drift:
+        ffmpeg_command += [
+        "-c:v",
+        "h264_nvenc" if nvenc_available else "h264",
         "-filter_complex",
         f"\"setpts=PTS*{speed_factor}\"",
-        "-c:v",
-        "h264",
         "-r",
         str(frame_rate),
+        ]
+    else:
+        ffmpeg_command += [
+        "-c:v",
+        "copy",
+        ]
+    ffmpeg_command += [
         "-y",
         os.path.join(output_folder, f"{video_name}.mp4"),
     ]
 
-    cmd = " ".join(ffmpeg_command)
-    # Optionally set the environment for subprocess to inherit
-    env = os.environ.copy()
+    cmd_str = " ".join(ffmpeg_command)
+    print(cmd_str)
 
-    process = subprocess.Popen(cmd, env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True, shell=True)
-    size = os.get_terminal_size()
-    for line in process.stdout:
-        print(line.replace("\n", " ")[:size.columns], end="\r")
-
+    process = subprocess.Popen(cmd_str, shell=True)
+    stdout, sterr = process.communicate()
+    
     return process
 
 
@@ -165,6 +186,11 @@ def main():
         type=str,
         default="synced",
         help="folder to store synced videos (default: synced)",
+    )
+    parser.add_argument(
+        "--compensate_video_drift",
+        action="store_true",
+        help="whether to compensate for video drift (very slow)",
     )
     parser.add_argument(
         "--fps",
@@ -290,7 +316,7 @@ def main():
         processes = []
         for file in stats:
             if stats[file]:
-                processes.append(sync_video(file, stats[file], output_folder=args.synced_folder, frame_rate=expected_fps))
+                processes.append(sync_video(file, stats[file], output_folder=args.synced_folder, frame_rate=expected_fps, compensate_drift=args.compensate_video_drift))
 
         for p in processes:
             p.wait()
