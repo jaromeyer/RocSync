@@ -254,6 +254,9 @@ def main():
     videos = [f for f in files if f.suffix.lower() in [".mp4", ".avi", ".mov"]]
     images = [f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]]
 
+    videos = sorted(videos)
+    images = sorted(images)
+
     if len(videos) + len(images) > 1:
         print(f"Found {len(videos)} videos and {len(images)} images:")
         for file in videos + images:
@@ -274,9 +277,21 @@ def main():
     if args.export_frames:
         os.makedirs(args.export_frames, exist_ok=True)
         warnprint(f"Exported frames will be stored in {args.export_frames}")
-
+    
     result = {}
+    if args.output:
+        output_path = pathlib.Path(args.output)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+
+        if output_path.exists():
+            with output_path.open("r") as file:
+                result = json.load(file)
+            print(f"Loaded previous results from {args.output}")
+    
     for file in tqdm(videos + images, desc="Processing files", position=0):
+        if str(file) in result:
+            print(f"Skipping {file}, already processed.")
+            continue
         print(f"Working on {file}")
 
         debug_dir = None
@@ -298,12 +313,12 @@ def main():
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
             result[str(file)] = ret if ret is not None else {}
 
-    if args.output:
-        output_path = pathlib.Path(args.output)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with output_path.open("w") as file:
-            json.dump(result, file, indent=4, cls=NpEncoder)
-        print(f"Result written to {args.output}")
+        
+        # Save result to file after every video to avoid data loss
+        if args.output:
+            with output_path.open("w") as f:
+                json.dump(result, f, indent=4, cls=NpEncoder)
+            print(f"Result written to {args.output}")
 
     if args.sync_video:
         output_path = pathlib.Path(args.output)
