@@ -71,14 +71,9 @@ def parse_time(time_str:str) -> float:
     
     return h * 3600 + m * 60 + s
 
-def sync_video(video_path: str, stats: dict, offset: float = 0, output_folder: str = "synced", frame_rate: int = 30, compensate_drift: bool = True) -> subprocess.Popen:
+def sync_video(video_path: str, stats: dict, offset: float = 0, output_file: str = "synced.mp4", frame_rate: int = 30, compensate_drift: bool = True) -> subprocess.Popen:
     cut_time = stats["first_frame"] * (-1 / 1000) + offset # in seconds
     speed_factor = stats["speed_factor"]
-
-    video_name, _ = os.path.splitext(os.path.basename(video_path))
-    video_folder = os.path.dirname(video_path)
-    output_folder = os.path.join(video_folder, output_folder)
-    os.makedirs(output_folder, exist_ok=True)
 
     # Check if nvenc is available for speed up
     nvenc_available = False
@@ -117,7 +112,7 @@ def sync_video(video_path: str, stats: dict, offset: float = 0, output_folder: s
         ]
     ffmpeg_command += [
         "-y",
-        os.path.join(output_folder, f"{video_name}.mp4"),
+        output_file,
     ]
 
     cmd_str = " ".join(ffmpeg_command)
@@ -230,6 +225,11 @@ def main():
         default=None,
         help="end time window of second window to search, in hh:mm:ss.ms format",
     )
+    parser.add_argument(
+        "--recurse_in_dir",
+        action="store_true",
+        help="recursively search for videos and images in directories",
+    )
 
     args = parser.parse_args()
 
@@ -242,7 +242,7 @@ def main():
         path_obj = Path(path)
         if path_obj.is_dir():
             # walk dir recursively
-            for file in path_obj.rglob("*"):
+            for file in path_obj.rglob("*") if args.recurse_in_dir else path_obj.glob("*"):
                 if file.is_file():
                     files.add(file.resolve())
         elif path_obj.is_file():
@@ -308,10 +308,16 @@ def main():
             ret = process_video(
                 file, CameraType(args.camera_type), export_dir, args.stride, debug_dir, start_time1, end_time1, start_time2, end_time2
             )
-            result[str(file)] = ret.to_dict() if ret is not None else {}
+            if ret is not None:
+                result[str(file)] = ret.to_dict()
+            else:
+                errprint(f"Error: Unable to time-sync {file}.")
         elif file in images:
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
-            result[str(file)] = ret if ret is not None else {}
+            if ret is not None:
+                result[str(file)] = ret
+            else:
+                errprint(f"Error: Unable to time-sync {file}.")
 
         
         # Save result to file after every video to avoid data loss
@@ -331,7 +337,25 @@ def main():
         processes = []
         for file in stats:
             if stats[file]:
-                processes.append(sync_video(file, stats[file], output_folder=args.synced_folder, frame_rate=expected_fps, compensate_drift=args.compensate_video_drift))
+                # Check if the output file already exists
+                video_name, _ = os.path.splitext(os.path.basename(file))
+                video_folder = os.path.dirname(file)
+                output_folder = os.path.join(video_folder, args.synced_folder)
+                output_file = os.path.join(output_folder, f"{video_name}.mp4")
+                os.makedirs(output_folder, exist_ok=True)
+
+                if os.path.exists(output_file):
+                    try:
+                        vid = cv2.VideoCapture(output_file)
+                        if not vid.isOpened():
+                            raise ValueError("Could not open video file")
+                    except Exception as e:
+                        pass
+                    else:
+                        print(f"Skipping {file}, already synced.")
+                        continue
+
+                processes.append(sync_video(file, stats[file], output_file=output_file, frame_rate=expected_fps, compensate_drift=args.compensate_video_drift))
 
         for p in processes:
             p.wait()
