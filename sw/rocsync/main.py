@@ -14,6 +14,7 @@ from rocsync.vision import CameraType, process_frame
 
 import subprocess
 
+
 class NpEncoder(json.JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.integer):
@@ -52,7 +53,7 @@ def mkdir_unique(name, parent_dir):
     return str(debug_dir)
 
 
-def parse_time(time_str:str) -> float:
+def parse_time(time_str: str) -> float:
     """Expects a delta time string with format hh:mm:ss.ms"""
     if time_str is None:
         return None
@@ -68,25 +69,35 @@ def parse_time(time_str:str) -> float:
     except ValueError:
         errprint(f"Invalid time format: {time_str}, expected hh:mm:ss.ms")
         raise ValueError
-    
+
     return h * 3600 + m * 60 + s
 
-def sync_video(video_path: str, stats: dict, offset: float = 0, output_file: str = "synced.mp4", frame_rate: int = 30, compensate_drift: bool = True) -> subprocess.Popen:
-    cut_time = stats["first_frame"] * (-1 / 1000) + offset # in seconds
+
+def sync_video(
+    video_path: str,
+    stats: dict,
+    offset: float = 0,
+    output_file: str = "synced.mp4",
+    frame_rate: int = 30,
+    compensate_drift: bool = True,
+) -> subprocess.Popen:
+    cut_time = stats["first_frame"] * (-1 / 1000) + offset  # in seconds
     speed_factor = stats["speed_factor"]
 
     # Check if nvenc is available for speed up
     nvenc_available = False
     if compensate_drift:
         try:
-            cmd = "ffmpeg -hide_banner -encoders | grep h264_nvenc"
+            cmd = "ffmpeg -hide_banner -encoders | grep hevc_nvenc"
             encoders = subprocess.check_output(cmd, shell=True).decode("utf-8")
-            if "h264_nvenc" not in encoders:
+            if "hevc_nvenc" not in encoders:
                 raise subprocess.CalledProcessError(1, cmd)
             else:
                 nvenc_available = True
         except subprocess.CalledProcessError:
-            warnprint("h264_nvenc not available, encoding will be very slow. Install NVIDIA drivers and ffmpeg with nvenc support or disable drift compensation.")
+            warnprint(
+                "hevc_nvenc not available, encoding will be very slow. Install NVIDIA drivers and ffmpeg with nvenc support or disable drift compensation."
+            )
 
     ffmpeg_command = [
         "ffmpeg",
@@ -98,17 +109,19 @@ def sync_video(video_path: str, stats: dict, offset: float = 0, output_file: str
 
     if compensate_drift:
         ffmpeg_command += [
-        "-c:v",
-        "h264_nvenc" if nvenc_available else "h264",
-        "-filter_complex",
-        f"\"setpts=PTS*{speed_factor}\"",
-        "-r",
-        str(frame_rate),
+            "-c:v",
+            "hevc_nvenc" if nvenc_available else "libx265",
+            "-crf",
+            "0",
+            "-filter_complex",
+            f'"setpts=PTS*{speed_factor}"',
+            "-r",
+            str(frame_rate),
         ]
     else:
         ffmpeg_command += [
-        "-c:v",
-        "copy",
+            "-c:v",
+            "copy",
         ]
     ffmpeg_command += [
         "-y",
@@ -120,7 +133,7 @@ def sync_video(video_path: str, stats: dict, offset: float = 0, output_file: str
 
     process = subprocess.Popen(cmd_str, shell=True)
     stdout, sterr = process.communicate()
-    
+
     return process
 
 
@@ -174,7 +187,6 @@ def main():
         "--sync_video",
         action="store_true",
         help="sync and cut video to predicted timestamps",
-
     )
     parser.add_argument(
         "--synced_folder",
@@ -242,7 +254,9 @@ def main():
         path_obj = Path(path)
         if path_obj.is_dir():
             # walk dir recursively
-            for file in path_obj.rglob("*") if args.recurse_in_dir else path_obj.glob("*"):
+            for file in (
+                path_obj.rglob("*") if args.recurse_in_dir else path_obj.glob("*")
+            ):
                 if file.is_file():
                     files.add(file.resolve())
         elif path_obj.is_file():
@@ -277,7 +291,7 @@ def main():
     if args.export_frames:
         os.makedirs(args.export_frames, exist_ok=True)
         warnprint(f"Exported frames will be stored in {args.export_frames}")
-    
+
     result = {}
     if args.output:
         output_path = pathlib.Path(args.output)
@@ -287,7 +301,7 @@ def main():
             with output_path.open("r") as file:
                 result = json.load(file)
             print(f"Loaded previous results from {args.output}")
-    
+
     for file in tqdm(videos + images, desc="Processing files", position=0):
         if str(file) in result:
             print(f"Skipping {file}, already processed.")
@@ -306,7 +320,15 @@ def main():
 
         if file in videos:
             ret = process_video(
-                file, CameraType(args.camera_type), export_dir, args.stride, debug_dir, start_time1, end_time1, start_time2, end_time2
+                file,
+                CameraType(args.camera_type),
+                export_dir,
+                args.stride,
+                debug_dir,
+                start_time1,
+                end_time1,
+                start_time2,
+                end_time2,
             )
             if ret is not None:
                 result[str(file)] = ret.to_dict()
@@ -319,7 +341,6 @@ def main():
             else:
                 errprint(f"Error: Unable to time-sync {file}.")
 
-        
         # Save result to file after every video to avoid data loss
         if args.output:
             with output_path.open("w") as f:
@@ -330,8 +351,12 @@ def main():
         output_path = pathlib.Path(args.output)
         with open(output_path, "r") as file:
             stats = json.load(file)
-        
-        expected_fps = int(round(list(stats.values())[0]["expected_fps"])) if args.fps is None else args.fps
+
+        expected_fps = (
+            int(round(list(stats.values())[0]["expected_fps"]))
+            if args.fps is None
+            else args.fps
+        )
         print(f"Syncing all videos to {expected_fps} FPS")
 
         processes = []
@@ -355,10 +380,19 @@ def main():
                         print(f"Skipping {file}, already synced.")
                         continue
 
-                processes.append(sync_video(file, stats[file], output_file=output_file, frame_rate=expected_fps, compensate_drift=args.compensate_video_drift))
+                processes.append(
+                    sync_video(
+                        file,
+                        stats[file],
+                        output_file=output_file,
+                        frame_rate=expected_fps,
+                        compensate_drift=args.compensate_video_drift,
+                    )
+                )
 
         for p in processes:
             p.wait()
+
 
 if __name__ == "__main__":
     main()
