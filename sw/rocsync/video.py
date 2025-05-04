@@ -1,3 +1,4 @@
+import math
 import os
 import queue
 import threading
@@ -13,17 +14,22 @@ from tqdm import tqdm
 
 from rocsync.printer import *
 from rocsync.video_statistics import VideoStatistics
-from rocsync.vision import process_frame
+from rocsync.vision import CameraType, process_frame
 
 
-def read_frames_async(cap, frame_queue):
-    cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
+def read_frames_async(cap, frame_queue, start_frame=0, end_frame=None):
+    cap.set(cv2.CAP_PROP_POS_FRAMES, start_frame)
     while True:
         ret, frame = cap.read()
         if not ret:
             frame_queue.put((None, None))
             break
+
         frame_number = int(cap.get(cv2.CAP_PROP_POS_FRAMES) - 1)
+        if end_frame is not None and frame_number >= end_frame:
+            frame_queue.put((None, None))
+            break
+
         frame_queue.put((frame, frame_number))
 
 
@@ -36,7 +42,8 @@ def export_frame_async(frame_queue, y_pred, path):
 
 
 def export_frames(video_path, output_path, y_pred):
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+    # cap.set(cv2.CAP_PROP_FFMPEG_HWACCEL, cv2.CAP_FFMPEG_HWACCEL_NVDEC)  # try to use
     if not cap.isOpened():
         errprint(f"Error: Could not open video: {video_path}")
         return
@@ -61,8 +68,52 @@ def export_frames(video_path, output_path, y_pred):
     cap.release()
 
 
-def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None):
+def process_video_window(video_path: str, camera_type: CameraType, window_start: int, window_end: int, stride=None, debug_dir: str = None, brightness_boost: int = None):
     cap = cv2.VideoCapture(video_path)
+
+    # Extract video metadata
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    start_frame = int(max(0, math.floor(window_start * fps)))
+    end_frame = int(min(math.ceil(window_end * fps) + 1, cap.get(cv2.CAP_PROP_FRAME_COUNT))) # end_frame is exclusive
+
+    # Read frames in separate thread
+    frame_queue = queue.Queue(maxsize=100)
+    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue, start_frame, end_frame))
+    thread.daemon = False
+    thread.start()
+
+    timestamps = {}
+    scan_window = 0
+    if stride is None:
+        stride = int(fps)
+    
+    pbar = tqdm(range(start_frame, end_frame), desc=f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps", position=1)
+    for _ in pbar:
+        frame, frame_number = frame_queue.get()  # blocking wait
+        if frame is None:
+            errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
+            break
+        if scan_window > 0 or frame_number % stride == 0:
+            rocsync_detected, timestamp = process_frame(frame, camera_type, frame_number, debug_dir, brightness_boost)
+            scan_window -= 1
+            if timestamp is not None:
+                timestamps[frame_number] = timestamp
+            if rocsync_detected:
+                scan_window = 5
+                pbar.set_description(f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps")
+
+
+    thread.join()
+    cap.release()
+            
+    return timestamps
+
+
+def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None, window1_start=None, window1_end=None, window2_start=None, window2_end=None, brightness_boost=None):
+    # Get video metadata
+    cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+    # cap.set(cv2.CAP_PROP_FFMPEG_HWACCEL, cv2.CAP_FFMPEG_HWACCEL_NVDEC)  # try to use
+
     if not cap.isOpened():
         errprint(f"Error: Could not open video: {video_path}")
         return
@@ -70,30 +121,36 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     fps = cap.get(cv2.CAP_PROP_FPS)
     n_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
     expected_duration = (n_frames - 1) / fps * 1000
+    cap.release()
 
-    # Read frames in separate thread
-    frame_queue = queue.Queue(maxsize=100)
-    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue))
-    thread.daemon = True
-    thread.start()
+    if window1_start is None:
+        window1_start = 0
+    elif window1_start < 0:
+        window1_start = max(0, (expected_duration / 1000) + window1_start)
+
+    if window1_end is None:
+        window1_end = expected_duration / 1000
+    elif window1_end < 0:
+        window1_end = max(0, (expected_duration / 1000) + window1_end)
+
+    if window2_start is None:
+        window2_start = 0
+    elif window2_start < 0:
+        window2_start = max(0, (expected_duration / 1000) + window2_start)
+
+    if window2_end is None:
+        window2_end = expected_duration / 1000
+    elif window2_end < 0:
+        window2_end = max(0, (expected_duration / 1000) + window2_end)
 
     # Analyze frames
-    timestamps = {}
-    scan_window = 0
-    if stride is None:
-        stride = int(fps)
-    for frame_number in tqdm(range(n_frames), desc="Analyzing frames", position=1):
-        frame, frame_number = frame_queue.get()  # blocking wait
-        if frame is None:
-            errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
-            break
-        if scan_window > 0 or frame_number % stride == 0:
-            timestamp = process_frame(frame, camera_type, frame_number, debug_dir)
-            scan_window -= 1
-            if timestamp is not None:
-                timestamps[frame_number] = timestamp
-                scan_window = 5
-    cap.release()
+    timestamps = process_video_window(video_path, camera_type, window1_start, window1_end, stride, debug_dir, brightness_boost)
+
+    if window2_start > window1_end or window2_end < window1_start: # check if window2 is not overlapping with window1
+        # TODO: better window checking
+        timestamps2 = process_video_window(video_path, camera_type, window2_start, window2_end, stride, debug_dir, brightness_boost)
+        timestamps = {**timestamps, **timestamps2}
+    
 
     if len(timestamps) == 0:
         errprint("Error: Unable to timestamp any frames.")
@@ -103,12 +160,15 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
     y = np.array([start for start, _ in timestamps.values()])
     model = RANSACRegressor(
-        min_samples=0.8,  # at least 80% of the data should be inliers
         residual_threshold=1000 / fps,  # max one frame deviation
         max_trials=1000,  # more trials for more consistent results
         random_state=0,  # deterministic results
     )
     model.fit(x, y)
+
+    # Assert that we have at least 80% inliers
+    if np.sum(model.inlier_mask_) < 0.8 * len(timestamps):
+        warnprint(f"WARNING: Estimated model has fewer than 80% inliers ({np.sum(model.inlier_mask_) / len(timestamps) * 100}%).")
 
     # Predict timestamps for all frames
     x_range = np.arange(0, n_frames).reshape(-1, 1)
@@ -155,7 +215,7 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         std_exposure_time=np.std(exposure_times),
         considered_timestamps=filtered_timestamps,
         rejected_timestamps=rejected_timestamps,
-        interpolated_timestamps=y_pred.tolist(),
+        # interpolated_timestamps=y_pred.tolist(),
     )
 
     print_statistics(statistics)

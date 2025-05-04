@@ -21,9 +21,9 @@ params.minArea = 100
 params.maxArea = 1000
 params.filterByCircularity = True
 params.minCircularity = 0.5
-params.filterByInertia = True
+params.filterByInertia = False
 params.minInertiaRatio = 0.5
-params.filterByConvexity = True
+params.filterByConvexity = False
 params.minConvexity = 0.8
 params.minDistBetweenBlobs = 0.01
 blob_detector = cv2.SimpleBlobDetector_create(params)
@@ -94,13 +94,15 @@ def read_ring(extracted_board, camera_type, draw_result=False):
 
         # Create mask and sample image
         led_mask = np.zeros((board_size, board_size), dtype=np.uint8)
-        cv2.circle(led_mask, (x, y), led_size, (255), -1)
+        axes = (led_size, int(led_size * 1.5))  # Example ellipse axes
+        rotation_angle = (angle * 180 / math.pi) + 90  # Convert to degrees and rotate by 90 degrees
+        cv2.ellipse(led_mask, (x, y), axes, rotation_angle, 0, 360, (255), -1)
         mean_intensity = np.mean(extracted_board[led_mask > 0])
         leds[i] = mean_intensity > 20  # TODO make param
 
         if draw_result:
             color = (0, 0, 255) if leds[i] else (255, 0, 0)
-            cv2.circle(extracted_board, (x, y), led_size, color, 1)
+            cv2.ellipse(extracted_board, (x, y), axes, rotation_angle, 0, 360, color, 1)
 
     potential_starts = []
     potential_ends = []
@@ -179,13 +181,6 @@ def find_corners_dots(mask, frame_number, debug_dir=None):
     points = blob_detector.detect(mask)
     if not points:
         return
-    closest_points = [
-        min(points, key=lambda p: np.linalg.norm(p.pt - target)).pt for target in corner_dots
-    ]
-    max_distance = max([np.linalg.norm(act - exp) for act, exp in zip(closest_points, corner_dots)])
-    if max_distance > 50:
-        return  # Some corner is too far away from where it should be
-
     if debug_dir:
         debug_image = cv2.drawKeypoints(
             mask,
@@ -196,10 +191,21 @@ def find_corners_dots(mask, frame_number, debug_dir=None):
         )
         cv2.imwrite(f"{debug_dir}/corner_{frame_number}.png", debug_image)
 
+    closest_points = [
+        min(points, key=lambda p: np.linalg.norm(p.pt - target)).pt for target in corner_dots
+    ]
+    max_distance = max([np.linalg.norm(act - exp) for act, exp in zip(closest_points, corner_dots)])
+    if max_distance > 50:
+        print(f"Rejected {frame_number}: corner LED was {max_distance} px from where it should be")
+        return  # Some corner is too far away from where it should be
+
     return np.array(closest_points, dtype=np.float32)
 
 
-def find_corners_aruco(mask, frame_number, debug_dir=None):
+def find_corners_aruco(mask, frame_number, debug_dir=None, brightness_boost=None):
+    if brightness_boost is not None:
+        mask = np.clip(mask * brightness_boost, 0, 255).astype(np.uint8)
+
     markers, marker_ids, _ = aruco_detector.detectMarkers(mask)
     if debug_dir:
         debug_image = mask.copy()
@@ -213,15 +219,30 @@ def find_corners_aruco(mask, frame_number, debug_dir=None):
         return marker_dict[aruco_marker_id]
 
 
-def process_frame(image, camera_type, frame_number, debug_dir=None):
+def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_boost=None):
     match camera_type:
         case CameraType.RGB:
             # First extract course PCB using ArUco marker
-            aruco_corners = find_corners_aruco(image, frame_number, debug_dir)
+            aruco_corners = find_corners_aruco(image, frame_number, debug_dir, brightness_boost)
             if aruco_corners is None:
-                return
+                return False, None
+
+            # Check if aruco marker fills x % of the image to make sure the PCB was held close enough
+            area = 0
+            for i in range(4):
+                x1, y1 = aruco_corners[0][i]
+                x2, y2 = aruco_corners[0][(i + 1) % 4]  # Wrap around to the first point
+                area += (x1 * y2) - (y1 * x2)
+            area = abs(area) / 2
+            height, width = image.shape[:2]
+            image_area = width * height
+            area_percentage = area/image_area
+            if area_percentage < 0.002:
+                print(f"Rejected {frame_number}: aruco marker only fills {area_percentage} of the image")
+                return False, None
+
             red_channel = image[:, :, 2]
-            _, mask = cv2.threshold(red_channel, 220, 255, cv2.THRESH_BINARY)
+            _, mask = cv2.threshold(red_channel, 240 , 255, cv2.THRESH_BINARY)
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
 
             # Use course PCB to accurately extract corner
@@ -231,21 +252,23 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
             rough_pcb = cv2.warpPerspective(
                 mask, rough_transformation_matrix, (board_size, board_size)
             )
+            cv2.imwrite(f"{debug_dir}/rough_pcb_{frame_number}.png", rough_pcb)
             corners = find_corners_dots(rough_pcb, frame_number, debug_dir)
             if corners is None:
-                return
+                return True, None
             transformation_matrix = np.dot(
                 cv2.getPerspectiveTransform(corners, corner_dots),
                 rough_transformation_matrix,
             )
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
+            cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", rough_pcb)
         case CameraType.INFRARED:
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             _, mask = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
             corners = find_corners_convexhull(mask, frame_number, debug_dir)
             if corners is None:
-                return
+                return False, None
             transformation_matrix = cv2.getPerspectiveTransform(corners, ir_corners)
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
 
@@ -254,7 +277,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
                 if read_counter(pcb, CameraType.INFRARED) == 0:
                     pcb = cv2.rotate(pcb, cv2.ROTATE_90_CLOCKWISE)
             if read_counter(pcb, CameraType.INFRARED) == 0:
-                return  # Counter was actually 0, can't determine orientation
+                return True, None  # Counter was actually 0, can't determine orientation
 
     if debug_dir:  # For RGB debug output
         pcb = cv2.cvtColor(pcb, cv2.COLOR_GRAY2BGR)
@@ -268,8 +291,10 @@ def process_frame(image, camera_type, frame_number, debug_dir=None):
     if ring is not None:
         start, end = ring
         if start > end or min(start, period - start) <= 2 or min(period, 100 - end) <= 2:
-            return  # Counter increment during exposure
+            return True, None # Counter increment during exposure
 
         start += counter * period
         end += counter * period
-        return start, end
+        return True, (start, end)
+
+    return True, None

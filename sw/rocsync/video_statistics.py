@@ -34,7 +34,7 @@ class VideoStatistics:
     # Timestamps
     considered_timestamps: dict
     rejected_timestamps: dict
-    interpolated_timestamps: list
+    # interpolated_timestamps: list
 
     def to_dict(self):
         return asdict(self)
