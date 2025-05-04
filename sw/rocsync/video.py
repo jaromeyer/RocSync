@@ -42,7 +42,8 @@ def export_frame_async(frame_queue, y_pred, path):
 
 
 def export_frames(video_path, output_path, y_pred):
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+    # cap.set(cv2.CAP_PROP_FFMPEG_HWACCEL, cv2.CAP_FFMPEG_HWACCEL_NVDEC)  # try to use
     if not cap.isOpened():
         errprint(f"Error: Could not open video: {video_path}")
         return
@@ -67,7 +68,7 @@ def export_frames(video_path, output_path, y_pred):
     cap.release()
 
 
-def process_video_window(video_path: str, camera_type: CameraType, window_start: int, window_end: int, stride=None, debug_dir: str = None):
+def process_video_window(video_path: str, camera_type: CameraType, window_start: int, window_end: int, stride=None, debug_dir: str = None, brightness_boost: int = None):
     cap = cv2.VideoCapture(video_path)
 
     # Extract video metadata
@@ -93,7 +94,7 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
             errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
             break
         if scan_window > 0 or frame_number % stride == 0:
-            rocsync_detected, timestamp = process_frame(frame, camera_type, frame_number, debug_dir)
+            rocsync_detected, timestamp = process_frame(frame, camera_type, frame_number, debug_dir, brightness_boost)
             scan_window -= 1
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
@@ -108,9 +109,11 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
     return timestamps
 
 
-def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None, window1_start=None, window1_end=None, window2_start=None, window2_end=None):
+def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None, window1_start=None, window1_end=None, window2_start=None, window2_end=None, brightness_boost=None):
     # Get video metadata
-    cap = cv2.VideoCapture(video_path)
+    cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
+    # cap.set(cv2.CAP_PROP_FFMPEG_HWACCEL, cv2.CAP_FFMPEG_HWACCEL_NVDEC)  # try to use
+
     if not cap.isOpened():
         errprint(f"Error: Could not open video: {video_path}")
         return
@@ -122,19 +125,30 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
     if window1_start is None:
         window1_start = 0
+    elif window1_start < 0:
+        window1_start = max(0, (expected_duration / 1000) + window1_start)
+
     if window1_end is None:
         window1_end = expected_duration / 1000
+    elif window1_end < 0:
+        window1_end = max(0, (expected_duration / 1000) + window1_end)
+
     if window2_start is None:
         window2_start = 0
+    elif window2_start < 0:
+        window2_start = max(0, (expected_duration / 1000) + window2_start)
+
     if window2_end is None:
         window2_end = expected_duration / 1000
+    elif window2_end < 0:
+        window2_end = max(0, (expected_duration / 1000) + window2_end)
 
     # Analyze frames
-    timestamps = process_video_window(video_path, camera_type, window1_start, window1_end, stride, debug_dir)
+    timestamps = process_video_window(video_path, camera_type, window1_start, window1_end, stride, debug_dir, brightness_boost)
 
     if window2_start > window1_end or window2_end < window1_start: # check if window2 is not overlapping with window1
         # TODO: better window checking
-        timestamps2 = process_video_window(video_path, camera_type, window2_start, window2_end, stride, debug_dir)
+        timestamps2 = process_video_window(video_path, camera_type, window2_start, window2_end, stride, debug_dir, brightness_boost)
         timestamps = {**timestamps, **timestamps2}
     
 
@@ -201,7 +215,7 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         std_exposure_time=np.std(exposure_times),
         considered_timestamps=filtered_timestamps,
         rejected_timestamps=rejected_timestamps,
-        interpolated_timestamps=y_pred.tolist(),
+        # interpolated_timestamps=y_pred.tolist(),
     )
 
     print_statistics(statistics)
