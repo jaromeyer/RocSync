@@ -199,9 +199,9 @@ def find_corners_dots(mask, frame_number, debug_dir=None):
         [np.linalg.norm(act - exp) for act, exp in zip(closest_points, corner_dots)]
     )
     if max_distance > 50:
-        print(
-            f"Rejected {frame_number}: corner LED was {max_distance} px from where it should be"
-        )
+        # print(
+        #     f"Rejected {frame_number}: corner LED was {max_distance} px from where it should be"
+        # )
         return  # Some corner is too far away from where it should be
 
     return np.array(closest_points, dtype=np.float32)
@@ -247,9 +247,9 @@ def process_frame(
             image_area = width * height
             area_percentage = area / image_area
             if area_percentage < 0.002:
-                print(
-                    f"Rejected {frame_number}: aruco marker only fills {area_percentage} of the image"
-                )
+                # print(
+                #     f"Rejected {frame_number}: aruco marker only fills {area_percentage} of the image"
+                # )
                 return False, None
 
             red_channel = image[:, :, 2]

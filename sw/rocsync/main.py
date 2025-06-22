@@ -8,9 +8,10 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
+from rocsync import syncvid
 from rocsync.ftk import process_ftk_recording
 from rocsync.printer import errprint, succprint, warnprint
-from rocsync.video import process_video, sync_video
+from rocsync.video import process_video
 from rocsync.vision import CameraType, process_frame
 
 
@@ -76,110 +77,99 @@ def main():
     parser = argparse.ArgumentParser(
         description="Extract timestamps from images and videos showing the RocSync device."
     )
-    parser.add_argument(
+    subparsers = parser.add_subparsers(
+        title="subcommands", dest="subcommand", required=True
+    )
+    syncvid.add_subparser(subparsers)
+
+    analyze_parser = subparsers.add_parser("analyze", help="Analyze videos")
+    analyze_parser.set_defaults(func=run)
+    analyze_parser.add_argument(
         "path",
         type=str,
         metavar="PATH",
         nargs="+",
         help="path to a video, image, or directory containing videos and/or images",
     )
-    parser.add_argument(
+    analyze_parser.add_argument(
         "-c",
         "--camera_type",
         choices=[e.value for e in CameraType],
         default=CameraType.RGB.value,
         help="specify the type of camera (default: rgb)",
     )
-    parser.add_argument(
+    analyze_parser.add_argument(
         "-s",
         "--stride",
         type=int,
         metavar="N",
         help="scan every N-th frame only (default: same as framerate, only applies to videos)",
     )
-    parser.add_argument(
+    analyze_parser.add_argument(
+        "-o",
+        "--output",
+        required=True,
+        type=str,
+        metavar="FILE",
+        help="JSON file to store results",
+    )
+    analyze_parser.add_argument(
+        "-y",
+        "--yes",
+        action="store_true",
+        help="do not ask for confirmation when processing multiple files",
+    )
+    analyze_parser.add_argument(
+        "--debug",
+        type=str,
+        metavar="DIRECTORY",
+        help="directory to store debug images (very slow)",
+    )
+    analyze_parser.add_argument(
+        "--recurse_in_dir",
+        action="store_true",
+        help="recursively search for videos and images in directories",
+    )
+    analyze_parser.add_argument(
         "-e",
         "--export_frames",
         type=str,
         metavar="DIRECTORY",
         help="directory to store all raw frames as PNGs with timestamp (only applies to videos)",
     )
-    parser.add_argument(
-        "-o",
-        "--output",
-        default="output.json",
-        type=str,
-        metavar="FILE",
-        help="JSON file to store results",
-    )
-    parser.add_argument(
-        "-y",
-        "--yes",
-        action="store_true",
-        help="do not ask for confirmation when processing multiple files",
-    )
-    parser.add_argument(
-        "--sync_video",
-        action="store_true",
-        help="sync and cut video to predicted timestamps",
-    )
-    parser.add_argument(
-        "--synced_folder",
-        type=str,
-        default="synced",
-        help="folder to store synced videos (default: synced)",
-    )
-    parser.add_argument(
-        "--compensate_video_drift",
-        action="store_true",
-        help="whether to compensate for video drift (very slow)",
-    )
-    parser.add_argument(
-        "--fps",
-        type=int,
-        default=None,
-        help="desired FPS for time-synced videos, if not provided the FPS will be determined from the videos",
-    )
-    parser.add_argument(
-        "--debug",
-        type=str,
-        metavar="DIRECTORY",
-        help="directory to store debug images (very slow)",
-    )
 
-    # Specify time windows to search for ROCsync
-    parser.add_argument(
+    # Specify two time windows to search for ROCsync
+    analyze_parser.add_argument(
         "--start1",
         type=str,
         default=None,
         help="start time of first window to search, in hh:mm:ss.ms format",
     )
-    parser.add_argument(
+    analyze_parser.add_argument(
         "--end1",
         type=str,
         default=None,
         help="end time window of first window to search, in hh:mm:ss.ms format",
     )
-    parser.add_argument(
+    analyze_parser.add_argument(
         "--start2",
         type=str,
         default=None,
         help="start time window of second window to search, in hh:mm:ss.ms format",
     )
-    parser.add_argument(
+    analyze_parser.add_argument(
         "--end2",
         type=str,
         default=None,
         help="end time window of second window to search, in hh:mm:ss.ms format",
     )
-    parser.add_argument(
-        "--recurse_in_dir",
-        action="store_true",
-        help="recursively search for videos and images in directories",
-    )
 
+    # Dispatch subcommand
     args = parser.parse_args()
+    args.func(args)
 
+
+def run(args):
     # Parse time arguments
     start_time1, end_time1 = parse_time(args.start1), parse_time(args.end1)
     start_time2, end_time2 = parse_time(args.start2), parse_time(args.end2)
@@ -228,14 +218,13 @@ def main():
         warnprint(f"Exported frames will be stored in {args.export_frames}")
 
     result = {}
-    if args.output:
-        output_path = pathlib.Path(args.output)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path = pathlib.Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if output_path.exists():
-            with output_path.open("r") as file:
-                result = json.load(file)
-            print(f"Loaded previous results from {args.output}")
+    if output_path.exists():
+        with output_path.open("r") as file:
+            result = json.load(file)
+        print(f"Output file {args.output} already exists, appending results")
 
     for file in tqdm(
         videos + images + ftk_recordings, desc="Processing files", position=0
@@ -255,6 +244,7 @@ def main():
             name, _ = os.path.splitext(os.path.basename(file))
             export_dir = mkdir_unique(name, args.export_frames)
 
+        ret = None
         if file in videos:
             ret = process_video(
                 file,
@@ -267,74 +257,20 @@ def main():
                 start_time2,
                 end_time2,
             )
-            if ret is not None:
-                result[str(file)] = ret.to_dict()
-            else:
-                errprint(f"Error: Unable to time-sync {file}.")
         elif file in images:
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
-            if ret is not None:
-                result[str(file)] = ret
-            else:
-                errprint(f"Error: Unable to time-sync {file}.")
         elif file in ftk_recordings:
-            timestamps = process_ftk_recording(file)
-            if timestamps is not None:
-                result[str(file)] = timestamps
-            else:
-                errprint(f"Error: Unable to process FTK recording {file}.")
+            ret = process_ftk_recording(file)
+
+        if ret is not None:
+            result[str(file)] = ret
+        else:
+            errprint(f"Error: Unable to time-sync {file}.")
 
         # Save result to file after every video to avoid data loss
-        if args.output:
-            with output_path.open("w") as f:
-                json.dump(result, f, indent=4, cls=NpEncoder)
-            print(f"Result written to {args.output}")
-
-    if args.sync_video:
-        output_path = pathlib.Path(args.output)
-        with open(output_path, "r") as file:
-            stats = json.load(file)
-
-        expected_fps = (
-            int(round(list(stats.values())[0]["expected_fps"]))
-            if args.fps is None
-            else args.fps
-        )
-        print(f"Syncing all videos to {expected_fps} FPS")
-
-        processes = []
-        for file in stats:
-            if stats[file]:
-                # Check if the output file already exists
-                video_name, _ = os.path.splitext(os.path.basename(file))
-                video_folder = os.path.dirname(file)
-                output_folder = os.path.join(video_folder, args.synced_folder)
-                output_file = os.path.join(output_folder, f"{video_name}.mp4")
-                os.makedirs(output_folder, exist_ok=True)
-
-                if os.path.exists(output_file):
-                    try:
-                        vid = cv2.VideoCapture(output_file)
-                        if not vid.isOpened():
-                            raise ValueError("Could not open video file")
-                    except Exception as e:
-                        pass
-                    else:
-                        print(f"Skipping {file}, already synced.")
-                        continue
-
-                processes.append(
-                    sync_video(
-                        file,
-                        stats[file],
-                        output_file=output_file,
-                        frame_rate=expected_fps,
-                        compensate_drift=args.compensate_video_drift,
-                    )
-                )
-
-        for p in processes:
-            p.wait()
+        with output_path.open("w") as f:
+            json.dump(result, f, indent=4, cls=NpEncoder)
+        print(f"Result written to {args.output}")
 
 
 if __name__ == "__main__":
