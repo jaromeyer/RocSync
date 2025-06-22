@@ -1,6 +1,7 @@
 import math
 import os
 import queue
+import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -12,7 +13,7 @@ from sklearn.linear_model import RANSACRegressor
 from sklearn.metrics import root_mean_squared_error
 from tqdm import tqdm
 
-from rocsync.printer import *
+from rocsync.printer import errprint, printresult, warnprint
 from rocsync.video_statistics import VideoStatistics
 from rocsync.vision import CameraType, process_frame
 
@@ -60,7 +61,9 @@ def export_frames(video_path, output_path, y_pred):
     with ThreadPoolExecutor(max_workers=100) as executor:
         futures = []
         for _ in range(n_frames):
-            futures.append(executor.submit(export_frame_async, frame_queue, y_pred, output_path))
+            futures.append(
+                executor.submit(export_frame_async, frame_queue, y_pred, output_path)
+            )
         for future in tqdm(
             as_completed(futures), total=n_frames, desc="Exporting frames", position=1
         ):
@@ -68,17 +71,29 @@ def export_frames(video_path, output_path, y_pred):
     cap.release()
 
 
-def process_video_window(video_path: str, camera_type: CameraType, window_start: int, window_end: int, stride=None, debug_dir: str = None, brightness_boost: int = None):
+def process_video_window(
+    video_path: str,
+    camera_type: CameraType,
+    window_start: int,
+    window_end: int,
+    stride=None,
+    debug_dir: str = None,
+    brightness_boost: int = None,
+):
     cap = cv2.VideoCapture(video_path)
 
     # Extract video metadata
     fps = cap.get(cv2.CAP_PROP_FPS)
     start_frame = int(max(0, math.floor(window_start * fps)))
-    end_frame = int(min(math.ceil(window_end * fps) + 1, cap.get(cv2.CAP_PROP_FRAME_COUNT))) # end_frame is exclusive
+    end_frame = int(
+        min(math.ceil(window_end * fps) + 1, cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    )  # end_frame is exclusive
 
     # Read frames in separate thread
     frame_queue = queue.Queue(maxsize=100)
-    thread = threading.Thread(target=read_frames_async, args=(cap, frame_queue, start_frame, end_frame))
+    thread = threading.Thread(
+        target=read_frames_async, args=(cap, frame_queue, start_frame, end_frame)
+    )
     thread.daemon = False
     thread.start()
 
@@ -86,30 +101,50 @@ def process_video_window(video_path: str, camera_type: CameraType, window_start:
     scan_window = 0
     if stride is None:
         stride = int(fps)
-    
-    pbar = tqdm(range(start_frame, end_frame), desc=f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps", position=1)
+
+    pbar = tqdm(
+        range(start_frame, end_frame),
+        desc=f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps",
+        position=1,
+    )
     for _ in pbar:
         frame, frame_number = frame_queue.get()  # blocking wait
         if frame is None:
-            errprint("Error: Input stream ended unexpectedly. Could be a sign of skipped frames.")
+            errprint(
+                "Error: Input stream ended unexpectedly. Could be a sign of skipped frames."
+            )
             break
         if scan_window > 0 or frame_number % stride == 0:
-            rocsync_detected, timestamp = process_frame(frame, camera_type, frame_number, debug_dir, brightness_boost)
+            rocsync_detected, timestamp = process_frame(
+                frame, camera_type, frame_number, debug_dir, brightness_boost
+            )
             scan_window -= 1
             if timestamp is not None:
                 timestamps[frame_number] = timestamp
             if rocsync_detected:
                 scan_window = 5
-                pbar.set_description(f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps")
-
+                pbar.set_description(
+                    f"Analyzing frames in time window [{window_start:.3f}s, {window_end:.3f}s] --> Found {len(timestamps)} timestamps"
+                )
 
     thread.join()
     cap.release()
-            
+
     return timestamps
 
 
-def process_video(video_path, camera_type, export_dir=None, stride=None, debug_dir=None, window1_start=None, window1_end=None, window2_start=None, window2_end=None, brightness_boost=None):
+def process_video(
+    video_path,
+    camera_type,
+    export_dir=None,
+    stride=None,
+    debug_dir=None,
+    window1_start=None,
+    window1_end=None,
+    window2_start=None,
+    window2_end=None,
+    brightness_boost=None,
+):
     # Get video metadata
     cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
     # cap.set(cv2.CAP_PROP_FFMPEG_HWACCEL, cv2.CAP_FFMPEG_HWACCEL_NVDEC)  # try to use
@@ -144,13 +179,30 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         window2_end = max(0, (expected_duration / 1000) + window2_end)
 
     # Analyze frames
-    timestamps = process_video_window(video_path, camera_type, window1_start, window1_end, stride, debug_dir, brightness_boost)
+    timestamps = process_video_window(
+        video_path,
+        camera_type,
+        window1_start,
+        window1_end,
+        stride,
+        debug_dir,
+        brightness_boost,
+    )
 
-    if window2_start > window1_end or window2_end < window1_start: # check if window2 is not overlapping with window1
+    if (
+        window2_start > window1_end or window2_end < window1_start
+    ):  # check if window2 is not overlapping with window1
         # TODO: better window checking
-        timestamps2 = process_video_window(video_path, camera_type, window2_start, window2_end, stride, debug_dir, brightness_boost)
+        timestamps2 = process_video_window(
+            video_path,
+            camera_type,
+            window2_start,
+            window2_end,
+            stride,
+            debug_dir,
+            brightness_boost,
+        )
         timestamps = {**timestamps, **timestamps2}
-    
 
     if len(timestamps) == 0:
         errprint("Error: Unable to timestamp any frames.")
@@ -168,7 +220,9 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
     # Assert that we have at least 80% inliers
     if np.sum(model.inlier_mask_) < 0.8 * len(timestamps):
-        warnprint(f"WARNING: Estimated model has fewer than 80% inliers ({np.sum(model.inlier_mask_) / len(timestamps) * 100}%).")
+        warnprint(
+            f"WARNING: Estimated model has fewer than 80% inliers ({np.sum(model.inlier_mask_) / len(timestamps) * 100}%)."
+        )
 
     # Predict timestamps for all frames
     x_range = np.arange(0, n_frames).reshape(-1, 1)
@@ -222,7 +276,13 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
     if debug_dir:
         plot_timechart(
-            filtered_x, filtered_y, x_range, y_pred, exposure_times, expected_duration, debug_dir
+            filtered_x,
+            filtered_y,
+            x_range,
+            y_pred,
+            exposure_times,
+            expected_duration,
+            debug_dir,
         )
         plot_exposure_histogram(exposure_times, debug_dir)
 
@@ -256,8 +316,8 @@ def print_statistics(statistics: VideoStatistics):
         f"{statistics.rmse_before:.2f}/{statistics.rmse_after:.2f} ms",
         statistics.rmse_after < 2,
     )
-    print(format_str.format("First frame:", f"{statistics.first_frame/1000:.3f} s"))
-    print(format_str.format("Last frame:", f"{statistics.last_frame/1000:.3f} s"))
+    print(format_str.format("First frame:", f"{statistics.first_frame / 1000:.3f} s"))
+    print(format_str.format("Last frame:", f"{statistics.last_frame / 1000:.3f} s"))
     print(
         format_str.format(
             "Framerate (expected/measured):",
@@ -267,7 +327,7 @@ def print_statistics(statistics: VideoStatistics):
     print(
         format_str.format(
             "Duration (expected/measured):",
-            f"{statistics.expected_duration/1000:.3f}/{statistics.measured_duration/1000:.3f} s (Δ={statistics.measured_duration-statistics.expected_duration:.2f} ms)",
+            f"{statistics.expected_duration / 1000:.3f}/{statistics.measured_duration / 1000:.3f} s (Δ={statistics.measured_duration - statistics.expected_duration:.2f} ms)",
         )
     )
     print(
@@ -314,3 +374,67 @@ def plot_exposure_histogram(exposure_times, debug_dir):
     plt.ylabel("Number of measured frames")
     plt.title("Exposure time histogram")
     plt.savefig(f"{debug_dir}/exposure.png")
+
+
+def sync_video(
+    video_path: str,
+    stats: dict,
+    offset: float = 0,
+    output_file: str = "synced.mp4",
+    frame_rate: int = 30,
+    compensate_drift: bool = True,
+) -> subprocess.Popen:
+    cut_time = stats["first_frame"] * (-1 / 1000) + offset  # in seconds
+    speed_factor = stats["speed_factor"]
+
+    # Check if nvenc is available for speed up
+    nvenc_available = False
+    if compensate_drift:
+        try:
+            cmd = "ffmpeg -hide_banner -encoders | grep hevc_nvenc"
+            encoders = subprocess.check_output(cmd, shell=True).decode("utf-8")
+            if "hevc_nvenc" not in encoders:
+                raise subprocess.CalledProcessError(1, cmd)
+            else:
+                nvenc_available = True
+        except subprocess.CalledProcessError:
+            warnprint(
+                "hevc_nvenc not available, encoding will be very slow. Install NVIDIA drivers and ffmpeg with nvenc support or disable drift compensation."
+            )
+
+    ffmpeg_command = [
+        "ffmpeg",
+        "-ss",
+        str(cut_time),
+        "-i",
+        video_path,
+    ]
+
+    if compensate_drift:
+        ffmpeg_command += [
+            "-c:v",
+            "hevc_nvenc" if nvenc_available else "libx265",
+            "-crf",
+            "0",
+            "-filter_complex",
+            f'"setpts=PTS*{speed_factor}"',
+            "-r",
+            str(frame_rate),
+        ]
+    else:
+        ffmpeg_command += [
+            "-c:v",
+            "copy",
+        ]
+    ffmpeg_command += [
+        "-y",
+        output_file,
+    ]
+
+    cmd_str = " ".join(ffmpeg_command)
+    print(cmd_str)
+
+    process = subprocess.Popen(cmd_str, shell=True)
+    stdout, sterr = process.communicate()
+
+    return process

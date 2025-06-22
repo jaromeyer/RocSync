@@ -8,12 +8,10 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from rocsync.printer import *
-from rocsync.video import process_video
-from rocsync.vision import CameraType, process_frame
 from rocsync.ftk import process_ftk_recording
-
-import subprocess
+from rocsync.printer import errprint, succprint, warnprint
+from rocsync.video import process_video, sync_video
+from rocsync.vision import CameraType, process_frame
 
 
 class NpEncoder(json.JSONEncoder):
@@ -72,70 +70,6 @@ def parse_time(time_str: str) -> float:
         raise ValueError
 
     return h * 3600 + m * 60 + s
-
-
-def sync_video(
-    video_path: str,
-    stats: dict,
-    offset: float = 0,
-    output_file: str = "synced.mp4",
-    frame_rate: int = 30,
-    compensate_drift: bool = True,
-) -> subprocess.Popen:
-    cut_time = stats["first_frame"] * (-1 / 1000) + offset  # in seconds
-    speed_factor = stats["speed_factor"]
-
-    # Check if nvenc is available for speed up
-    nvenc_available = False
-    if compensate_drift:
-        try:
-            cmd = "ffmpeg -hide_banner -encoders | grep hevc_nvenc"
-            encoders = subprocess.check_output(cmd, shell=True).decode("utf-8")
-            if "hevc_nvenc" not in encoders:
-                raise subprocess.CalledProcessError(1, cmd)
-            else:
-                nvenc_available = True
-        except subprocess.CalledProcessError:
-            warnprint(
-                "hevc_nvenc not available, encoding will be very slow. Install NVIDIA drivers and ffmpeg with nvenc support or disable drift compensation."
-            )
-
-    ffmpeg_command = [
-        "ffmpeg",
-        "-ss",
-        str(cut_time),
-        "-i",
-        video_path,
-    ]
-
-    if compensate_drift:
-        ffmpeg_command += [
-            "-c:v",
-            "hevc_nvenc" if nvenc_available else "libx265",
-            "-crf",
-            "0",
-            "-filter_complex",
-            f'"setpts=PTS*{speed_factor}"',
-            "-r",
-            str(frame_rate),
-        ]
-    else:
-        ffmpeg_command += [
-            "-c:v",
-            "copy",
-        ]
-    ffmpeg_command += [
-        "-y",
-        output_file,
-    ]
-
-    cmd_str = " ".join(ffmpeg_command)
-    print(cmd_str)
-
-    process = subprocess.Popen(cmd_str, shell=True)
-    stdout, sterr = process.communicate()
-
-    return process
 
 
 def main():
@@ -270,9 +204,10 @@ def main():
     images = sorted([f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]])
     ftk_recordings = sorted([f for f in files if f.suffix.lower() == ".csv"])
 
-
     if len(videos) + len(images) + len(ftk_recordings) > 1:
-        print(f"Found {len(videos)} videos, {len(images)} images, and {len(ftk_recordings)} ftk recordings:")
+        print(
+            f"Found {len(videos)} videos, {len(images)} images, and {len(ftk_recordings)} ftk recordings:"
+        )
         for file in videos + images + ftk_recordings:
             print(f"    {file}")
         while True and not args.yes:
@@ -302,7 +237,9 @@ def main():
                 result = json.load(file)
             print(f"Loaded previous results from {args.output}")
 
-    for file in tqdm(videos + images + ftk_recordings, desc="Processing files", position=0):
+    for file in tqdm(
+        videos + images + ftk_recordings, desc="Processing files", position=0
+    ):
         if str(file) in result:
             print(f"Skipping {file}, already processed.")
             continue

@@ -22,7 +22,7 @@ def boldprint(string):
 
 
 def printresult(name, value, is_valid):
-    string = f"{name+':':<40} {value:>30}"
+    string = f"{name + ':':<40} {value:>30}"
     if is_valid:
         succprint(string)
     else:
