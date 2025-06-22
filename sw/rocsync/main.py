@@ -11,6 +11,7 @@ from tqdm import tqdm
 from rocsync.printer import *
 from rocsync.video import process_video
 from rocsync.vision import CameraType, process_frame
+from rocsync.ftk import process_ftk_recording
 
 import subprocess
 
@@ -265,15 +266,14 @@ def main():
             errprint(f"Invalid path: {path}")
             return
 
-    videos = [f for f in files if f.suffix.lower() in [".mp4", ".avi", ".mov"]]
-    images = [f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]]
+    videos = sorted([f for f in files if f.suffix.lower() in [".mp4", ".avi", ".mov"]])
+    images = sorted([f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]])
+    ftk_recordings = sorted([f for f in files if f.suffix.lower() == ".csv"])
 
-    videos = sorted(videos)
-    images = sorted(images)
 
-    if len(videos) + len(images) > 1:
-        print(f"Found {len(videos)} videos and {len(images)} images:")
-        for file in videos + images:
+    if len(videos) + len(images) + len(ftk_recordings) > 1:
+        print(f"Found {len(videos)} videos, {len(images)} images, and {len(ftk_recordings)} ftk recordings:")
+        for file in videos + images + ftk_recordings:
             print(f"    {file}")
         while True and not args.yes:
             response = input("Do you want to continue (Y/n): ").strip().lower()
@@ -302,7 +302,7 @@ def main():
                 result = json.load(file)
             print(f"Loaded previous results from {args.output}")
 
-    for file in tqdm(videos + images, desc="Processing files", position=0):
+    for file in tqdm(videos + images + ftk_recordings, desc="Processing files", position=0):
         if str(file) in result:
             print(f"Skipping {file}, already processed.")
             continue
@@ -340,6 +340,12 @@ def main():
                 result[str(file)] = ret
             else:
                 errprint(f"Error: Unable to time-sync {file}.")
+        elif file in ftk_recordings:
+            timestamps = process_ftk_recording(file)
+            if timestamps is not None:
+                result[str(file)] = timestamps
+            else:
+                errprint(f"Error: Unable to process FTK recording {file}.")
 
         # Save result to file after every video to avoid data loss
         if args.output:
