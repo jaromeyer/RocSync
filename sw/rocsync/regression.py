@@ -77,16 +77,4 @@ def fit_timestamps(
         # interpolated_timestamps=y_pred.tolist(),
     )
 
-    # if debug_dir:
-    #     statistics.plot_timechart(
-    #         filtered_x,
-    #         filtered_y,
-    #         x_range,
-    #         y_pred,
-    #         exposure_times,
-    #         expected_duration,
-    #         debug_dir,
-    #     )
-    #     statistics.plot_exposure_histogram(exposure_times, debug_dir)
-
     return statistics

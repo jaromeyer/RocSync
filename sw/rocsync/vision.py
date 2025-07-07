@@ -274,7 +274,7 @@ def process_frame(
             pcb = cv2.warpPerspective(
                 mask, transformation_matrix, (board_size, board_size)
             )
-            cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", rough_pcb)
+            cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", pcb)
         case CameraType.INFRARED:
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             _, mask = cv2.threshold(

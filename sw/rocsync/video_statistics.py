@@ -1,4 +1,6 @@
+import json
 from dataclasses import asdict, dataclass
+import numpy as np
 
 
 @dataclass
@@ -42,7 +44,6 @@ class VideoStatistics:
     # Timestamps
     considered_timestamps: dict
     rejected_timestamps: dict
-    # interpolated_timestamps: list
 
     def to_dict(self):
         return asdict(self)
@@ -69,7 +70,7 @@ class VideoStatistics:
                 f"{self.rmse_before:.2f}/{self.rmse_after:.2f} ms",
                 self.rmse_after > 2,
             ),
-            ("First frame", f"{self.first_frame / 1000:.3f} s", True),
+            ("First frame", f"{self.first_frame / 1000:.3f} s", False),
             ("Last frame", f"{self.last_frame / 1000:.3f} s", False),
             (
                 "Framerate (expected/measured)",

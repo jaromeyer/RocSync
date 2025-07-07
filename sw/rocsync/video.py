@@ -1,7 +1,6 @@
 import math
 import os
 import queue
-import subprocess
 import threading
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
@@ -11,7 +10,7 @@ import numpy as np
 from matplotlib.ticker import MaxNLocator
 from tqdm import tqdm
 
-from rocsync.printer import errprint, warnprint
+from rocsync.printer import errprint
 from rocsync.regression import fit_timestamps
 from rocsync.video_statistics import VideoMetadata
 from rocsync.vision import CameraType, process_frame
@@ -208,13 +207,8 @@ def process_video(
         )
         timestamps = {**timestamps, **timestamps2}
 
-    if len(timestamps) == 0:
-        errprint("Error: Unable to timestamp any frames.")
-        return
-
     statistics = fit_timestamps(video, timestamps)
     print(statistics)
-    # print_statistics(statistics)
 
     # if debug_dir:
     #     plot_timechart(

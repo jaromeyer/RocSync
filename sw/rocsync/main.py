@@ -257,6 +257,8 @@ def run(args):
                 start_time2,
                 end_time2,
             )
+            if ret is not None:
+                ret = ret.to_dict()
         elif file in images:
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
         elif file in ftk_recordings:
