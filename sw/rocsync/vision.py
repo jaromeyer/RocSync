@@ -98,7 +98,7 @@ def read_ring(extracted_board, camera_type, draw_result=False):
         ) + 90  # Convert to degrees and rotate by 90 degrees
         cv2.ellipse(led_mask, (x, y), axes, rotation_angle, 0, 360, (255), -1)
         mean_intensity = np.mean(extracted_board[led_mask > 0])
-        leds[i] = mean_intensity > 20  # TODO make param
+        leds[i] = mean_intensity > 10  # TODO make param
 
         if draw_result:
             color = (0, 0, 255) if leds[i] else (255, 0, 0)
@@ -127,7 +127,7 @@ def read_counter(extracted_board, camera_type, draw_result=False):
         led_mask = np.zeros((board_size, board_size), dtype=np.uint8)
         cv2.circle(led_mask, (x, y), led_size, (255), -1)
         mean_intensity = np.mean(extracted_board[led_mask > 0])
-        enabled = mean_intensity > 20  # TODO make param
+        enabled = mean_intensity > 50  # TODO make param
         if enabled:
             counter += 2 ** (15 - i)
         if draw_result:
