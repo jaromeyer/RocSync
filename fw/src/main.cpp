@@ -15,20 +15,9 @@ const int MODE_LED_PIN = PC3;
 // config
 const int FREQ = 1000; // in hz
 const int PERIOD = 100;
-const int HIGH_RING_BRIGHTNESS = 100; // 0-100%
-const int HIGH_COUNTER_BRIGHTNESS = 100;
-const int HIGH_CORNER_BRIGHTNESS = 100;
-const int LOW_RING_BRIGHTNESS = 100;
-const int LOW_COUNTER_BRIGHTNESS = 50;
-const int LOW_CORNER_BRIGHTNESS = 50;
-
-enum BrightnessMode
-{
-  HIGHB,
-  LOWB,
-  OFF,
-  STATE_COUNT
-};
+const int RING_BRIGHTNESS = 100; // 0-100%
+const int COUNTER_BRIGHTNESS = 30;
+const int CORNER_BRIGHTNESS = 100;
 
 void update()
 {
@@ -54,30 +43,23 @@ void update()
 
 void changeMode()
 {
-  static BrightnessMode brightnessMode = HIGHB;
-  brightnessMode = static_cast<BrightnessMode>((brightnessMode + 1) % STATE_COUNT);
-  switch (brightnessMode)
+  static bool standby = false;
+  standby = !standby;
+  if (standby)
   {
-  case HIGHB:
-    analogWrite(RING_BLANK_PIN, (1 - HIGH_RING_BRIGHTNESS / 100.0) * 4096);
-    analogWrite(COUNTER_BLANK_PIN, (1 - HIGH_COUNTER_BRIGHTNESS / 100.0) * 4096);
-    analogWrite(CORNER_ENABLE_PIN, HIGH_CORNER_BRIGHTNESS / 100.0 * 4096);
-    digitalWrite(MODE_LED_PIN, LOW);
-    break;
-  case LOWB:
-    analogWrite(RING_BLANK_PIN, (1 - LOW_RING_BRIGHTNESS / 100.0) * 4096);
-    analogWrite(COUNTER_BLANK_PIN, (1 - LOW_COUNTER_BRIGHTNESS / 100.0) * 4096);
-    analogWrite(CORNER_ENABLE_PIN, LOW_CORNER_BRIGHTNESS / 100.0 * 4096);
-    digitalWrite(MODE_LED_PIN, LOW);
-    break;
-  case OFF:
+    // turn off LEDs
     analogWrite(RING_BLANK_PIN, 4096);
     analogWrite(COUNTER_BLANK_PIN, 4096);
     analogWrite(CORNER_ENABLE_PIN, 0);
     digitalWrite(MODE_LED_PIN, HIGH);
-    break;
-  default:
-    break;
+  }
+  else
+  {
+    // turn on LEDs with configured brightness
+    analogWrite(RING_BLANK_PIN, (1 - RING_BRIGHTNESS / 100.0) * 4096);
+    analogWrite(COUNTER_BLANK_PIN, (1 - COUNTER_BRIGHTNESS / 100.0) * 4096);
+    analogWrite(CORNER_ENABLE_PIN, CORNER_BRIGHTNESS / 100.0 * 4096);
+    digitalWrite(MODE_LED_PIN, LOW);
   }
 }
 
@@ -106,9 +88,9 @@ void setup()
 
   // set brightness using PWM
   analogWriteFrequency(8000); // set PWM frequency (internally sets frequency for Timer2)
-  analogWrite(RING_BLANK_PIN, (1 - HIGH_RING_BRIGHTNESS / 100.0) * 4096);
-  analogWrite(COUNTER_BLANK_PIN, (1 - HIGH_COUNTER_BRIGHTNESS / 100.0) * 4096);
-  analogWrite(CORNER_ENABLE_PIN, HIGH_CORNER_BRIGHTNESS / 100.0 * 4096);
+  analogWrite(RING_BLANK_PIN, (1 - RING_BRIGHTNESS / 100.0) * 4096);
+  analogWrite(COUNTER_BLANK_PIN, (1 - COUNTER_BRIGHTNESS / 100.0) * 4096);
+  analogWrite(CORNER_ENABLE_PIN, CORNER_BRIGHTNESS / 100.0 * 4096);
 
   // clear shift registers
   for (int i = 0; i < PERIOD; i++)
