@@ -16,7 +16,7 @@ const int MODE_LED_PIN = PC3;
 const int FREQ = 1000; // in hz
 const int PERIOD = 100;
 const int RING_BRIGHTNESS = 100; // 0-100%
-const int COUNTER_BRIGHTNESS = 30;
+const int COUNTER_BRIGHTNESS = 50;
 const int CORNER_BRIGHTNESS = 100;
 
 void update()
