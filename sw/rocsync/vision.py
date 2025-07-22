@@ -23,10 +23,6 @@ params.blobColor = 255
 params.filterByInertia = True
 params.minInertiaRatio = 0.8
 
-# params.filterByCircularity = True
-# params.minCircularity = 0.8
-# params.minDistBetweenBlobs = 0.01
-
 blob_detector = cv2.SimpleBlobDetector_create(params)
 
 # ArUco detector params
@@ -221,7 +217,7 @@ def find_corners_dots(mask, frame_number, debug_dir=None):
     ]
     max_distance = max([np.linalg.norm(act - exp) for act, exp in zip(closest_points, corner_dots)])
     if max_distance > 50:
-        print(f"Rejected {frame_number}: corner LED was {max_distance} px from where it should be")
+        # print(f"Rejected {frame_number}: corner LED was {max_distance} px from where it should be")
         return  # Some corner is too far away from where it should be
 
     return np.array(closest_points, dtype=np.float32)
@@ -278,7 +274,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
             rough_pcb = cv2.warpPerspective(
                 mask, rough_transformation_matrix, (board_size, board_size)
             )
-            cv2.imwrite(f"{debug_dir}/rough_pcb_{frame_number}.png", rough_pcb)
+            # cv2.imwrite(f"{debug_dir}/rough_pcb_{frame_number}.png", rough_pcb)
             corners = find_corners_dots(rough_pcb, frame_number, debug_dir)
             if corners is None:
                 return True, None
@@ -287,7 +283,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
                 rough_transformation_matrix,
             )
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
-            cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", pcb)
+            # cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", pcb)
         case CameraType.INFRARED:
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             _, mask = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
