@@ -14,20 +14,22 @@ class CameraType(Enum):
 
 # Blob detector params
 params = cv2.SimpleBlobDetector_Params()
+
+# Detect white blobs
 params.filterByColor = True
 params.blobColor = 255
-params.filterByArea = False
-params.minArea = 100
-params.maxArea = 1000
-params.filterByCircularity = True
-params.minCircularity = 0.5
-params.filterByInertia = False
-params.minInertiaRatio = 0.5
-params.filterByConvexity = False
-params.minConvexity = 0.8
-params.minDistBetweenBlobs = 0.01
+
+# Exclude elongated blobs caused by motion blur
+params.filterByInertia = True
+params.minInertiaRatio = 0.8
+
+# params.filterByCircularity = True
+# params.minCircularity = 0.8
+# params.minDistBetweenBlobs = 0.01
+
 blob_detector = cv2.SimpleBlobDetector_create(params)
 
+# ArUco detector params
 dictionary = cv2.aruco.getPredefinedDictionary(cv2.aruco.DICT_4X4_50)
 parameters = cv2.aruco.DetectorParameters()
 parameters.cornerRefinementMethod = cv2.aruco.CORNER_REFINE_NONE
@@ -84,26 +86,38 @@ def draw_polygon(points, image, color):
         )
 
 
+def read_led(img, x, y):
+    led_mask = np.zeros(img.shape[:2], dtype=np.uint8)
+    cv2.circle(led_mask, (x, y), led_size, (255), -1)
+    led_intensity = np.mean(img[led_mask > 0])
+    return led_intensity
+
+
+def read_led_simple(img, x, y):
+    x_min = max(x - led_size, 0)
+    x_max = min(x + led_size + 1, img.shape[1])
+    y_min = max(y - led_size, 0)
+    y_max = min(y + led_size + 1, img.shape[0])
+    patch = img[y_min:y_max, x_min:x_max]
+    return patch.mean()
+
+
 def read_ring(extracted_board, camera_type, draw_result=False):
     radius = visible_radius if camera_type == CameraType.RGB else ir_radius
-    leds = np.zeros(period, dtype=bool)
+
+    # Collect mean LED intensities
+    led_intensities = np.zeros(period, dtype=np.uint8)
     for i in range(period):
         angle = -(i / period + 0.25) * 2 * math.pi
         x = int(board_size / 2 + radius * math.cos(angle))
         y = int(board_size / 2 + radius * math.sin(angle))
+        led_intensities[i] = read_led(extracted_board, x, y)
 
-        # Create mask and sample image
-        led_mask = np.zeros((board_size, board_size), dtype=np.uint8)
-        axes = (led_size, int(led_size * 1.5))  # Example ellipse axes
-        rotation_angle = (angle * 180 / math.pi) + 90  # Convert to degrees and rotate by 90 degrees
-        cv2.ellipse(led_mask, (x, y), axes, rotation_angle, 0, 360, (255), -1)
-        mean_intensity = np.mean(extracted_board[led_mask > 0])
-        leds[i] = mean_intensity > 20  # TODO make param
+    # Apply Otsu's thresholding to led_intensities
+    _, otsu_thresh = cv2.threshold(led_intensities, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    leds = otsu_thresh.astype(bool)
 
-        if draw_result:
-            color = (0, 0, 255) if leds[i] else (255, 0, 0)
-            cv2.ellipse(extracted_board, (x, y), axes, rotation_angle, 0, 360, color, 1)
-
+    # Find segments of enabled LEDs
     potential_starts = []
     potential_ends = []
     for i in range(period):
@@ -111,27 +125,38 @@ def read_ring(extracted_board, camera_type, draw_result=False):
             potential_starts.append(i)
         if leds[i] and not leds[(i + 1) % period]:
             potential_ends.append(i)
+        if draw_result:
+            angle = -(i / period + 0.25) * 2 * math.pi
+            x = int(board_size / 2 + radius * math.cos(angle))
+            y = int(board_size / 2 + radius * math.sin(angle))
+            color = (0, 0, 255) if leds[i] else (255, 0, 0)
+            cv2.circle(extracted_board, (x, y), led_size, color, 1)
 
-    # Make sure that there is exactly ONE of enabled
+    # There must be exactly ONE segment of enabled LEDs
     if len(potential_starts) == 1 and len(potential_ends) == 1:
         return (potential_starts[0], potential_ends[0])
 
 
 def read_counter(extracted_board, camera_type, draw_result=False):
     y = int(53 / 250 * 640) if camera_type == CameraType.RGB else int(48 / 250 * 640)
-    counter = 0
+
+    # Collect mean LED intensities
+    led_intensities = np.zeros(16, dtype=np.uint8)
     for i in range(0, 16):
         x = int((65 + i * 8) / 250 * 640)
+        led_intensities[i] = read_led_simple(extracted_board, x, y)
 
-        # Create mask and sample image
-        led_mask = np.zeros((board_size, board_size), dtype=np.uint8)
-        cv2.circle(led_mask, (x, y), led_size, (255), -1)
-        mean_intensity = np.mean(extracted_board[led_mask > 0])
-        enabled = mean_intensity > 20  # TODO make param
-        if enabled:
+    # Apply Otsu's thresholding to led_intensities
+    _, otsu_thresh = cv2.threshold(led_intensities, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+    leds = otsu_thresh.astype(bool)
+
+    counter = 0
+    for i in range(16):
+        if leds[i]:
             counter += 2 ** (15 - i)
         if draw_result:
-            color = (0, 0, 255) if enabled else (255, 0, 0)
+            x = int((65 + i * 8) / 250 * 640)
+            color = (0, 0, 255) if leds[i] else (255, 0, 0)
             cv2.circle(extracted_board, (x, y), led_size, color, 1)
     return counter
 
@@ -242,8 +267,9 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
                 return False, None
 
             red_channel = image[:, :, 2]
-            _, mask = cv2.threshold(red_channel, 240 , 255, cv2.THRESH_BINARY)
-            mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+            # _, mask = cv2.threshold(red_channel, 240 , 255, cv2.THRESH_BINARY)
+            # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
+            mask = red_channel
 
             # Use course PCB to accurately extract corner
             rough_transformation_matrix = cv2.getPerspectiveTransform(
@@ -261,7 +287,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
                 rough_transformation_matrix,
             )
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
-            cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", rough_pcb)
+            cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", pcb)
         case CameraType.INFRARED:
             gray_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
             _, mask = cv2.threshold(gray_image, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -290,7 +316,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
 
     if ring is not None:
         start, end = ring
-        if start > end or min(start, period - start) <= 2 or min(period, 100 - end) <= 2:
+        if start > end or start <= 1 or period - end <= 1:
             return True, None # Counter increment during exposure
 
         start += counter * period

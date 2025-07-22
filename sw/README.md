@@ -89,6 +89,8 @@ ffmpeg \
 	synchronized.mp4
 ```
 
-## TODO
-- [ ] Write debug images in separate thread
-- [ ] More filters for IR (e.g., uniform corner distance)
+## Ideas for future improvements
+- [ ] Write debug images in separate thread to not slow down the main processing
+- [ ] Implement additional filters for the IR pipeline (e.g., uniform corner distance)
+- [ ] Use partial ring LED intensity to determine sub-millisecond timestamps (e.g., compute distance to min and max detected intensity)
+- [ ] Use gray code and partial LED detection to decode the counter even when it changed during the exposure
