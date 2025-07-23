@@ -85,29 +85,27 @@ def draw_polygon(points, image, color):
 def read_led(img, x, y):
     led_mask = np.zeros(img.shape[:2], dtype=np.uint8)
     cv2.circle(led_mask, (x, y), led_size, (255), -1)
-    led_intensity = np.mean(img[led_mask > 0])
+    led_intensity = np.quantile(img[led_mask > 0], 0.75)
     return led_intensity
-
-
-def read_led_simple(img, x, y):
-    x_min = max(x - led_size, 0)
-    x_max = min(x + led_size + 1, img.shape[1])
-    y_min = max(y - led_size, 0)
-    y_max = min(y + led_size + 1, img.shape[0])
-    patch = img[y_min:y_max, x_min:x_max]
-    return patch.mean()
 
 
 def read_ring(extracted_board, camera_type, draw_result=False):
     radius = visible_radius if camera_type == CameraType.RGB else ir_radius
 
-    # Collect mean LED intensities
+    # Collect mean LED intensities relative to local background
     led_intensities = np.zeros(period, dtype=np.uint8)
     for i in range(period):
         angle = -(i / period + 0.25) * 2 * math.pi
+
         x = int(board_size / 2 + radius * math.cos(angle))
         y = int(board_size / 2 + radius * math.sin(angle))
-        led_intensities[i] = read_led(extracted_board, x, y)
+        led_intensity = read_led(extracted_board, x, y)
+
+        x_bg = int(board_size / 2 + (radius - 25) * math.cos(angle))
+        y_bg = int(board_size / 2 + (radius - 25) * math.sin(angle))
+        bg_intensity = read_led(extracted_board, x_bg, y_bg)
+
+        led_intensities[i] = np.clip(led_intensity - bg_intensity, 0, 255)
 
     # Apply Otsu's thresholding to led_intensities
     _, otsu_thresh = cv2.threshold(led_intensities, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
@@ -136,11 +134,13 @@ def read_ring(extracted_board, camera_type, draw_result=False):
 def read_counter(extracted_board, camera_type, draw_result=False):
     y = int(53 / 250 * 640) if camera_type == CameraType.RGB else int(48 / 250 * 640)
 
-    # Collect mean LED intensities
+    # Collect mean LED intensities relative to local background
     led_intensities = np.zeros(16, dtype=np.uint8)
     for i in range(0, 16):
         x = int((65 + i * 8) / 250 * 640)
-        led_intensities[i] = read_led_simple(extracted_board, x, y)
+        led_intensity = read_led(extracted_board, x, y)
+        bg_intensity = read_led(extracted_board, x, y - 25)
+        led_intensities[i] = np.clip(led_intensity - bg_intensity, 0, 255)
 
     # Apply Otsu's thresholding to led_intensities
     _, otsu_thresh = cv2.threshold(led_intensities, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
