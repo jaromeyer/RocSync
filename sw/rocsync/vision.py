@@ -20,7 +20,7 @@ params.filterByColor = True
 params.blobColor = 255
 
 # Exclude elongated blobs caused by motion blur
-params.filterByInertia = True
+params.filterByInertia = False
 params.minInertiaRatio = 0.8
 
 blob_detector = cv2.SimpleBlobDetector_create(params)
@@ -263,7 +263,7 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
                 return False, None
 
             red_channel = image[:, :, 2]
-            # _, mask = cv2.threshold(red_channel, 240 , 255, cv2.THRESH_BINARY)
+            # _, mask = cv2.threshold(red_channel, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
             # mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
             mask = red_channel
 
