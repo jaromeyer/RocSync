@@ -30,7 +30,7 @@ class NpEncoder(json.JSONEncoder):
 
 def process_image(path, camera_type, debug_dir=None):
     image = cv2.imread(path)
-    timestamp = process_frame(image, camera_type, debug_dir)
+    _, timestamp = process_frame(image, camera_type, 0, debug_dir)
     if timestamp is not None:
         succprint(f"start: {timestamp[0]} ms, end {timestamp[1]} ms")
         return {"start": timestamp[0], "end": timestamp[1]}
