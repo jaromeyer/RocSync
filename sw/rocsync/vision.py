@@ -194,9 +194,20 @@ def read_ring(extracted_board, camera_type, draw_result=False):
 
     # Find most likely segment of enabled LEDs, allowing for false detections
     (start, end), score = find_optimal_ring_start_end(leds)
-    if start != end:
-        # return inclusive bounds (i.e. start is the first led ON, end -1 is the last led ON)
-        return start, (end - 1) % period
+
+    if start == end:
+        # no segment found
+        return None
+
+    if draw_result:
+        for i in range(period):
+            angle = -(i / period + 0.25) * 2 * math.pi
+            x = int(board_size / 2 + radius * math.cos(angle))
+            y = int(board_size / 2 + radius * math.sin(angle))
+            color = (0, 0, 255) if leds[i] else (255, 0, 0)
+            cv2.circle(extracted_board, (x, y), led_size, color, 1)
+    # return inclusive bounds (i.e. start is the first led ON, end -1 is the last led ON)
+    return start, (end - 1) % period
 
 
 def read_counter(extracted_board, camera_type, draw_result=False):
