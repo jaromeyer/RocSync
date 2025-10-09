@@ -49,6 +49,7 @@ def read_ring(
 ) -> tuple[int, int] | None:
     if draw_result:
         plt.figure(figsize=(6, 6))
+        plt.title("Read Ring")
         fiducials_arr = np.array(fiducials)
         plt.scatter(fiducials_arr[:, 0], fiducials_arr[:, 1], color="green")
 
@@ -67,7 +68,7 @@ def read_ring(
                 break
 
         if draw_result:
-            circle = plt.Circle((x, y), led_size, color="red", fill=False)
+            circle = plt.Circle((x, y), led_size, color="red", fill=leds[i])
             plt.gca().add_patch(circle)
     if draw_result:
         plt.gca().invert_yaxis()
@@ -91,9 +92,11 @@ def read_counter(fiducials: list[tuple[float, float]], draw_result: bool = False
     y = 48
     counter = 0
 
-    # plt.figure(figsize=(6, 6))
-    # fiducials_arr = np.array(fiducials)
-    # plt.scatter(fiducials_arr[:, 0], fiducials_arr[:, 1], color="green")
+    if draw_result:
+        plt.figure(figsize=(6, 6))
+        plt.title("Read Counter")
+        fiducials_arr = np.array(fiducials)
+        plt.scatter(fiducials_arr[:, 0], fiducials_arr[:, 1], color="green")
 
     for i in range(0, 16):
         x = 65 + i * 8
@@ -107,17 +110,19 @@ def read_counter(fiducials: list[tuple[float, float]], draw_result: bool = False
         if enabled:
             counter += 2 ** (15 - i)
 
-        # circle = plt.Circle((x, y), led_size, color="red", fill=False)
-        # plt.gca().add_patch(circle)
+        if draw_result:
+            circle = plt.Circle((x, y), led_size, color="red", fill=enabled)
+            plt.gca().add_patch(circle)
 
-    # plt.gca().invert_yaxis()
-    # plt.grid(True)
-    # plt.show()
+    if draw_result:
+        plt.gca().invert_yaxis()
+        plt.grid(True)
+        plt.show()
     return counter
 
 
 def process_frame(
-    position: np.ndarray, rotation_matrix: np.ndarray, fiducials: list[dict]
+    position: np.ndarray, rotation_matrix: np.ndarray, fiducials: list[dict], draw_result: bool = False
 ) -> tuple[int, int] | None:
     # Transform fiducials into local coordinate system
     transformed_fiducials = []
@@ -142,8 +147,17 @@ def process_frame(
         ):
             transformed_fiducials.append(fid_pos_marker[:2])
 
+    if draw_result:
+        plt.figure(figsize=(6, 6))
+        plt.title("Detected Fiducials")
+        fiducials_arr = np.array(transformed_fiducials)
+        plt.scatter(fiducials_arr[:, 0], fiducials_arr[:, 1], color="green")
+        plt.gca().invert_yaxis()
+        plt.grid(True)
+        plt.show()
+
     # Rotate until counter is readable
-    counter = read_counter(transformed_fiducials)
+    counter = read_counter(transformed_fiducials, draw_result=draw_result)
     for _ in range(3):
         if counter == 0:
             # Rotate 90 degrees arround center
@@ -160,7 +174,7 @@ def process_frame(
     if counter == 0:
         return None
 
-    ring = read_ring(transformed_fiducials)
+    ring = read_ring(transformed_fiducials, draw_result=draw_result)
     if ring is not None:
         start, end = ring
         # Check if the values are valid
@@ -176,14 +190,25 @@ def process_frame(
         return start, end
     return None
 
+def plot_timechart(x, y, x_range, y_pred, debug_dir):
+    plt.figure()
+    plt.scatter(x, y, color="blue", label="Measurements", marker=".")
+    plt.plot(x_range, y_pred, color="r", label="Fitted Model")
+    plt.xlabel("Device timestamp")
+    plt.ylabel("RocSync timestamp [ms]")
+    plt.title("Frame timing")
+    plt.gca().ticklabel_format(style="plain", useOffset=False)
+    plt.legend(loc="upper left")
+    plt.grid(True)
+    plt.savefig(f"{debug_dir}/timestamps.png")
 
-def fit_ftk_timestamps(timestamps: dict[int, tuple[int, int]]) -> dict:
+def fit_ftk_timestamps(timestamps: dict[int, tuple[int, int]], debug_dir = None) -> dict:
     # Assuming constant frame rate, fit robust linear model
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
     y = np.array([start for start, _ in timestamps.values()])
     model = RANSACRegressor(
         residual_threshold=10,
-        max_trials=1000,  # more trials for more consistent results
+        max_trials=10000,  # more trials for more consistent results
         random_state=0,  # deterministic results
     )
     # Convert x to numeric type before fitting
@@ -207,10 +232,16 @@ def fit_ftk_timestamps(timestamps: dict[int, tuple[int, int]]) -> dict:
         "n_considered_frames": len(filtered_timestamps),
         "n_rejected_frames": len(timestamps) - len(filtered_timestamps),
     }
+
+    if debug_dir is not None:
+        # Predict timestamps for all frames
+        x_range = np.array([np.min(x), np.max(x)]).reshape(-1, 1)
+        y_pred = model.predict(x_range)
+        plot_timechart(x, y, x_range, y_pred, debug_dir)
     return results
 
 
-def process_ftk_recording(filename: str) -> dict:
+def process_ftk_recording(filename: str, debug_dir=None) -> dict:
     with open(filename, "r") as file:
         total_lines = sum(1 for _ in file)
 
@@ -307,6 +338,6 @@ def process_ftk_recording(filename: str) -> dict:
                     if result is not None:
                         timestamps[int(marker_dict["ftk_timestamp"])] = result
     if len(timestamps) > 0:
-        statistics = fit_ftk_timestamps(timestamps)
+        statistics = fit_ftk_timestamps(timestamps, debug_dir)
         return statistics
     return None

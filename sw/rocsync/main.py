@@ -262,7 +262,7 @@ def run(args):
         elif file in images:
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
         elif file in ftk_recordings:
-            ret = process_ftk_recording(file)
+            ret = process_ftk_recording(file, debug_dir)
 
         if ret is not None:
             result[str(file)] = ret
