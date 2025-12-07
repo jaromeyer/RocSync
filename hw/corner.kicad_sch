@@ -1,14 +1,18 @@
 (kicad_sch
-	(version 20231120)
+	(version 20250114)
 	(generator "eeschema")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(uuid "7ddc237d-98db-4cee-a805-6d7a8cd18240")
 	(paper "A4")
 	(lib_symbols
 		(symbol "Device:LED"
-			(pin_numbers hide)
+			(pin_numbers
+				(hide yes)
+			)
 			(pin_names
-				(offset 1.016) hide)
+				(offset 1.016)
+				(hide yes)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -76,10 +80,22 @@
 			(symbol "LED_0_1"
 				(polyline
 					(pts
-						(xy -1.27 -1.27) (xy -1.27 1.27)
+						(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
 					)
 					(stroke
-						(width 0.254)
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
+					)
+					(stroke
+						(width 0)
 						(type default)
 					)
 					(fill
@@ -100,7 +116,7 @@
 				)
 				(polyline
 					(pts
-						(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
+						(xy -1.27 -1.27) (xy -1.27 1.27)
 					)
 					(stroke
 						(width 0.254)
@@ -112,22 +128,10 @@
 				)
 				(polyline
 					(pts
-						(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
+						(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
 					)
 					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
-					)
-					(stroke
-						(width 0)
+						(width 0.254)
 						(type default)
 					)
 					(fill
@@ -173,9 +177,12 @@
 					)
 				)
 			)
+			(embedded_fonts no)
 		)
 		(symbol "Device:R"
-			(pin_numbers hide)
+			(pin_numbers
+				(hide yes)
+			)
 			(pin_names
 				(offset 0)
 			)
@@ -294,6 +301,7 @@
 					)
 				)
 			)
+			(embedded_fonts no)
 		)
 		(symbol "custom_symbols:BCR420UW6Q"
 			(exclude_from_sim no)
@@ -429,12 +437,17 @@
 					)
 				)
 			)
+			(embedded_fonts no)
 		)
 		(symbol "power:GND"
 			(power)
-			(pin_numbers hide)
+			(pin_numbers
+				(hide yes)
+			)
 			(pin_names
-				(offset 0) hide)
+				(offset 0)
+				(hide yes)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -525,12 +538,17 @@
 					)
 				)
 			)
+			(embedded_fonts no)
 		)
 		(symbol "power:VCC"
 			(power)
-			(pin_numbers hide)
+			(pin_numbers
+				(hide yes)
+			)
 			(pin_names
-				(offset 0) hide)
+				(offset 0)
+				(hide yes)
+			)
 			(exclude_from_sim no)
 			(in_bom yes)
 			(on_board yes)
@@ -602,7 +620,7 @@
 				)
 				(polyline
 					(pts
-						(xy 0 0) (xy 0 2.54)
+						(xy 0 2.54) (xy 0.762 1.27)
 					)
 					(stroke
 						(width 0)
@@ -614,7 +632,7 @@
 				)
 				(polyline
 					(pts
-						(xy 0 2.54) (xy 0.762 1.27)
+						(xy 0 0) (xy 0 2.54)
 					)
 					(stroke
 						(width 0)
@@ -645,7 +663,19 @@
 					)
 				)
 			)
+			(embedded_fonts no)
 		)
+	)
+	(text "R_EXT configured for ~20 mA sink current"
+		(exclude_from_sim no)
+		(at 88.646 85.852 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(color 249 0 0 1)
+			)
+		)
+		(uuid "fd657191-4a8f-43f1-9ac0-e2a926110e81")
 	)
 	(junction
 		(at 134.62 71.12)
@@ -666,10 +696,22 @@
 		(uuid "29fa3158-8015-4dfa-80fd-ddd636aaa60e")
 	)
 	(junction
+		(at 162.56 71.12)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "34c1e5ee-46fd-42b8-bb6d-2c7b89578b1f")
+	)
+	(junction
 		(at 74.93 33.02)
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "35a12972-19af-4fab-b618-c9b8567dbf28")
+	)
+	(junction
+		(at 119.38 80.01)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "59333edc-1de2-49bd-a902-8ec94ce760cb")
 	)
 	(junction
 		(at 55.88 71.12)
@@ -688,6 +730,12 @@
 		(diameter 0)
 		(color 0 0 0 0)
 		(uuid "a56f155e-964e-4711-ace0-378f7d2f004a")
+	)
+	(junction
+		(at 128.27 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c3d360f4-6235-475b-b644-0fd94a5decef")
 	)
 	(junction
 		(at 107.95 71.12)
@@ -919,6 +967,16 @@
 	)
 	(wire
 		(pts
+			(xy 156.21 48.26) (xy 156.21 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a5d5d9bd-e2ab-4f53-8ad1-d0bac1df06b3")
+	)
+	(wire
+		(pts
 			(xy 137.16 62.23) (xy 139.7 62.23)
 		)
 		(stroke
@@ -969,6 +1027,26 @@
 	)
 	(wire
 		(pts
+			(xy 128.27 33.02) (xy 156.21 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c6a50f62-5dee-4bcc-9fd7-77cc5cd30c35")
+	)
+	(wire
+		(pts
+			(xy 162.56 71.12) (xy 156.21 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c9e06882-51e4-472f-8607-94dacf4c3b37")
+	)
+	(wire
+		(pts
 			(xy 74.93 33.02) (xy 101.6 33.02)
 		)
 		(stroke
@@ -976,6 +1054,16 @@
 			(type default)
 		)
 		(uuid "cc2b5a26-93f2-4d22-84d5-1521e58a42ca")
+	)
+	(wire
+		(pts
+			(xy 167.64 71.12) (xy 162.56 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "cdd91335-62f7-4d5a-93b0-5230bd999afc")
 	)
 	(wire
 		(pts
@@ -989,6 +1077,16 @@
 	)
 	(wire
 		(pts
+			(xy 147.32 80.01) (xy 119.38 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d96d76a0-7f0f-4877-8267-8489999f320c")
+	)
+	(wire
+		(pts
 			(xy 107.95 71.12) (xy 101.6 71.12)
 		)
 		(stroke
@@ -996,6 +1094,16 @@
 			(type default)
 		)
 		(uuid "dc95b20b-bda8-41f1-a80d-d4c0690495f9")
+	)
+	(wire
+		(pts
+			(xy 167.64 69.85) (xy 167.64 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ec6b5419-5518-493a-9530-76f6fe190759")
 	)
 	(wire
 		(pts
@@ -1009,6 +1117,26 @@
 	)
 	(wire
 		(pts
+			(xy 147.32 62.23) (xy 147.32 80.01)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ee17da72-218a-45b4-a3ee-ea54d08780bd")
+	)
+	(wire
+		(pts
+			(xy 165.1 62.23) (xy 167.64 62.23)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ee493442-c116-4240-8d22-da1d531ad23c")
+	)
+	(wire
+		(pts
 			(xy 119.38 62.23) (xy 119.38 80.01)
 		)
 		(stroke
@@ -1017,21 +1145,9 @@
 		)
 		(uuid "f948387a-5de5-44db-8cd4-4e33c60613ad")
 	)
-	(text "R_EXT configured for ~20 mA sink current"
-		(exclude_from_sim no)
-		(at 88.646 85.852 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-				(color 249 0 0 1)
-			)
-		)
-		(uuid "fd657191-4a8f-43f1-9ac0-e2a926110e81")
-	)
 	(hierarchical_label "EN"
 		(shape input)
 		(at 30.48 80.01 180)
-		(fields_autoplaced yes)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1050,7 +1166,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "008a0eff-f1d9-4181-8fc7-e3e39ebb1ff1")
-		(property "Reference" "D237"
+		(property "Reference" "D266"
 			(at 53.34 44.7674 90)
 			(effects
 				(font
@@ -1104,7 +1220,7 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D237")
+					(reference "D266")
 					(unit 1)
 				)
 			)
@@ -1259,7 +1375,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "16583351-7042-4455-b9f0-a83f2a48a9a9")
-		(property "Reference" "D235"
+		(property "Reference" "D269"
 			(at 105.41 37.1474 90)
 			(effects
 				(font
@@ -1313,7 +1429,7 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D235")
+					(reference "D269")
 					(unit 1)
 				)
 			)
@@ -1387,6 +1503,72 @@
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
 					(reference "U14")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 162.56 71.12 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "278dadca-15aa-4609-b4de-d4715ef3703e")
+		(property "Reference" "#PWR025"
+			(at 162.56 77.47 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 162.56 76.2 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 162.56 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 162.56 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 162.56 71.12 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "59d23b28-7b93-417c-b4f7-04ec6d5c9213")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
+					(reference "#PWR025")
 					(unit 1)
 				)
 			)
@@ -1475,7 +1657,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "5b518cc3-4486-459d-8218-57bc278206b6")
-		(property "Reference" "D239"
+		(property "Reference" "D270"
 			(at 105.41 44.7674 90)
 			(effects
 				(font
@@ -1529,7 +1711,7 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D239")
+					(reference "D270")
 					(unit 1)
 				)
 			)
@@ -1676,6 +1858,79 @@
 		)
 	)
 	(symbol
+		(lib_id "custom_symbols:BCR420UW6Q")
+		(at 151.13 54.61 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6fcc6a93-1c4b-4aad-8bb0-682b3a6667b9")
+		(property "Reference" "U15"
+			(at 151.384 52.832 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "BCR420UW6Q"
+			(at 155.956 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "Package_TO_SOT_SMD:SOT-23-6"
+			(at 151.13 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 151.13 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" ""
+			(at 151.13 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3800098f-9d5a-41cd-896d-55ee2a99b120")
+		)
+		(pin "2"
+			(uuid "82d55d5f-4776-46e6-91b6-834d5cd9a720")
+		)
+		(pin "6"
+			(uuid "b6ef14e8-dddd-4c00-bfae-92089bd61215")
+		)
+		(pin "4"
+			(uuid "35941fbf-82f6-4959-be97-ee1d60e942bb")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
+					(reference "U15")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
 		(lib_id "Device:LED")
 		(at 128.27 44.45 90)
 		(unit 1)
@@ -1685,7 +1940,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "756dedb7-8cbf-41b7-8aaa-d81523f83e51")
-		(property "Reference" "D240"
+		(property "Reference" "D272"
 			(at 132.08 44.7674 90)
 			(effects
 				(font
@@ -1739,7 +1994,7 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D240")
+					(reference "D272")
 					(unit 1)
 				)
 			)
@@ -1891,7 +2146,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "a95f8ff4-a13b-4ab0-b0fc-83f539a149d6")
-		(property "Reference" "D233"
+		(property "Reference" "D265"
 			(at 53.34 37.1474 90)
 			(effects
 				(font
@@ -1945,7 +2200,77 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D233")
+					(reference "D265")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 156.21 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "aad5117a-132a-4d1a-a99d-eb0809315237")
+		(property "Reference" "D274"
+			(at 160.02 44.7674 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "LED"
+			(at 160.02 47.3074 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 156.21 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 156.21 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 156.21 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b30eef82-c440-4167-b664-64b335f4232f")
+		)
+		(pin "2"
+			(uuid "e41cff51-5e69-40ba-b5e1-f92dad81312b")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
+					(reference "D274")
 					(unit 1)
 				)
 			)
@@ -2026,7 +2351,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "ca01d446-9841-4e84-888f-4a560e596db1")
-		(property "Reference" "D234"
+		(property "Reference" "D267"
 			(at 78.74 37.1474 90)
 			(effects
 				(font
@@ -2080,7 +2405,7 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D234")
+					(reference "D267")
 					(unit 1)
 				)
 			)
@@ -2096,7 +2421,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d43fb777-b0a7-40bf-8d67-17eae1b3c69d")
-		(property "Reference" "D238"
+		(property "Reference" "D268"
 			(at 78.74 44.7674 90)
 			(effects
 				(font
@@ -2150,7 +2475,7 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D238")
+					(reference "D268")
 					(unit 1)
 				)
 			)
@@ -2166,7 +2491,7 @@
 		(dnp no)
 		(fields_autoplaced yes)
 		(uuid "d45734ff-e4ba-4fd8-964b-5592f2ceb4ef")
-		(property "Reference" "D236"
+		(property "Reference" "D271"
 			(at 132.08 37.1474 90)
 			(effects
 				(font
@@ -2220,7 +2545,147 @@
 		(instances
 			(project "RocSync_testing"
 				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
-					(reference "D236")
+					(reference "D271")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 167.64 66.04 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e074297f-e8f6-49f0-9869-4a6c44c909d1")
+		(property "Reference" "R25"
+			(at 170.18 64.7699 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100"
+			(at 170.18 67.3099 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 165.862 66.04 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 167.64 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 167.64 66.04 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2384450b-a210-47bf-9c9a-42993b0c989c")
+		)
+		(pin "2"
+			(uuid "1e8147f1-271d-4f64-935a-316067ee3426")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
+					(reference "R25")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 156.21 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "e6435016-f5a3-458d-b1e5-e791dcb34bc0")
+		(property "Reference" "D273"
+			(at 160.02 37.1474 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 160.02 39.6874 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 156.21 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 156.21 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 156.21 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1cd72309-c93d-4742-b158-1618c4766b7d")
+		)
+		(pin "2"
+			(uuid "aceed6ba-da08-4d96-b657-f8e035531d86")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/7264c74f-1404-43c8-aa37-7270970b741f"
+					(reference "D273")
 					(unit 1)
 				)
 			)

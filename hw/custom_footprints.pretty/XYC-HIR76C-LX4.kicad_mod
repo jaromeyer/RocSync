@@ -1,7 +1,7 @@
 (footprint "XYC-HIR76C-LX4"
-	(version 20240108)
+	(version 20241229)
 	(generator "pcbnew")
-	(generator_version "8.0")
+	(generator_version "9.0")
 	(layer "F.Cu")
 	(descr "https://wmsc.lcsc.com/wmsc/upload/file/pdf/v2/lcsc/2204151015_NEWOPTO-XYC-HIR76C-LX4_C2988728.pdf")
 	(tags "LED")
@@ -23,19 +23,6 @@
 		(effects
 			(font
 				(size 1 1)
-				(thickness 0.15)
-			)
-		)
-	)
-	(property "Footprint" ""
-		(at 0 0 0)
-		(unlocked yes)
-		(layer "F.Fab")
-		(hide yes)
-		(uuid "4f649a1c-cc2e-43d0-b8c6-ccd21670fb76")
-		(effects
-			(font
-				(size 1.27 1.27)
 				(thickness 0.15)
 			)
 		)
@@ -201,26 +188,16 @@
 	(pad "1" smd rect
 		(at 1.25 0)
 		(size 1.5 2.2)
-		(layers "F.Cu" "F.Paste" "F.Mask")
+		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "0f92cede-73bb-403b-8f67-855871880cf2")
 	)
 	(pad "2" smd rect
 		(at -1 0)
 		(size 2 2.2)
-		(layers "F.Cu" "F.Paste" "F.Mask")
+		(layers "F.Cu" "F.Mask" "F.Paste")
 		(uuid "f27b831f-46e7-4d40-bf6e-c86d81803aec")
 	)
-	(model "${KICAD8_3DMODEL_DIR}/LED_SMD.3dshapes/LED_PLCC_2835.wrl"
-		(offset
-			(xyz 0 0 0)
-		)
-		(scale
-			(xyz 1 1 1)
-		)
-		(rotate
-			(xyz 0 0 0)
-		)
-	)
+	(embedded_fonts no)
 	(model "${KICAD8_3DMODEL_DIR}/LED_SMD.3dshapes/LED_RGB_Wuerth-PLCC4_3.2x2.8mm_150141M173100.wrl"
 		(offset
 			(xyz 0 0 0)
