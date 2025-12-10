@@ -4,12 +4,12 @@
 const int CLK_PIN = PD0;
 const int RING_DATA_PIN = PD2;
 const int RING_BLANK_PIN = PD3;
-const int RING_LATCH_PIN = PC1;
+const int RING_LATCH_PIN = PC4;
 const int COUNTER_DATA_PIN = PD5;
 const int COUNTER_BLANK_PIN = PD4;
 const int COUNTER_LATCH_PIN = PD6;
 const int CORNER_ENABLE_PIN = PC0;
-const int MODE_BUTTON_PIN = PC2;
+const int MODE_BUTTON_PIN = PA2;
 const int MODE_LED_PIN = PC3;
 
 // config
@@ -65,6 +65,9 @@ void changeMode()
 
 void setup()
 {
+
+  SetSysClockTo_24MHz_HSE(); // set system clock to 24 MHz using external oscillator in BYPASS mode
+
   // initialize IO
   pinMode(CLK_PIN, OUTPUT);
   pinMode(RING_DATA_PIN, OUTPUT);
@@ -112,3 +115,62 @@ void setup()
 }
 
 void loop() {}
+
+static void SetSysClockTo_24MHz_HSE(void)
+{
+  __IO uint32_t StartUpCounter = 0, HSEStatus = 0;
+
+  /* Close PA0-PA1 GPIO function */
+  RCC->APB2PCENR |= RCC_AFIOEN;
+  AFIO->PCFR1 |= (1 << 15);
+
+  /* Enable BYPASS mode for HSE */
+  RCC->CTLR |= ((uint32_t)RCC_HSEBYP);
+
+  /* Enable HSE */
+  RCC->CTLR |= ((uint32_t)RCC_HSEON);
+
+  /* Wait till HSE is ready and if Time out is reached exit */
+  do
+  {
+    HSEStatus = RCC->CTLR & RCC_HSERDY;
+    StartUpCounter++;
+  } while ((HSEStatus == 0) && (StartUpCounter != HSE_STARTUP_TIMEOUT));
+
+  RCC->APB2PCENR |= RCC_AFIOEN;
+  AFIO->PCFR1 |= (1 << 15);
+
+  if ((RCC->CTLR & RCC_HSERDY) != RESET)
+  {
+    HSEStatus = (uint32_t)0x01;
+  }
+  else
+  {
+    HSEStatus = (uint32_t)0x00;
+  }
+
+  if (HSEStatus == (uint32_t)0x01)
+  {
+    /* Flash 0 wait state */
+    FLASH->ACTLR &= (uint32_t)((uint32_t)~FLASH_ACTLR_LATENCY);
+    FLASH->ACTLR |= (uint32_t)FLASH_ACTLR_LATENCY_0;
+
+    /* HCLK = SYSCLK = APB1 */
+    RCC->CFGR0 |= (uint32_t)RCC_HPRE_DIV1;
+
+    /* Select HSE as system clock source */
+    RCC->CFGR0 &= (uint32_t)((uint32_t)~(RCC_SW));
+    RCC->CFGR0 |= (uint32_t)RCC_SW_HSE;
+    /* Wait till HSE is used as system clock source */
+    while ((RCC->CFGR0 & (uint32_t)RCC_SWS) != (uint32_t)0x04)
+    {
+    }
+  }
+  else
+  {
+    /*
+     * If HSE fails to start-up, the application will have wrong clock
+     * configuration. User can add here some code to deal with this error
+     */
+  }
+}
