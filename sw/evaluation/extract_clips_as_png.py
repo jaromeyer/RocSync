@@ -22,6 +22,7 @@ class Config:
     clips_to_extract_json: str            # path to clips json
     target_fps: float
     from_raw_camera_time_of_camera: Optional[str] = None  # camera basename used to define clip timecodes (optional)
+    only_specified: bool = False          # if True, only process from_raw_camera_time_of_camera
 
 
 def _auto_find_time_sync_json(dataset_folder: Path) -> Path:
@@ -93,6 +94,11 @@ def build_arg_parser() -> argparse.ArgumentParser:
         dest="from_raw_camera_time_of_camera",
         help="Camera basename that defines clip timecodes (optional).",
     )
+    p.add_argument(
+        "--only-specified",
+        action="store_true",
+        help="If set, only produce PNGs for the camera given by --from-camera.",
+    )
     # Optional overrides (otherwise auto-detected relative to dataset_folder)
     p.add_argument(
         "--time-sync-json",
@@ -113,6 +119,12 @@ def build_arg_parser() -> argparse.ArgumentParser:
 
 def main(config: Config) -> None:
     print(f"Processing dataset folder: {config.dataset_folder}")
+
+    if config.only_specified and not config.from_raw_camera_time_of_camera:
+        raise ValueError(
+            "--only-specified was set but no --from-camera was provided. "
+            "Please specify which camera to process."
+        )
 
     output_folder_name = "synced_clips_pngs"
 
@@ -157,6 +169,13 @@ def main(config: Config) -> None:
     # For each clip and each camera, compute frames and save PNGs
     for clip in clips:
         for camera, camera_time_sync_data in time_sync_data.items():
+            camera_basename = os.path.splitext(os.path.basename(camera))[0]
+
+            # If --only-specified is set, skip all other cameras
+            if config.only_specified and config.from_raw_camera_time_of_camera is not None:
+                if camera_basename != config.from_raw_camera_time_of_camera:
+                    continue
+
             raw_video_path = os.path.join(config.dataset_folder, camera)
             print(f"Processing {raw_video_path}.")
             if not os.path.exists(raw_video_path):
@@ -174,8 +193,8 @@ def main(config: Config) -> None:
             )
 
             # Output folder:
-            camera_name = os.path.splitext(os.path.basename(camera))[0]
-            # NEW: strip trailing "_raw" from camera folder name if present
+            camera_name = camera_basename
+            # strip trailing "_raw" from camera folder name if present
             if camera_name.endswith("_raw"):
                 camera_name = camera_name[:-4]
 
@@ -436,6 +455,7 @@ if __name__ == "__main__":
         clips_to_extract_json=str(clips_path),
         target_fps=float(args.target_fps),
         from_raw_camera_time_of_camera=args.from_raw_camera_time_of_camera,
+        only_specified=args.only_specified,
     )
 
     main(cfg)
