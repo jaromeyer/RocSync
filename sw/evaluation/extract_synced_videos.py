@@ -18,11 +18,12 @@ camera_formats = {".mp4", ".mov", ".avi", ".mkv"}
 
 @dataclass
 class Config:
-    dataset_folder: str 					# root folder containing subfolders with raw and internal calibration videos
-    time_sync_json_path: str 				# path to time sync json
-    clips_to_extract_json: str 				# path to clips json
+    dataset_folder: str                     # root folder containing subfolders with raw and internal calibration videos
+    time_sync_json_path: str               # path to time sync json
+    clips_to_extract_json: str             # path to clips json
     target_fps: float
     from_raw_camera_time_of_camera: Optional[str] = None
+    ignore_overlap: bool = False           # if True, ignore global overlap and mark short cameras with _overlap
 
 
 def _auto_find_time_sync_json(dataset_folder: Path) -> Path:
@@ -70,6 +71,7 @@ def main(config: Config) -> None:
         for camera, data in time_sync_data.items()
     }
 
+    # Parse clips (once; your original had a duplicate block)
     if config.from_raw_camera_time_of_camera:
         matching_key = next(
             (k for k in time_sync_data
@@ -89,59 +91,50 @@ def main(config: Config) -> None:
     else:
         clips = _parse_clips_to_extract_json(config.clips_to_extract_json)
 
-    if config.from_raw_camera_time_of_camera:
-        matching_key = next(
-            (k for k in time_sync_data
-             if os.path.splitext(os.path.basename(k))[0] == config.from_raw_camera_time_of_camera),
-            None
-        )
-        if not matching_key:
-            raise ValueError(f"No match found for camera name: {config.from_raw_camera_time_of_camera}")
-
-        time_defining_camera_time_sync_data = time_sync_data[matching_key]
-        clips = _parse_clips_to_extract_json(
-            config.clips_to_extract_json,
-            from_camera_time=True,
-            first_frame_time=time_defining_camera_time_sync_data["first_frame"],
-            speed_factor=time_defining_camera_time_sync_data["speed_factor"]
-        )
-    else:
-        clips = _parse_clips_to_extract_json(config.clips_to_extract_json)
-
-    # --- NEW: validate clips against common overlap of all cameras ---
+    # --- GLOBAL OVERLAP CHECK (optionally ignored) ---
     if not time_sync_data:
         raise ValueError("Time synchronization JSON is empty – no cameras found.")
 
-    # Get global overlap interval where *all* cameras have coverage
     first_frames = [float(d["first_frame"]) for d in time_sync_data.values()]
     last_frames  = [float(d["last_frame"])  for d in time_sync_data.values()]
 
     overlap_start = max(first_frames)   # latest start among all cameras
     overlap_end   = min(last_frames)    # earliest end among all cameras
 
-    if overlap_start >= overlap_end:
-        raise ValueError(
-            f"No temporal overlap between cameras: "
-            f"max(first_frame)={overlap_start:.2f} ms >= "
-            f"min(last_frame)={overlap_end:.2f} ms."
-        )
-
-    # Helper for nice time strings (HH:MM:SS.mmm)
     to_time_str = Clip._parse_timecode_to_milliseconds_inverse
 
+    if overlap_start >= overlap_end:
+        msg = (
+            f"No temporal overlap between cameras: "
+            f"max(first_frame)={overlap_start:.2f} ms ({to_time_str(int(overlap_start))}) >= "
+            f"min(last_frame)={overlap_end:.2f} ms ({to_time_str(int(overlap_end))})."
+        )
+        if not config.ignore_overlap:
+            raise ValueError(msg)
+        else:
+            print("[WARN]", msg)
+            print("[WARN] --ignore-overlap is set, proceeding anyway (per-camera brute-force).")
+
+    # Per-clip global overlap validation (can be ignored)
     for clip in clips:
-        # clip.start / clip.end are already in GLOBAL ms (even with --from-camera)
         if clip.start < overlap_start or clip.end > overlap_end:
-            raise ValueError(
+            msg = (
                 "Requested clip is outside the common overlap of all cameras.\n"
                 f"  Clip: [{clip.start} ms ({to_time_str(int(clip.start))}), "
                 f"{clip.end} ms ({to_time_str(int(clip.end))})]\n"
                 f"  Overlap (all cameras): "
                 f"[{overlap_start:.2f} ms ({to_time_str(int(overlap_start))}), "
                 f"{overlap_end:.2f} ms ({to_time_str(int(overlap_end))})]\n\n"
-                "Choose start >= latest camera start and end <= earliest camera end."
+                "Choose start >= latest camera start and end <= earliest camera end, "
+                "or pass --ignore-overlap to process anyway."
             )
-        
+            if not config.ignore_overlap:
+                raise ValueError(msg)
+            else:
+                print("[WARN]", msg)
+                print("[WARN] --ignore-overlap is set, continuing for per-camera extraction.\n")
+
+    # --- MAIN EXTRACTION LOOP ---
     for clip in clips:
         for camera, camera_time_sync_data in time_sync_data.items():
             raw_video_path = os.path.join(config.dataset_folder, camera)
@@ -155,6 +148,11 @@ def main(config: Config) -> None:
                 print(f"Not a video: {raw_video_path}. Will skip this camera.")
                 continue
 
+            # Per-camera coverage vs clip
+            cam_first = float(camera_time_sync_data["first_frame"])
+            cam_last  = float(camera_time_sync_data["last_frame"])
+            has_full_overlap = (cam_first <= clip.start) and (clip.end <= cam_last)
+
             # Build per-frame real-time timestamps (uses measured_fps & speed_factor when present)
             actual_timestamps = _get_theoretical_timestamps_of_all_frames(camera_time_sync_data)
 
@@ -163,14 +161,18 @@ def main(config: Config) -> None:
 
             # --- MODIFICATION: Clean up camera name and define output path ---
             camera_name_raw = os.path.splitext(os.path.basename(camera))[0]
-            
+
             # 1. Remove "_raw" suffix if present
             if camera_name_raw.endswith("_raw"):
                 camera_name_cleaned = camera_name_raw[:-4]
             else:
                 camera_name_cleaned = camera_name_raw
-            
-            # 2. Set output filename to _synced.mp4
+
+            # 2. If ignoring overlap and this camera is too short, mark with _overlap
+            if config.ignore_overlap and not has_full_overlap:
+                camera_name_cleaned = f"{camera_name_cleaned}_overlap"
+
+            # 3. Set output filename to *_synced.mp4
             output_video_filename = f"{camera_name_cleaned}_synced.mp4"
             output_video_path = os.path.join(
                 config.dataset_folder,
@@ -180,7 +182,7 @@ def main(config: Config) -> None:
             )
             # --- END MODIFICATION ---
 
-            # 3. Check if file already exists and skip synchronization if it does
+            # Skip if file already exists
             if os.path.exists(output_video_path):
                 print(f"Output video already exists at {output_video_path}. Skipping synchronization.")
                 continue
@@ -563,6 +565,15 @@ def build_arg_parser() -> argparse.ArgumentParser:
                     help="Output FPS for the sampled videos (e.g., 30)")
     p.add_argument("--from-camera", dest="from_raw_camera_time_of_camera",
                     help="Camera basename that defines clip timecodes (optional)")
+    p.add_argument(
+        "--ignore-overlap",
+        action="store_true",
+        help=(
+            "Ignore global common-overlap checks and process clips anyway. "
+            "Cameras that do not fully cover the clip will get an '_overlap' "
+            "suffix in their output filename."
+        ),
+    )
     # Optional overrides (otherwise auto-detected relative to dataset_folder)
     p.add_argument("--time-sync-json", dest="time_sync_json_path",
                     help="Path to time_synchronization_*.json (optional)")
@@ -593,6 +604,7 @@ if __name__ == "__main__":
         time_sync_json_path=str(time_sync_path),
         clips_to_extract_json=str(clips_path),
         target_fps=float(args.target_fps),
-        from_raw_camera_time_of_camera=args.from_raw_camera_time_of_camera
+        from_raw_camera_time_of_camera=args.from_raw_camera_time_of_camera,
+        ignore_overlap=args.ignore_overlap,
     )
     main(cfg)

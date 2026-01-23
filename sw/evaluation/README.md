@@ -13,7 +13,7 @@ dataset_folder/
 │
 └── time sync/
     ├── clips_config.json
-    ├── time_synchronization_run0.json
+    ├── time_synchronization.json
     ├── extract_synced_videos.py
     ├── extract_clips_as_png.py
     ├── check_time_sync_all.py
@@ -30,76 +30,9 @@ dataset_folder/
 
 ---
 
-
-## 🎥 Extract Synced Videos
-
-This guide explains how to organize your dataset and run the `extract_synced_videos.py` script to generate **time-synchronized video clips** from multiple cameras.
-
-
-### 🧭 Usage
-
-Run the extraction script from your terminal:
-
-```bash
-python path/to/extract_synced_videos.py \
-    --dataset-folder path/to/dataset_folder \
-    --target-fps 30 \
-    --from-camera "cameraX"
-```
-
-### Arguments:
-
-* `--dataset-folder`
-  Path to your dataset folder (the one containing `raw_videos/` and `time sync/`).
-
-* `--target-fps`
-  Desired output frame rate (e.g., 30).
-
-* `--from-camera`
-  Name of the reference camera (e.g., `"camera1_raw"` or `"gopro7_raw"`) — this camera’s timing is used as the reference for synchronization.
-
-  If the Folder setup is correct, the file also works without arguments.
-
-
-### Output:
-* Folder called synced_videos with the syncronized clips
-
-
-## 📷 Extract Synced Frames
-This guide explains how to organize your dataset and run the `extract_clips_as_png.py` script to generate **time-synchronized pictures** from multiple cameras.
-
-
-### 🧭 Usage
-
-Run the script from your terminal:
-
-```bash
-python extract_clips_as_png.py \
-  --dataset-folder /path/to/dataset \
-  --target-fps 30 \
-  --from-camera "cameraX" \
-```
- If the Folder setup is correct, the file also works without arguments.
-
-### Arguments:
-
-* `--dataset-folder`
-  Path to your dataset folder (the one containing `raw_videos/` and `time sync/`).
-
-* `--target-fps`
-  Desired output frame rate (e.g., 30).
-
-* `--from-camera`
-  Name of the reference camera (e.g., `"camera1_raw"` or `"gopro7_raw"`) — this camera’s timing is used as the reference for synchronization.
-
-
-### Output:
-* Folder called synced_clips_png with the synchronized png frames
-
-
 ## ✅ Check synchronization of all clips
 
-Once you have a finished `time_synchronization_*.json` file, check if all videos have been synchronized correctly by the RocSync script and the manual synchronization. Check a moment near the beginning of the Recording and a moment near the end of the Recording to make sure there is no drift. Run this before synchronizing huge datasets, it will save you a lot of time down the road.
+Once you have a finished `time_synchronization_*.json` file, check if all videos have been synchronized correctly by the RocSync script and/or the manual synchronization. Check a moment near the beginning of the Recording and a moment near the end of the Recording to make sure there is no drift. Run this before synchronizing huge datasets, it will save you a lot of time down the road.
 
 Run the script:
 ```bash
@@ -115,3 +48,80 @@ python path/to/check_time_sync_all.py \
 
 * `--from-camera`
   Name of the reference camera (e.g., `"camera1_raw"` or `"gopro7_raw"`) — this camera’s timing is used as the reference for synchronization.
+
+---
+
+## 🎥 Extract Synced Videos
+
+This guide explains how to organize your dataset and run the `extract_synced_videos.py` script to generate **time-synchronized video clips** from multiple cameras.
+
+
+### 🧭 Usage
+
+Run the extraction script from your terminal:
+
+```bash
+python extract_synced_videos.py 
+```
+
+### Optional Arguments:
+
+* `--dataset-folder`
+  Path to your dataset folder (the one containing `raw_videos/` and `time sync/`). Not necessary if you follow the **folder setup** above.
+
+* `--target-fps`
+  Desired output frame rate (e.g., 30).
+
+* `--from-camera`
+  Name of the reference camera (e.g., `"camera1_raw"` or `"gopro7_raw"`) — this camera’s timing is used as the reference for synchronization.
+
+* `--time-sync-json`
+  Path to your `time_synchronization_*.json` file
+
+* `--clips-json`
+  Path to the `clips_config.json` file
+
+* `--ignore-overlap`
+  If set, the script will not restrict synchronization to the time interval shared by **all** files (the global overlap).  
+  Use this if some videos do **not** cover the requested timestamp/time range (e.g., some cameras started later or stopped earlier).
+### Output:
+* Folder called synced_videos with the syncronized clips
+
+
+## 📷 Extract Synced Frames
+This guide explains how to organize your dataset and run the `extract_clips_as_png.py` script to generate **time-synchronized pictures** from multiple cameras.
+
+
+### 🧭 Usage
+
+Run the script from your terminal:
+
+```bash
+python extract_clips_as_png.py 
+```
+
+### Optional Arguments:
+
+* `--dataset-folder`
+  Path to your dataset folder (the one containing `raw_videos/` and `time sync/`). Not necessary if you follow the **folder setup** above.
+
+* `--target-fps`
+  Desired output frame rate (e.g., 30).
+
+* `--from-camera`
+  Name of the reference camera (e.g., `"camera1_raw"` or `"gopro7_raw"`) — this camera’s timing is used as the reference for synchronization.
+
+* `--time-sync-json`
+  Path to your `time_synchronization_*.json` file
+
+* `--clips-json`
+  Path to the `clips_config.json` file
+
+* `--only-specified`
+  If set, only produce PNGs for the camera given by `--from-camera`.
+  
+
+### Output:
+* Folder called synced_clips_png with the synchronized png frames
+
+
