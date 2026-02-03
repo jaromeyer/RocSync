@@ -84,6 +84,10 @@ python extract_synced_videos.py
 * `--ignore-overlap`
   If set, the script will not restrict synchronization to the time interval shared by **all** files (the global overlap).  
   Use this if some videos do **not** cover the requested timestamp/time range (e.g., some cameras started later or stopped earlier).
+
+* `--only-for-camera`
+  Add this to only sync one specific camera (e.g., `"camera1_raw"` or `"gopro7_raw"`)
+  
 ### Output:
 * Folder called synced_videos with the syncronized clips
 

@@ -307,7 +307,7 @@ def main(cfg: Config) -> None:
         camera_basename, frame = frames_info[idx]
 
         # --- Resize so width <= 500 px while keeping aspect ratio ---
-        max_width = 500
+        max_width = 1000
         h, w = frame.shape[:2]
         if w > max_width:
             scale = max_width / float(w)
