@@ -93,6 +93,87 @@ def read_led(img, x, y):
     return led_intensity
 
 
+def find_optimal_ring_start_end(leds):
+    """
+        Find the most likely window of leds turned ON, while allowing for false detections.
+        Computes the window [start, end) that maximizes the sum of values within the window minus the sum of values outside,
+        while allowing for wrap-around windows. True is treated as 1 and False as -1.
+
+        Args:
+            leds: A list of booleans indicating the detected led state.
+
+        Returns:
+            A tuple containing:
+            - A tuple of [start, end) indices for the optimal window.
+              If start > end, the window wraps around.
+              If start == end, the window is empty.
+            - The maximum possible score.
+        """
+    nums = [1 if val else -1 for val in leds]
+    n = len(nums)
+    total_sum = sum(nums)
+
+    # --- Find max non-wrapping subarray and its indices (Kadane's Algorithm) ---
+    max_score = -float('inf')
+    max_start, max_end = 0, 0
+    current_max = 0
+    current_start_max = 0
+    for i, x in enumerate(nums):
+        if current_max <= 0:
+            current_start_max = i
+            current_max = x
+        else:
+            current_max += x
+
+        if current_max > max_score:
+            max_score = current_max
+            max_start = current_start_max
+            max_end = i + 1
+
+    # --- Find min non-wrapping subarray and its indices ---
+    min_score = float('inf')
+    min_start, min_end = 0, 0
+    current_min = 0
+    current_start_min = 0
+    for i, x in enumerate(nums):
+        if current_min >= 0:
+            current_start_min = i
+            current_min = x
+        else:
+            current_min += x
+
+        if current_min < min_score:
+            min_score = current_min
+            min_start = current_start_min
+            min_end = i + 1
+
+    # --- Determine the optimal window and score, now considering the empty set ---
+    max_wrap_sum = -float('inf')
+    if n > 1:  # A wrapping window needs at least 2 elements
+        max_wrap_sum = total_sum - min_score
+
+    # The three candidates for the best window sum are:
+    # 1. The best non-wrapping sum (max_kadane)
+    # 2. The best wrapping sum (max_wrap_sum)
+    # 3. The empty set sum (0)
+
+    if max_score > max_wrap_sum and max_score > 0:
+        max_window_sum = max_score
+        final_window = (max_start, max_end)
+    elif max_wrap_sum > 0:
+        max_window_sum = max_wrap_sum
+        final_window = (min_end, min_start)
+    else:
+        # If both wrapping and non-wrapping sums are negative or zero,
+        # the empty window (sum=0) is the best choice.
+        max_window_sum = 0
+        final_window = (0, 0)
+
+    final_score = 2 * max_window_sum - total_sum
+
+    return final_window, final_score
+
+
 def read_ring(extracted_board, camera_type, draw_result=False):
     radius = visible_radius if camera_type == CameraType.RGB else ir_radius
 
@@ -113,26 +194,24 @@ def read_ring(extracted_board, camera_type, draw_result=False):
 
     # Apply Otsu's thresholding to led_intensities
     _, otsu_thresh = cv2.threshold(led_intensities, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-    leds = otsu_thresh.astype(bool)
+    leds = otsu_thresh.astype(bool).flatten().tolist()
 
-    # Find segments of enabled LEDs
-    potential_starts = []
-    potential_ends = []
-    for i in range(period):
-        if not leds[(i - 1) % period] and leds[i]:
-            potential_starts.append(i)
-        if leds[i] and not leds[(i + 1) % period]:
-            potential_ends.append(i)
-        if draw_result:
+    # Find most likely segment of enabled LEDs, allowing for false detections
+    (start, end), score = find_optimal_ring_start_end(leds)
+
+    if start == end:
+        # no segment found
+        return None
+
+    if draw_result:
+        for i in range(period):
             angle = -(i / period + 0.25) * 2 * math.pi
             x = int(board_size / 2 + radius * math.cos(angle))
             y = int(board_size / 2 + radius * math.sin(angle))
             color = (0, 0, 255) if leds[i] else (255, 0, 0)
             cv2.circle(extracted_board, (x, y), led_size, color, 1)
-
-    # There must be exactly ONE segment of enabled LEDs
-    if len(potential_starts) == 1 and len(potential_ends) == 1:
-        return (potential_starts[0], potential_ends[0])
+    # return inclusive bounds (i.e. start is the first led ON, end -1 is the last led ON)
+    return start, (end - 1) % period
 
 
 def read_counter(extracted_board, camera_type, draw_result=False):
@@ -295,18 +374,18 @@ def process_frame(image, camera_type, frame_number, debug_dir=None, brightness_b
                 return False, None
 
             # Check if aruco marker fills x % of the image to make sure the PCB was held close enough
-            area = 0
-            for i in range(4):
-                x1, y1 = aruco_corners[0][i]
-                x2, y2 = aruco_corners[0][(i + 1) % 4]  # Wrap around to the first point
-                area += (x1 * y2) - (y1 * x2)
-            area = abs(area) / 2
-            height, width = image.shape[:2]
-            image_area = width * height
-            area_percentage = area/image_area
-            if area_percentage < 0.002:
-                print(f"Rejected {frame_number}: aruco marker only fills {area_percentage} of the image")
-                return False, None
+            #area = 0
+            #for i in range(4):
+            #    x1, y1 = aruco_corners[0][i]
+            #    x2, y2 = aruco_corners[0][(i + 1) % 4]  # Wrap around to the first point
+            #    area += (x1 * y2) - (y1 * x2)
+            #area = abs(area) / 2
+            #height, width = image.shape[:2]
+            #image_area = width * height
+            #area_percentage = area/image_area
+            #if area_percentage < 0.002:
+            #    print(f"Rejected {frame_number}: aruco marker only fills {area_percentage} of the image")
+            #    return False, None
 
             red_channel = image[:, :, 2]
             # _, mask = cv2.threshold(red_channel, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)

@@ -152,8 +152,8 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
         timestamps = {**timestamps, **timestamps2}
     
 
-    if len(timestamps) == 0:
-        errprint("Error: Unable to timestamp any frames.")
+    if len(timestamps) < 2:
+        errprint("Error: Insufficient number of timestamped frames.")
         return
 
     # Assuming constant frame rate, fit robust linear model
@@ -168,7 +168,7 @@ def process_video(video_path, camera_type, export_dir=None, stride=None, debug_d
 
     # Assert that we have at least 80% inliers
     if np.sum(model.inlier_mask_) < 0.8 * len(timestamps):
-        warnprint(f"WARNING: Estimated model has fewer than 80% inliers ({np.sum(model.inlier_mask_) / len(timestamps) * 100}%).")
+        warnprint(f"WARNING: Estimated model has fewer than 80% inliers ({np.sum(model.inlier_mask_) / len(timestamps):.2%}).")
 
     # Predict timestamps for all frames
     x_range = np.arange(0, n_frames).reshape(-1, 1)
