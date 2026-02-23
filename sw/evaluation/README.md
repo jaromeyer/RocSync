@@ -86,7 +86,7 @@ python extract_synced_videos.py
   Use this if some videos do **not** cover the requested timestamp/time range (e.g., some cameras started later or stopped earlier).
 
 * `--only-for-camera`
-  Add this to only sync one specific camera (e.g., `"camera1_raw"` or `"gopro7_raw"`)
+  Add this to only sync one specific camera (basename without extension, e.g. `Cam1` or `Cam1_raw`)
   
 ### Output:
 * Folder called synced_videos with the syncronized clips
