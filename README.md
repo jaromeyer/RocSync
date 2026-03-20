@@ -2,7 +2,7 @@
  
 **Millisecond-Accurate Temporal Synchronization for Heterogeneous Camera Systems**
  
-[![Paper](https://img.shields.io/badge/Paper-MDPI%20Sensors-blue?style=flat-square)](https://doi.org/)
+[![Paper](https://img.shields.io/badge/Paper-MDPI%20Sensors-blue?style=flat-square)](https://www.mdpi.com/3715386)
 [![ETH Zurich](https://img.shields.io/badge/Institution-ETH%20Zurich-red?style=flat-square)](https://ethz.ch)
 [![Balgrist](https://img.shields.io/badge/Institution-Balgrist%20ROCS-green?style=flat-square)](https://rocs.balgrist.ch/en/)
 [![License](https://img.shields.io/badge/License-MPL--2.0-yellow?style=flat-square)](LICENSE)
