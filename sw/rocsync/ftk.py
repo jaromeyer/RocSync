@@ -122,7 +122,10 @@ def read_counter(fiducials: list[tuple[float, float]], draw_result: bool = False
 
 
 def process_frame(
-    position: np.ndarray, rotation_matrix: np.ndarray, fiducials: list[dict], draw_result: bool = False
+    position: np.ndarray,
+    rotation_matrix: np.ndarray,
+    fiducials: list[dict],
+    draw_result: bool = False,
 ) -> tuple[int, int] | None:
     # Transform fiducials into local coordinate system
     transformed_fiducials = []
@@ -190,6 +193,7 @@ def process_frame(
         return start, end
     return None
 
+
 def plot_timechart(x, y, x_range, y_pred, debug_dir):
     plt.figure()
     plt.scatter(x, y, color="blue", label="Measurements", marker=".")
@@ -202,7 +206,8 @@ def plot_timechart(x, y, x_range, y_pred, debug_dir):
     plt.grid(True)
     plt.savefig(f"{debug_dir}/timestamps.png")
 
-def fit_ftk_timestamps(timestamps: dict[int, tuple[int, int]], debug_dir = None) -> dict:
+
+def fit_ftk_timestamps(timestamps: dict[int, tuple[int, int]], debug_dir=None) -> dict:
     # Assuming constant frame rate, fit robust linear model
     x = np.array(list(timestamps.keys())).reshape(-1, 1)
     y = np.array([start for start, _ in timestamps.values()])
@@ -266,7 +271,10 @@ def process_ftk_recording(filename: str, debug_dir=None) -> dict:
                             break
                         pbar.update(1)
                         fid_fields = fid_line.strip().split(",")
-                        if fid_fields[2] != "f":
+                        if (
+                            fid_fields[2] != "f"
+                            or fid_fields[1] != marker_dict["ftk_timestamp"]
+                        ):
                             # Not a fiducial, stop collecting
                             file.seek(current_pos)
                             break
