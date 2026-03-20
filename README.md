@@ -1,4 +1,16 @@
-# RocSync: Temporal Multi-Camera Synchronization
+# 🎥 RocSync
+ 
+**Millisecond-Accurate Temporal Synchronization for Heterogeneous Camera Systems**
+ 
+[![Paper](https://img.shields.io/badge/Paper-MDPI%20Sensors-blue?style=flat-square)](https://doi.org/)
+[![ETH Zurich](https://img.shields.io/badge/Institution-ETH%20Zurich-red?style=flat-square)](https://ethz.ch)
+[![Balgrist](https://img.shields.io/badge/Institution-Balgrist%20ROCS-green?style=flat-square)](https://rocs.balgrist.ch/en/)
+[![License](https://img.shields.io/badge/License-MPL--2.0-yellow?style=flat-square)](LICENSE)
+ 
+> *Jaro Meyer¹, Frédéric Giraud², Joschua Wüthrich¹, Marc Pollefeys¹, Philipp Fürnstahl², Lilian Calvet²*
+>
+> ¹ Department of Computer Science, ETH Zurich, Switzerland\
+> ² Research in Orthopedic Computer Science, Balgrist University Hospital, University of Zurich, Switzerland
 
 ![RocSync Front](https://github.com/user-attachments/assets/09734239-36fa-4ac8-a8b1-2877538088eb)
 
@@ -14,7 +26,25 @@ This repository contains three main sections, each with its own README:
 
 ## Getting Started
 
-For detailed instructions on setting up and using RocSync, please refer to the README files in the respective sections. 
+For detailed instructions on setting up and using RocSync, please refer to the README files in the respective sections.
+
+## Citation
+If you use RocSync in your research, please cite:
+```
+@Article{s26031036,
+AUTHOR = {Meyer, Jaro and Giraud, Frédéric and Wüthrich, Joschua and Pollefeys, Marc and Fürnstahl, Philipp and Calvet, Lilian},
+TITLE = {RocSync: Millisecond-Accurate Temporal Synchronization for Heterogeneous Camera Systems},
+JOURNAL = {Sensors},
+VOLUME = {26},
+YEAR = {2026},
+NUMBER = {3},
+ARTICLE-NUMBER = {1036},
+URL = {https://www.mdpi.com/1424-8220/26/3/1036},
+PubMedID = {41682551},
+ISSN = {1424-8220},
+DOI = {10.3390/s26031036}
+}
+```
 
 ## Credits
 
