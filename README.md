@@ -20,8 +20,9 @@
 
 This repository contains three main sections, each with its own README:
 
-- **`hw/`**: KiCad files for PCB design and CAD models.
 - **`fw/`**: PlatformIO project for microcontroller firmware.
+- **`hw/`**: KiCad files for PCB design and CAD models.
+- **`misc/`**: IR marker geometry specifications.
 - **`sw/`**: Python source code for computer vision processing.
 
 ## Getting Started
