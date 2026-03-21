@@ -273,7 +273,7 @@ D98,LED,HL-A-3528,146.548851,-12.036966,169.2,top
 D99,LED,HL-A-3528,139.413321,-10.906809,172.8,top
 J1,USB_C_Receptacle_PowerOnly_6P,USB_C_Receptacle_GCT_USB4115-03-C,46.415,-125.0,0.0,bottom
 J2,BATT,JST_PH_B2B-PH-K_1x02_P2.00mm_Vertical,61.0,-148.5,180.0,bottom
-J3,Conn_01x03_Pin,PinHeader_1x03_P2.54mm_Vertical,46.5,-109.25,-90.0,top
+J3,Conn_01x03_Pin,PinHeader_1x03_P2.54mm_Vertical,46.5,-109.25,90.0,bottom
 R1,5.1k,R_0402_1005Metric,45.5,-120.335,-90.0,top
 R10,2.7k,R_0402_1005Metric,162.0,-213.5,-90.0,top
 R11,2.7k,R_0402_1005Metric,218.0,-146.5,0.0,top
