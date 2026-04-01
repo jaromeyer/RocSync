@@ -214,7 +214,7 @@ def find_corners_convexhull(mask, frame_number, debug_dir=None):
 
     # Draw detected blobs as red circles
     debug_image = cv2.drawKeypoints(
-        mask,
+        mask.copy(),
         points,
         np.array([]),
         (0, 0, 255),
@@ -257,7 +257,7 @@ def find_corners_dots(mask, frame_number, board, debug_dir=None):
         return
     if debug_dir:
         debug_image = cv2.drawKeypoints(
-            mask,
+            mask.copy(),
             points,
             np.array([]),
             (0, 0, 255),
@@ -282,7 +282,8 @@ def find_corners_aruco(mask, frame_number, debug_dir=None, brightness_boost=None
     markers, marker_ids, _ = aruco_detector.detectMarkers(mask)
     if debug_dir:
         debug_image = mask.copy()
-        cv2.aruco.drawDetectedMarkers(debug_image, markers, marker_ids)
+        if marker_ids is not None:
+            cv2.aruco.drawDetectedMarkers(debug_image, markers, marker_ids)
         cv2.imwrite(f"{debug_dir}/aruco_{frame_number}.png", debug_image)
 
     if marker_ids is None:
@@ -315,9 +316,7 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
                 aruco_corners = markers[board.aruco_marker_id]
 
             board_size = board.board_size
-
-            red_channel = image[:, :, 2]
-            mask = red_channel
+            mask = image[:, :, 2]  # red channel
 
             # Use coarse PCB to accurately extract corners
             rough_transformation_matrix = cv2.getPerspectiveTransform(
