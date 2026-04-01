@@ -28,9 +28,9 @@ class NpEncoder(json.JSONEncoder):
         return super().default(obj)
 
 
-def process_image(path, camera_type, debug_dir=None):
+def process_image(path, camera_type, debug_dir=None, try_hard=False):
     image = cv2.imread(path)
-    _, timestamp = process_frame(image, camera_type, 0, debug_dir)
+    _, timestamp = process_frame(image, camera_type, 0, debug_dir, try_hard=try_hard)
     if timestamp is not None:
         succprint(f"start: {timestamp[0]} ms, end {timestamp[1]} ms")
         return {"start": timestamp[0], "end": timestamp[1]}
@@ -242,6 +242,11 @@ def main():
         action="store_true",
         help="recursively search for videos and images in directories",
     )
+    parser.add_argument(
+        "--try-hard",
+        action="store_true",
+        help="relaxed mode: retry ArUco with brightness boost, refine homography with partial corner LED detections",
+    )
 
     args = parser.parse_args()
 
@@ -329,13 +334,14 @@ def main():
                 end_time1,
                 start_time2,
                 end_time2,
+                try_hard=args.try_hard,
             )
             if ret is not None:
                 result[str(file)] = ret.to_dict()
             else:
                 errprint(f"Error: Unable to time-sync {file}.")
         elif file in images:
-            ret = process_image(file, CameraType(args.camera_type), debug_dir)
+            ret = process_image(file, CameraType(args.camera_type), debug_dir, try_hard=args.try_hard)
             if ret is not None:
                 result[str(file)] = ret
             else:
