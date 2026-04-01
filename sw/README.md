@@ -2,14 +2,18 @@
 
 This folder contains the Python application for detecting and decoding the RocSync device in videos and images where it is visible.
 
-### How it works:
-
+## How it works:
 1. **Find ArUco marker**: Detect the ArUco marker to determine the approximate position and orientation.
 2. **Coarse homographic reprojection**: Use the detected marker's corners to perform a coarse homographic reprojection of the image.
 3. **Locate corner LEDs**: Identify the corner LEDs in the reprojected image.
 4. **Accurate reprojection**: Use the corner LEDs to refine the reprojection for higher accuracy.
 5. **Decode LEDs**: Decode the circle and binary counter LEDs by thresholding their general areas to obtain an exact timestamp.
 6. **Timestamp fitting**: If the input was a video, perform robust linear regression on all extracted timestamps to reject outliers and estimate timestamps for all frames.
+
+## TODO
+- [ ] Add back support for rev1 (currently only rev2 is supported)
+- [ ] Speed up processing (e.g., removing quantile computation and using precomputed mask for LED thresholding)
+- [ ] Merge **ftk** branch and add support for **rev2**
 
 ## Installation
 To install RocSync as a Python module, run the following commands:
