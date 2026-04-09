@@ -66,10 +66,10 @@ CORNER_POS = corner_led_positions()
 _cx = [p[0] for p in COUNTER_POS]
 _cy = [p[1] for p in COUNTER_POS]
 COUNTER_BBOX = (
-    min(_cx) - led_size - 15,
-    min(_cy) - led_size - 15,
-    max(_cx) + led_size + 15,
-    max(_cy) + led_size + 15,
+    min(_cx) - led_size - 10,
+    min(_cy) - led_size - 10,
+    max(_cx) + led_size + 10,
+    max(_cy) + led_size + 10,
 )
 
 # ArUco region in rectified board coords
@@ -114,7 +114,6 @@ class ImageAnnotation:
     counter_leds: list = field(default_factory=lambda: [False] * 16)
     counter_value: int = 0
 
-    ring_visible: bool = False
     ring_start: int = 0  # first ON LED index
     ring_end: int = 0    # first OFF LED index (exclusive); == start → undecodable
 
@@ -164,7 +163,6 @@ class ImageAnnotation:
         steps = stats.get("steps", {})
         ring_step = steps.get("ring_reading", {})
         if ring_step.get("success") and stats.get("timestamp"):
-            ann.ring_visible = True
             ts = stats["timestamp"]
             counter_val = steps.get("counter_reading", {}).get("value", 0)
             ccw_start = ts[0] - counter_val * period
@@ -172,7 +170,6 @@ class ImageAnnotation:
             ann.ring_start = (ccw_end - 1) % period   # first ON clockwise
             ann.ring_end = (ccw_start - 1) % period    # first OFF clockwise
         elif stats.get("ring_leds") is not None:
-            ann.ring_visible = True
             ann.ring_start = 0
             ann.ring_end = 0
 
@@ -213,16 +210,17 @@ class ImageAnnotation:
             "corners": corners,
             "homography": self.homography,
             "counter": {"visible": self.counter_visible},
-            "ring": {"visible": self.ring_visible},
         }
 
         if self.aruco_visible:
             result["aruco"]["id"] = self.aruco_id
         if self.counter_visible:
             result["counter"]["value"] = self.counter_value
-        if self.ring_visible:
-            result["ring"]["start"] = self.ring_start
-            result["ring"]["end"] = self.ring_end
+        if self.ring_start == self.ring_end:
+            self.ring_start = 0
+            self.ring_end = 0
+        result["ring"]["start"] = self.ring_start
+        result["ring"]["end"] = self.ring_end
 
         return result
 
@@ -233,14 +231,20 @@ class ImageAnnotation:
         ann.aruco_visible = aruco.get("visible", False)
         ann.aruco_id = aruco.get("id", 0)
 
+        ann.homography = data.get("homography")
+
         for i, c in enumerate(data.get("corners", [])):
             if i < 4:
+                if "position" in c:
+                    pos = list(c["position"])
+                elif ann.homography is not None:
+                    pos = ann.to_original(*CORNER_POS[i])
+                else:
+                    pos = list(CORNER_POS[i])
                 ann.corners[i] = {
                     "visible": c.get("visible", False),
-                    "position": list(c["position"]) if "position" in c else list(CORNER_POS[i]),
+                    "position": pos,
                 }
-
-        ann.homography = data.get("homography")
 
         counter = data.get("counter", {})
         ann.counter_visible = counter.get("visible", False)
@@ -250,7 +254,6 @@ class ImageAnnotation:
         ]
 
         ring = data.get("ring", {})
-        ann.ring_visible = ring.get("visible", False)
         ann.ring_start = ring.get("start", 0)
         ann.ring_end = ring.get("end", 0)
         return ann
@@ -366,13 +369,13 @@ class AnnotationTool:
                     self.ground_truth["images"][rel_path])
             else:
                 self.annotation = ImageAnnotation.from_stats(self.stats)
+                # Use the pipeline homography for new annotations
+                H = self.stats.get("homography")
+                if H is not None:
+                    self.annotation.homography = np.array(H, dtype=np.float64).tolist()
 
-            # Always use the current pipeline homography for display
-            H = self.stats.get("homography")
-            if H is not None:
-                self.annotation.homography = np.array(H, dtype=np.float64).tolist()
-                # Convert any corners still at default board positions to original
-                # image coordinates so all positions are in a consistent space.
+            # Ensure invisible corners have positions in original image coords
+            if self.annotation.homography is not None:
                 for i, c in enumerate(self.annotation.corners):
                     if not c["visible"]:
                         c["position"] = self.annotation.to_original(*CORNER_POS[i])
@@ -380,13 +383,27 @@ class AnnotationTool:
                 # No homography — place invisible corners in a centered square
                 # proportional to the board's corner layout.
                 img_h, img_w = image.shape[:2]
-                scale = min(img_w, img_h) / board_size
+                scale = 0.5 * min(img_w, img_h) / board_size
                 ox = (img_w - board_size * scale) / 2
                 oy = (img_h - board_size * scale) / 2
                 for i, c in enumerate(self.annotation.corners):
                     if not c["visible"]:
                         bx, by = CORNER_POS[i]
                         c["position"] = [ox + bx * scale, oy + by * scale]
+
+            # Re-warp the rectified image using the annotation's homography
+            # so the displayed image is consistent with to_original/to_board.
+            # This matters when loading a saved annotation whose homography
+            # differs from the pipeline's (e.g. user corrected corners earlier).
+            if all(c["visible"] for c in self.annotation.corners):
+                self._recompute_homography(image)
+            elif self.annotation.homography is not None:
+                # Not all corners visible but we have a saved homography.
+                # Warp using it so the displayed image matches to_original/to_board.
+                H = np.array(self.annotation.homography, dtype=np.float64)
+                mask = image[:, :, 2]
+                self.stats["rectified"] = cv2.warpPerspective(
+                    mask, H, (board_size, board_size))
 
             self.mode = Mode.IDLE
             self._ring_start_candidate = None
@@ -527,7 +544,7 @@ class AnnotationTool:
     def _hit_test_corner_original(self, ox, oy):
         """Hit-test corners in original image coordinates."""
         img_h, img_w = self._current_image.shape[:2]
-        hit_r = HIT_CORNER * max(img_w, img_h) / board_size
+        hit_r = 2 * int(max(0.01 * min(img_w, img_h), 2))
         for i, c in enumerate(self.annotation.corners):
             cx, cy = c["position"]
             if (ox - cx) ** 2 + (oy - cy) ** 2 <= hit_r ** 2:
@@ -550,7 +567,7 @@ class AnnotationTool:
                     dx = ox - self._drag_start_original[0]
                     dy = oy - self._drag_start_original[1]
                     img_h, img_w = self._current_image.shape[:2]
-                    threshold = DRAG_THRESHOLD * max(img_w, img_h) / board_size
+                    threshold = int(max(0.01 * min(img_w, img_h), DRAG_THRESHOLD))
                     if not self._drag_started and (dx * dx + dy * dy) > threshold ** 2:
                         self._drag_started = True
                         self.mode = Mode.DRAGGING_CORNER
@@ -588,7 +605,6 @@ class AnnotationTool:
             elem, idx = self._hit_test(bx, by)
             if elem == "ring":
                 self.annotation.ring_end = idx
-                self.annotation.ring_visible = True
                 self.mode = Mode.IDLE
                 self._ring_start_candidate = None
                 self.status_msg = ""
@@ -640,8 +656,11 @@ class AnnotationTool:
         self._needs_redraw = True
 
     def _toggle_counter_led(self, idx):
-        self.annotation.counter_leds[idx] = not self.annotation.counter_leds[idx]
-        self.annotation.recompute_counter()
+        if self.annotation.counter_visible:
+            self.annotation.counter_leds[idx] = not self.annotation.counter_leds[idx]
+            self.annotation.recompute_counter()
+        else:
+            self.annotation.counter_visible = True
         self._needs_redraw = True
 
     def _toggle_counter_visibility(self):
@@ -694,13 +713,16 @@ class AnnotationTool:
         # Left panel: original image with corner LEDs
         left = original.copy()
         left_h, left_w = left.shape[:2]
-        corner_radius = int(led_size * max(left_w, left_h) / board_size) + 2
+        corner_radius = int(max(0.01 * min(left_w, left_h), 2))
+        overlay = left.copy()
         for i, c in enumerate(ann.corners):
             cx, cy = int(round(c["position"][0])), int(round(c["position"][1]))
             color = COLOR_ON if c["visible"] else COLOR_NOT_VIS
+            cv2.circle(overlay, (cx, cy), corner_radius, (0, 255, 255), -1)
             cv2.circle(left, (cx, cy), corner_radius, color, 2)
             cv2.putText(left, str(i), (cx + corner_radius + 4, cy + 5),
                         font, 0.5, color, 1)
+        cv2.addWeighted(overlay, 0.35, left, 0.65, 0, dst=left)
 
         # Right panel: rectified board with overlays
         rectified = self.stats.get("rectified")
@@ -763,7 +785,7 @@ class AnnotationTool:
 
         # Ring LEDs
         for i, (rx, ry) in enumerate(RING_POS):
-            if not ann.ring_visible:
+            if ann.ring_start == ann.ring_end:
                 color = COLOR_NOT_VIS
             else:
                 in_arc = self._led_in_ring_arc(i, ann.ring_start, ann.ring_end)
