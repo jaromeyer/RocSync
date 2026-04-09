@@ -62,14 +62,14 @@ RING_POS = ring_led_positions()
 COUNTER_POS = counter_led_positions()
 CORNER_POS = corner_led_positions()
 
-# Counter bounding box (x1, y1, x2, y2) with 5px margin around LEDs
+# Counter bounding box (x1, y1, x2, y2) with margin around LEDs
 _cx = [p[0] for p in COUNTER_POS]
 _cy = [p[1] for p in COUNTER_POS]
 COUNTER_BBOX = (
-    min(_cx) - led_size - 5,
-    min(_cy) - led_size - 5,
-    max(_cx) + led_size + 5,
-    max(_cy) + led_size + 5,
+    min(_cx) - led_size - 15,
+    min(_cy) - led_size - 15,
+    max(_cx) + led_size + 15,
+    max(_cy) + led_size + 15,
 )
 
 # ArUco region in rectified board coords
@@ -79,7 +79,7 @@ ARUCO_IDS = [0, 21]  # known marker IDs to cycle through
 
 # Hit-test radii (in board coordinates)
 HIT_CORNER = 20
-HIT_COUNTER = 16
+HIT_COUNTER = led_size
 HIT_RING = 25
 DRAG_THRESHOLD = 3  # px before a click becomes a drag
 
@@ -301,6 +301,7 @@ class AnnotationTool:
         # Display state
         self.show_help = False
         self.left_panel_w = 0
+        self.left_scale = 1.0
         self.board_scale = 1.0
         self.status_msg = ""
 
@@ -311,7 +312,9 @@ class AnnotationTool:
         self._current_image = None
         self._drag_idx = None
         self._drag_start = None
+        self._drag_start_original = None
         self._drag_started = False
+        self._drag_on_left = False
         self._ring_start_candidate = None
         self._needs_redraw = True
         self._window_sized = False
@@ -373,6 +376,17 @@ class AnnotationTool:
                 for i, c in enumerate(self.annotation.corners):
                     if not c["visible"]:
                         c["position"] = self.annotation.to_original(*CORNER_POS[i])
+            else:
+                # No homography — place invisible corners in a centered square
+                # proportional to the board's corner layout.
+                img_h, img_w = image.shape[:2]
+                scale = min(img_w, img_h) / board_size
+                ox = (img_w - board_size * scale) / 2
+                oy = (img_h - board_size * scale) / 2
+                for i, c in enumerate(self.annotation.corners):
+                    if not c["visible"]:
+                        bx, by = CORNER_POS[i]
+                        c["position"] = [ox + bx * scale, oy + by * scale]
 
             self.mode = Mode.IDLE
             self._ring_start_candidate = None
@@ -468,6 +482,14 @@ class AnnotationTool:
             return None, None
         return bx, by
 
+    def _display_to_original(self, x, y):
+        """Convert display pixel coords to original image coords. Returns None if outside left panel."""
+        if x >= self.left_panel_w:
+            return None, None
+        ox = x / self.left_scale
+        oy = y / self.left_scale
+        return ox, oy
+
     def _hit_test(self, bx, by):
         """Returns (element_type, index) or (None, None)."""
         # 1. Corner LEDs
@@ -502,12 +524,59 @@ class AnnotationTool:
 
         return None, None
 
+    def _hit_test_corner_original(self, ox, oy):
+        """Hit-test corners in original image coordinates."""
+        img_h, img_w = self._current_image.shape[:2]
+        hit_r = HIT_CORNER * max(img_w, img_h) / board_size
+        for i, c in enumerate(self.annotation.corners):
+            cx, cy = c["position"]
+            if (ox - cx) ** 2 + (oy - cy) ** 2 <= hit_r ** 2:
+                return i
+        return None
+
     def _mouse_callback(self, event, x, y, flags, param):
+        # Try left panel (original image) — corners only
+        ox, oy = self._display_to_original(x, y)
+        if ox is not None:
+            if event == cv2.EVENT_LBUTTONDOWN:
+                idx = self._hit_test_corner_original(ox, oy)
+                if idx is not None:
+                    self._drag_idx = idx
+                    self._drag_start_original = (ox, oy)
+                    self._drag_started = False
+                    self._drag_on_left = True
+            elif event == cv2.EVENT_MOUSEMOVE and self._drag_on_left:
+                if self._drag_idx is not None and (flags & cv2.EVENT_FLAG_LBUTTON):
+                    dx = ox - self._drag_start_original[0]
+                    dy = oy - self._drag_start_original[1]
+                    img_h, img_w = self._current_image.shape[:2]
+                    threshold = DRAG_THRESHOLD * max(img_w, img_h) / board_size
+                    if not self._drag_started and (dx * dx + dy * dy) > threshold ** 2:
+                        self._drag_started = True
+                        self.mode = Mode.DRAGGING_CORNER
+                    if self._drag_started:
+                        self.annotation.corners[self._drag_idx]["position"] = [ox, oy]
+                        self._needs_redraw = True
+            elif event == cv2.EVENT_LBUTTONUP and self._drag_on_left:
+                if self._drag_idx is not None:
+                    if not self._drag_started:
+                        self._cycle_corner_state(self._drag_idx)
+                    if all(c["visible"] for c in self.annotation.corners):
+                        self._recompute_homography(self._current_image)
+                    self._drag_idx = None
+                    self._drag_started = False
+                    self._drag_on_left = False
+                    self.mode = Mode.IDLE
+                    self._needs_redraw = True
+            return
+
+        # Right panel (rectified board)
         bx, by = self._display_to_board(x, y)
         if bx is None:
             return
 
         if event == cv2.EVENT_LBUTTONDOWN:
+            self._drag_on_left = False
             self._on_left_down(bx, by)
         elif event == cv2.EVENT_MOUSEMOVE:
             self._on_mouse_move(bx, by, flags)
@@ -622,8 +691,16 @@ class AnnotationTool:
         font = cv2.FONT_HERSHEY_SIMPLEX
         ann = self.annotation
 
-        # Left panel: original image
+        # Left panel: original image with corner LEDs
         left = original.copy()
+        left_h, left_w = left.shape[:2]
+        corner_radius = int(led_size * max(left_w, left_h) / board_size) + 2
+        for i, c in enumerate(ann.corners):
+            cx, cy = int(round(c["position"][0])), int(round(c["position"][1]))
+            color = COLOR_ON if c["visible"] else COLOR_NOT_VIS
+            cv2.circle(left, (cx, cy), corner_radius, color, 2)
+            cv2.putText(left, str(i), (cx + corner_radius + 4, cy + 5),
+                        font, 0.5, color, 1)
 
         # Right panel: rectified board with overlays
         rectified = self.stats.get("rectified")
@@ -713,6 +790,7 @@ class AnnotationTool:
         board_scaled = cv2.resize(board_img, (int(board_size * h / board_size), h))
 
         self.left_panel_w = left_scaled.shape[1]
+        self.left_scale = h / left_h
         self.board_scale = h / board_size
 
         # Status bar (3 rows: info, shortcuts, legend)
