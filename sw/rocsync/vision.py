@@ -146,7 +146,7 @@ def find_optimal_ring_start_end(leds):
     return final_window, final_score
 
 
-def read_ring(extracted_board, camera_type, board, draw_result=False):
+def read_ring(extracted_board, camera_type, board, draw_result=False, return_leds=False):
     radius = board.visible_radius if camera_type == CameraType.RGB else board.ir_radius
     board_size = board.board_size
     period = board.period
@@ -175,6 +175,8 @@ def read_ring(extracted_board, camera_type, board, draw_result=False):
 
     if start == end:
         # no segment found
+        if return_leds:
+            return None, leds
         return None
 
     if draw_result:
@@ -185,10 +187,13 @@ def read_ring(extracted_board, camera_type, board, draw_result=False):
             color = (0, 0, 255) if leds[i] else (255, 0, 0)
             cv2.circle(extracted_board, (x, y), led_size, color, 1)
     # return inclusive bounds (i.e. start is the first led ON, end -1 is the last led ON)
-    return start, (end - 1) % period
+    result = (start, (end - 1) % period)
+    if return_leds:
+        return result, leds
+    return result
 
 
-def read_counter(extracted_board, camera_type, board, draw_result=False):
+def read_counter(extracted_board, camera_type, board, draw_result=False, return_leds=False):
     led_coords = board.counter_led_coords[camera_type]
     bg_y = board.counter_bg_y[camera_type]
     n_bits = board.counter_bits
@@ -219,6 +224,8 @@ def read_counter(extracted_board, camera_type, board, draw_result=False):
                 1
             )
 
+    if return_leds:
+        return counter, leds.flatten()
     return counter
 
 
@@ -320,26 +327,35 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
             t0 = time.perf_counter()
             gray_img_clahe = clahe.apply(gray_image)
             markers = find_corners_aruco(gray_img_clahe, frame_number, debug_dir, brightness_boost)
+
             _record_step(stats, "aruco_detection", t0, success=markers is not None, count=1 if markers is not None else 0)
             if markers is None:
+                if stats is not None:
+                    stats["rectified"] = None
+                    stats["corner_positions"] = None
                 _finalize_stats(stats, total_start, False, None)
                 return False, None
 
             # Resolve board profile
+            aruco_corners = None
             if board is None:
                 for marker_id, corners in markers.items():
                     if marker_id in PROFILES_BY_ARUCO:
                         board = PROFILES_BY_ARUCO[marker_id]
                         aruco_corners = corners
                         break
-                else:
-                    return False, None
-            else:
-                if board.aruco_marker_id not in markers:
-                    return False, None
+            elif board.aruco_marker_id in markers:
                 aruco_corners = markers[board.aruco_marker_id]
+                board_size = board.board_size
 
-            board_size = board.board_size
+            if aruco_corners is not None and board is not None:
+                if stats is not None:
+                    stats["aruco_id"] = board.aruco_marker_id
+                    stats["aruco_corners"] = aruco_corners.tolist() if aruco_corners is not None else None
+            else:
+                _finalize_stats(stats, total_start, False, None)
+                return False, None
+
             mask = image[:, :, 2]  # red channel
 
             # Use coarse PCB to accurately extract corners
@@ -354,17 +370,26 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
             corners = find_corners_dots(rough_pcb, frame_number, board, debug_dir)
             _record_step(stats, "corner_detection", t0, success=corners is not None,
                          count=len(corners) if corners is not None else 0)
+
             if corners is None:
                 _finalize_stats(stats, total_start, True, None)
                 return True, None
+            if stats is not None:
+                stats["corner_positions"] = [list(pt) if pt is not None else None for pt in corners]
 
+            all_corners = np.array([pt for pt in corners], dtype=np.float32)
             s = board.perspective_corner_slice
             transformation_matrix = np.dot(
-                cv2.getPerspectiveTransform(corners[s], board.corner_dots[s]),
+                cv2.getPerspectiveTransform(all_corners[s], board.corner_dots[s]),
                 rough_transformation_matrix,
             )
+            t0 = time.perf_counter()
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
             _record_step(stats, "fine_rectification", t0)
+
+            if stats is not None:
+                stats["rectified"] = pcb.copy()
+                stats["homography"] = transformation_matrix
 
             if debug_dir:
                 cv2.imwrite(f"{debug_dir}/rectified_pcb_{frame_number}.png", pcb)
@@ -396,11 +421,19 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
         pcb = cv2.cvtColor(pcb, cv2.COLOR_GRAY2BGR)
 
     t0 = time.perf_counter()
-    counter = read_counter(pcb, camera_type, board, draw_result=True)
+    if stats is not None:
+        counter, counter_leds = read_counter(pcb, camera_type, board, draw_result=True, return_leds=True)
+        stats["counter_leds"] = counter_leds
+    else:
+        counter = read_counter(pcb, camera_type, board, draw_result=True)
     _record_step(stats, "counter_reading", t0, value=int(counter))
 
     t0 = time.perf_counter()
-    ring = read_ring(pcb, camera_type, board, draw_result=True)
+    if stats is not None:
+        ring, ring_leds = read_ring(pcb, camera_type, board, draw_result=True, return_leds=True)
+        stats["ring_leds"] = ring_leds
+    else:
+        ring = read_ring(pcb, camera_type, board, draw_result=True)
     _record_step(stats, "ring_reading", t0, success=ring is not None)
 
     if debug_dir:

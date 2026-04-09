@@ -93,6 +93,10 @@ ffmpeg \
 	synchronized.mp4
 ```
 
+## Benchmarking
+
+See [`rocsync/benchmark/README.md`](rocsync/benchmark/README.md) for tools to evaluate the pipeline against validation images, including an interactive annotation tool for creating ground truth.
+
 ## Ideas for future improvements
 - [ ] Write debug images in separate thread to not slow down the main processing
 - [ ] Implement additional filters for the IR pipeline (e.g., uniform corner distance)

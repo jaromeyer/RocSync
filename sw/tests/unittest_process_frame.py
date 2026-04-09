@@ -32,6 +32,7 @@ def test_piecewise():
         frame_number=999,
         debug_dir=TEST_DIR/"output_piecewise"
     )
+    assert markers is not None
     aruco_corners = markers[board.aruco_marker_id]
     red_channel = image[:, :, 2]
     rough_transformation_matrix = cv.getPerspectiveTransform(
