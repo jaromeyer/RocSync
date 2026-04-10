@@ -16,25 +16,10 @@ import cv2
 from tqdm import tqdm
 
 from rocsync.vision import CameraType, period, process_frame
-
-STEP_ORDER = [
-    "aruco_detection",
-    "corner_detection",
-    "fine_rectification",
-    "counter_reading",
-    "ring_reading",
-]
+from rocsync.benchmark.common import STEP_ORDER, collect_images
 
 
-def collect_images(root_dir):
-    """Collect all image files recursively, sorted by path."""
-    exts = {".png", ".jpg", ".jpeg"}
-    return sorted(
-        p for p in Path(root_dir).rglob("*") if p.suffix.lower() in exts
-    )
-
-
-def build_result(stats):
+def extract_pipeline_result(stats):
     """Extract a ground-truth-compatible result dict from pipeline stats.
 
     Returns a dict with keys: aruco, corners, counter, ring, timestamp.
@@ -89,7 +74,7 @@ def build_result(stats):
     }
 
 
-def build_timing(stats):
+def extract_pipeline_timing(stats):
     """Extract per-step timing from pipeline stats."""
     steps = stats.get("steps", {})
     timing = {}
@@ -118,8 +103,8 @@ def run_benchmark(data_dir, images, try_hard=False, debug_dir=None):
         )
 
         rel_path = str(path.relative_to(data_dir))
-        result = build_result(stats)
-        timing = build_timing(stats)
+        result = extract_pipeline_result(stats)
+        timing = extract_pipeline_timing(stats)
 
         results[rel_path] = {
             **result,

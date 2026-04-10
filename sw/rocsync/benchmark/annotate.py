@@ -31,7 +31,7 @@ from rocsync.vision import (
     process_frame,
     visible_radius,
 )
-from rocsync.benchmark.validate import collect_images
+from rocsync.benchmark.common import collect_images
 
 
 # ── Board geometry helpers ──────────────────────────────────────────────────
