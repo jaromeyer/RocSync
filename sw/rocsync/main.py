@@ -10,6 +10,7 @@ from tqdm import tqdm
 
 from rocsync.board_profiles import PROFILES_BY_NAME
 from rocsync.printer import errprint, succprint, warnprint
+from rocsync.board_profiles import PROFILES_BY_NAME
 from rocsync.video import process_video
 from rocsync.vision import CameraType, process_frame
 

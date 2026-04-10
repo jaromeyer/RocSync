@@ -63,6 +63,7 @@ def _build_v1(board_size=640, board_mm=250):
     ir_leds = np.stack([x_coords, np.full(n_leds, ir_y)], axis=1)
 
     # Background sampled at y - 25 px in original code
+    # TODO fix bg location
     rgb_bg_y = rgb_y - 25
     ir_bg_y = ir_y - 25
 
@@ -128,6 +129,7 @@ def _build_v2(board_size=640, board_mm=250):
         np.concatenate([np.full(n_per_row, ir_y1), np.full(n_per_row, ir_y2)]),
     ], axis=1)
 
+    # TODO fix bg location
     bg_y = round(mm2px(34))
 
     return BoardProfile(

@@ -86,7 +86,7 @@ def test_full():
         camera_type=CameraType.RGB,
         frame_number=999,
         board=BOARD_V2,
-        debug_dir=TEST_DIR/"output_full"
+        debug_dir=TEST_DIR / "output_full"
     )
     print(f"output of process frame was: {out}")
 
