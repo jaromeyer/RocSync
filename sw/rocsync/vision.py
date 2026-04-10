@@ -377,7 +377,7 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
                 _finalize_stats(stats, total_start, True, None)
                 return True, None
             if stats is not None:
-                stats["corner_positions"] = [list(pt) if pt is not None else None for pt in corners]
+                stats["corner_positions"] = [[pt[0].item(), pt[1].item()] if pt is not None else None for pt in corners]
 
             all_corners = np.array([pt for pt in corners], dtype=np.float32)
             s = board.perspective_corner_slice

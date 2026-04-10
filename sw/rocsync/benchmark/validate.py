@@ -88,7 +88,7 @@ def extract_pipeline_timing(stats):
     return timing
 
 
-def run_benchmark(data_dir, images, try_hard=False, debug_dir=None):
+def run_benchmark(data_dir, images, debug_dir=None):  # try_hard=False,
     """Run pipeline on all images, returning results dict keyed by relative path."""
     results = {}
     for i, path in enumerate(tqdm(images)):
@@ -101,7 +101,7 @@ def run_benchmark(data_dir, images, try_hard=False, debug_dir=None):
         success, timestamp = process_frame(
             image, CameraType.RGB, i,
             debug_dir=debug_dir,
-            try_hard=try_hard,
+            #try_hard=try_hard,
             stats=stats,
         )
 
@@ -122,8 +122,8 @@ def main():
     parser = argparse.ArgumentParser(description="Benchmark rocsync on validation data")
     parser.add_argument("data_dir", nargs="?", default="validation_data",
                         help="Path to validation data directory (default: validation_data)")
-    parser.add_argument("--try-hard", action="store_true",
-                        help="Enable try_hard mode for corner detection")
+    #parser.add_argument("--try-hard", action="store_true",
+    #                    help="Enable try_hard mode for corner detection")
     parser.add_argument("-o", "--output", default="benchmark_results.json",
                         help="Output JSON file (default: benchmark_results.json)")
     parser.add_argument("--debug", default=None,
@@ -139,14 +139,15 @@ def main():
     if args.debug:
         Path(args.debug).mkdir(parents=True, exist_ok=True)
 
-    print(f"Found {len(images)} images (try_hard={'on' if args.try_hard else 'off'})")
-    results = run_benchmark(data_dir, images, try_hard=args.try_hard, debug_dir=args.debug)
+    #print(f"Found {len(images)} images (try_hard={'on' if args.try_hard else 'off'})")
+    print(f"Found {len(images)} images")
+    results = run_benchmark(data_dir, images, debug_dir=args.debug) # try_hard=args.try_hard,
 
     n_success = sum(1 for r in results.values() if r["success"])
     print(f"Detection rate: {n_success}/{len(results)} ({n_success/len(results):.1%})")
 
     output = {
-        "config": {"try_hard": args.try_hard, "data_dir": str(data_dir)},
+        "config": {"data_dir": str(data_dir)},  #"try_hard": args.try_hard,
         "images": results,
     }
     with open(args.output, "w") as f:
