@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Benchmark rocsync pipeline on validation data.
 
-Runs process_frame on all images, collects per-step timing and detection
-statistics, saves results as JSON, and prints a summary table.
+Runs process_frame on all images, collects per-image results in a structure
+mirroring the ground truth format (aruco, corners, counter, ring), plus
+per-step timing. Saves results as JSON without aggregate statistics — those
+are computed by the evaluate tool.
 """
 
 import argparse
@@ -11,10 +13,9 @@ import sys
 from pathlib import Path
 
 import cv2
-import numpy as np
 from tqdm import tqdm
 
-from rocsync.vision import CameraType, process_frame
+from rocsync.vision import CameraType, period, process_frame
 
 STEP_ORDER = [
     "aruco_detection",
@@ -33,9 +34,80 @@ def collect_images(root_dir):
     )
 
 
-def run_benchmark(images, try_hard=False, debug_dir=None):
-    """Run pipeline on all images, returning per-image stats dicts."""
-    results = []
+def build_result(stats):
+    """Extract a ground-truth-compatible result dict from pipeline stats.
+
+    Returns a dict with keys: aruco, corners, counter, ring, timestamp.
+    Structure mirrors ground_truth.json to simplify comparison.
+    """
+    steps = stats.get("steps", {})
+
+    # -- ArUco --
+    aruco_step = steps.get("aruco_detection", {})
+    aruco_visible = aruco_step.get("success", False)
+    aruco = {
+        "visible": aruco_visible,
+        "id": stats.get("aruco_id") if aruco_visible else None,
+    }
+
+    # -- Corners --
+    corner_positions = stats.get("corner_positions")
+    if corner_positions is not None:
+        corners = []
+        for pos in corner_positions:
+            if pos is not None:
+                corners.append({"visible": True, "state": True, "position": pos})
+            else:
+                corners.append({"visible": False, "state": None, "position": None})
+    else:
+        corners = [{"visible": False, "state": None, "position": None}] * 4
+
+    # -- Counter --
+    counter_step = steps.get("counter_reading", {})
+    counter_value = counter_step.get("value")
+    counter = {
+        "visible": counter_value is not None,
+        "value": counter_value,
+    }
+
+    # -- Ring --
+    ring_step = steps.get("ring_reading", {})
+    ring_visible = ring_step.get("success", False)
+    timestamp = stats.get("timestamp")
+
+    if ring_visible and timestamp is not None:
+        # read_ring returns inclusive end (last ON LED); convert to half-open
+        # (first OFF LED) to match ground truth convention.
+        ring = {
+            "start": timestamp[0] % period,
+            "end": (timestamp[1] + 1) % period,
+        }
+    else:
+        ring = {"start": 0, "end": 0}
+
+    return {
+        "aruco": aruco,
+        "corners": corners,
+        "counter": counter,
+        "ring": ring,
+        "timestamp": timestamp,
+    }
+
+
+def build_timing(stats):
+    """Extract per-step timing from pipeline stats."""
+    steps = stats.get("steps", {})
+    timing = {}
+    for step in STEP_ORDER:
+        if step in steps:
+            timing[f"{step}_ms"] = steps[step]["time_ms"]
+    timing["total_ms"] = stats.get("total_time_ms")
+    return timing
+
+
+def run_benchmark(data_dir, images, try_hard=False, debug_dir=None):
+    """Run pipeline on all images, returning results dict keyed by relative path."""
+    results = {}
     for i, path in enumerate(tqdm(images)):
         image = cv2.imread(str(path))
         if image is None:
@@ -49,124 +121,18 @@ def run_benchmark(images, try_hard=False, debug_dir=None):
             try_hard=try_hard,
             stats=stats,
         )
-        stats["image"] = str(path)
-        results.append(stats)
+
+        rel_path = str(path.relative_to(data_dir))
+        result = build_result(stats)
+        timing = build_timing(stats)
+
+        results[rel_path] = {
+            **result,
+            "success": success and timestamp is not None,
+            "timing": timing,
+        }
 
     return results
-
-
-def describe(values):
-    """Return dict with mean, std, min, max for a list of numbers."""
-    if not values:
-        return {"mean": None, "std": None, "min": None, "max": None, "n": 0}
-    a = np.array(values, dtype=np.float64)
-    return {
-        "mean": float(np.mean(a)),
-        "std": float(np.std(a)),
-        "min": float(np.min(a)),
-        "max": float(np.max(a)),
-        "n": len(values),
-    }
-
-
-def aggregate_stats(results):
-    """Aggregate per-image results into summary statistics."""
-    success_results = [r for r in results if r.get("success") and r.get("timestamp")]
-    failure_results = [r for r in results if not (r.get("success") and r.get("timestamp"))]
-
-    summary = {
-        "total_images": len(results),
-        "total_success": len(success_results),
-        "total_failure": len(failure_results),
-        "detection_rate": len(success_results) / len(results) if results else 0,
-    }
-
-    # Aggregate per-step and total timing/detection for each group
-    for group_name, group in [("all", results), ("success", success_results), ("failure", failure_results)]:
-        group_stats = {}
-
-        # Per-step stats
-        for step in STEP_ORDER:
-            times = [r["steps"][step]["time_ms"] for r in group if step in r.get("steps", {})]
-            group_stats[f"{step}_time"] = describe(times)
-
-            if step in ("aruco_detection", "corner_detection", "ring_reading"):
-                successes = [1 if r["steps"][step].get("success") else 0 for r in group if step in r.get("steps", {})]
-                group_stats[f"{step}_rate"] = describe(successes)
-
-            if step == "corner_detection":
-                counts = [r["steps"][step].get("count", 0) for r in group if step in r.get("steps", {})]
-                group_stats[f"{step}_count"] = describe(counts)
-
-            if step == "counter_reading":
-                values = [r["steps"][step].get("value", 0) for r in group if step in r.get("steps", {})]
-                group_stats[f"{step}_value"] = describe(values)
-
-        # Total timing
-        total_times = [r["total_time_ms"] for r in group if "total_time_ms" in r]
-        group_stats["total_time"] = describe(total_times)
-
-        summary[group_name] = group_stats
-
-    return summary
-
-
-def fmt(val, width=8):
-    """Format a numeric value or None for table display."""
-    if val is None:
-        return "-".rjust(width)
-    if isinstance(val, float):
-        return f"{val:.2f}".rjust(width)
-    return str(val).rjust(width)
-
-
-def print_table(summary):
-    """Print formatted summary table to stdout."""
-    print(f"\n{'=' * 80}")
-    print(f"  BENCHMARK SUMMARY — {summary['total_images']} images")
-    print(f"  Detection rate: {summary['total_success']}/{summary['total_images']}"
-          f" ({summary['detection_rate']:.1%})")
-    print(f"{'=' * 80}")
-
-    for group_name in ["all", "success", "failure"]:
-        group = summary[group_name]
-        n = group.get("total_time", {}).get("n", 0)
-        if n == 0:
-            continue
-
-        label = {"all": "ALL IMAGES", "success": "SUCCESS (timestamp extracted)", "failure": "FAILURE"}[group_name]
-        print(f"\n  {label} (n={n})")
-        print(f"  {'-' * 76}")
-
-        # Timing table
-        print(f"  {'Timing (ms)':<28} {'Mean':>8} {'Std':>8} {'Min':>8} {'Max':>8} {'N':>6}")
-        print(f"  {'-' * 28} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 6}")
-        for step in STEP_ORDER:
-            key = f"{step}_time"
-            if key in group:
-                s = group[key]
-                print(f"  {step:<28} {fmt(s['mean'])} {fmt(s['std'])} {fmt(s['min'])} {fmt(s['max'])} {fmt(s['n'], 6)}")
-        s = group["total_time"]
-        print(f"  {'TOTAL':<28} {fmt(s['mean'])} {fmt(s['std'])} {fmt(s['min'])} {fmt(s['max'])} {fmt(s['n'], 6)}")
-
-        # Detection table
-        det_rows = []
-        for step in STEP_ORDER:
-            rate_key = f"{step}_rate"
-            count_key = f"{step}_count"
-            if rate_key in group:
-                s = group[rate_key]
-                det_rows.append((step + " rate", s))
-            if count_key in group:
-                s = group[count_key]
-                det_rows.append((step + " count", s))
-
-        if det_rows:
-            print()
-            print(f"  {'Detection':<28} {'Mean':>8} {'Std':>8} {'Min':>8} {'Max':>8} {'N':>6}")
-            print(f"  {'-' * 28} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 8} {'-' * 6}")
-            for label, s in det_rows:
-                print(f"  {label:<28} {fmt(s['mean'])} {fmt(s['std'])} {fmt(s['min'])} {fmt(s['max'])} {fmt(s['n'], 6)}")
 
 
 def main():
@@ -181,26 +147,28 @@ def main():
                         help="Directory for debug images")
     args = parser.parse_args()
 
-    images = collect_images(args.data_dir)
+    data_dir = Path(args.data_dir)
+    images = collect_images(data_dir)
     if not images:
-        print(f"No images found in {args.data_dir}", file=sys.stderr)
+        print(f"No images found in {data_dir}", file=sys.stderr)
         sys.exit(1)
 
     if args.debug:
         Path(args.debug).mkdir(parents=True, exist_ok=True)
 
     print(f"Found {len(images)} images (try_hard={'on' if args.try_hard else 'off'})")
-    results = run_benchmark(images, try_hard=args.try_hard, debug_dir=args.debug)
+    results = run_benchmark(data_dir, images, try_hard=args.try_hard, debug_dir=args.debug)
 
-    summary = aggregate_stats(results)
+    n_success = sum(1 for r in results.values() if r["success"])
+    print(f"Detection rate: {n_success}/{len(results)} ({n_success/len(results):.1%})")
 
-    output = {"config": {"try_hard": args.try_hard, "data_dir": str(args.data_dir)},
-              "per_image": results, "summary": summary}
+    output = {
+        "config": {"try_hard": args.try_hard, "data_dir": str(data_dir)},
+        "images": results,
+    }
     with open(args.output, "w") as f:
         json.dump(output, f, indent=2)
-    print(f"\nResults saved to {args.output}")
-
-    print_table(summary)
+    print(f"Results saved to {args.output}")
 
 
 if __name__ == "__main__":

@@ -157,18 +157,15 @@ class ImageAnnotation:
             ann.counter_leds = list(counter_leds)
             ann.counter_value = sum(2 ** (15 - i) for i in range(16) if counter_leds[i])
 
-        # Ring — pipeline returns CCW [start, end) half-open.
-        # Convert to clockwise: first ON (CW) = last ON (CCW) = end-1,
-        #                        first OFF (CW) = before first ON (CCW) = start-1.
+        # Ring — read_ring returns inclusive (first ON, last ON).
+        # Convert to half-open [start, end) in ascending index order.
         steps = stats.get("steps", {})
         ring_step = steps.get("ring_reading", {})
         if ring_step.get("success") and stats.get("timestamp"):
             ts = stats["timestamp"]
             counter_val = steps.get("counter_reading", {}).get("value", 0)
-            ccw_start = ts[0] - counter_val * period
-            ccw_end = ts[1] - counter_val * period + 1  # pipeline is inclusive, make half-open
-            ann.ring_start = (ccw_end - 1) % period   # first ON clockwise
-            ann.ring_end = (ccw_start - 1) % period    # first OFF clockwise
+            ann.ring_start = (ts[0] - counter_val * period) % period
+            ann.ring_end = (ts[1] - counter_val * period + 1) % period
         elif stats.get("ring_leds") is not None:
             ann.ring_start = 0
             ann.ring_end = 0
@@ -210,6 +207,7 @@ class ImageAnnotation:
             "corners": corners,
             "homography": self.homography,
             "counter": {"visible": self.counter_visible},
+            "ring": {},
         }
 
         if self.aruco_visible:
@@ -604,7 +602,11 @@ class AnnotationTool:
         if self.mode == Mode.RING_AWAITING_END:
             elem, idx = self._hit_test(bx, by)
             if elem == "ring":
-                self.annotation.ring_end = idx
+                # Convert CW clicks to ascending [start, end):
+                # CW first ON  → ascending end (exclusive)
+                # CW first OFF → ascending start
+                self.annotation.ring_start = (idx + 1) % period
+                self.annotation.ring_end = (self._ring_start_candidate + 1) % period
                 self.mode = Mode.IDLE
                 self._ring_start_candidate = None
                 self.status_msg = ""
@@ -696,11 +698,10 @@ class AnnotationTool:
         self.stats["rectified"] = cv2.warpPerspective(mask, H, (board_size, board_size))
 
     def _handle_ring_first_click(self, idx):
-        """First ring click: set the first ON LED, then wait for first OFF LED."""
-        self.annotation.ring_start = idx
+        """First ring click (CW first ON LED), then wait for CW first OFF LED."""
         self._ring_start_candidate = idx
         self.mode = Mode.RING_AWAITING_END
-        self.status_msg = f"Ring: first ON={idx}, click first OFF LED..."
+        self.status_msg = f"Ring: (clock-wise) first ON={idx}, click first OFF LED..."
         self._needs_redraw = True
 
     # ── Rendering ───────────────────────────────────────────────────────
@@ -752,7 +753,7 @@ class AnnotationTool:
             aruco_label = f"ArUco ID {ann.aruco_id}"
         else:
             aruco_label = "ArUco: none"
-        cv2.putText(board_img, aruco_label,(ARUCO_X1, ARUCO_Y1 - 8), font, 0.5, COLOR_BOARD_TEXT, 1)
+        cv2.putText(board_img, aruco_label,(ARUCO_X1, ARUCO_Y1 - 8), font, 0.5, (128, 128, 128), 1)
 
         # Corner LEDs (positions stored in original image space, transform to board)
         for i, c in enumerate(ann.corners):
@@ -864,19 +865,19 @@ class AnnotationTool:
 
     @staticmethod
     def _led_in_ring_arc(idx, start, end):
-        """Check if LED is ON in the clockwise arc from start (first ON) to end (first OFF).
+        """Check if LED idx is ON in the half-open arc [start, end).
 
-        The arc goes clockwise (decreasing index): start, start-1, ..., end+1.
+        Ascending index order: start, start+1, ..., end-1.
         LED at index `end` is the first OFF and is excluded.
         """
         if start == end:
             return False  # undecodable
-        if start > end:
-            # Non-wrapping: ON indices are end+1, end+2, ..., start
-            return end < idx <= start
+        if start < end:
+            # Non-wrapping: ON indices are start, start+1, ..., end-1
+            return start <= idx < end
         else:
-            # Wrapping past 0: indices ..., 1, 0, 99, ...
-            return idx <= start or idx > end
+            # Wrapping past 99→0: ON indices are start, ..., 99, 0, ..., end-1
+            return idx >= start or idx < end
 
     @staticmethod
     def _draw_help(img):
