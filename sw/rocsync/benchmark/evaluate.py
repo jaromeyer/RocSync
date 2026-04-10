@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Compare benchmark results against ground truth annotations.
 
-Loads validation result JSON files from output/benchmark/ and compares them
-against validation_data/ground_truth.json. Prints detection metrics (TPR, FPR,
-F1), result accuracy, and per-step timing statistics.
+Loads validation result JSON files and compares them against
+validation_data/ground_truth.json. Accepts either a directory (loads all .json
+files in it) or one or more explicit .json filepaths. Prints detection metrics
+(TPR, FPR, F1), result accuracy, and per-step timing statistics.
 
 Positive/negative annotation is determined per-step from the ground truth
 visible flags, not from a global status field.
@@ -53,10 +54,18 @@ STEP_PRED_POSITIVE = {
 }
 
 
-def load_benchmarks(directory):
-    """Load all benchmark JSON files, keyed by stem name."""
+def load_benchmarks(paths):
+    """Load benchmark JSON files, keyed by stem name.
+
+    If *paths* is a single directory, loads all .json files from it.
+    Otherwise, each element is treated as a filepath to a .json file.
+    """
     benchmarks = {}
-    for path in sorted(Path(directory).glob("*.json")):
+    if len(paths) == 1 and Path(paths[0]).is_dir():
+        files = sorted(Path(paths[0]).glob("*.json"))
+    else:
+        files = [Path(p) for p in paths]
+    for path in files:
         with open(path) as f:
             benchmarks[path.stem] = json.load(f)
     return benchmarks
@@ -577,7 +586,7 @@ def print_report(methods, all_metrics, col_width, label_width=LABEL_WIDTH_DEFAUL
             print()
 
 
-def print_timing(methods, timing, col_width, label_width=30):
+def print_timing(methods, timing, col_width, label_width=LABEL_WIDTH_DEFAULT):
     subset_labels = {
         "all": "ALL IMAGES",
         "positive": "POSITIVE ANNOTATIONS (per-step)",
@@ -596,11 +605,11 @@ def print_timing(methods, timing, col_width, label_width=30):
         print(f"{'=' * 100}")
         print(f"  TIMING — {subset_labels[subset_name]} (ms)")
         print(f"{'=' * 100}")
-        print_header(methods, col_width, label_width)
+        print_header(methods, col_width, label_width, STEP_ORDER[0])
 
-        for step in STEP_ORDER + ["total"]:
-            step_label = step.upper() if step == "total" else step
-            print(f"  {step_label:>{label_width}}")
+        for i, step in enumerate(STEP_ORDER + ["total"]):
+            if i > 0:
+                print(f"  {step.upper():-^{label_width}}")
             for stat in stat_keys:
                 print(f"  {'  ' + stat:>{label_width}}", end="")
                 for m in methods:
@@ -611,8 +620,9 @@ def print_timing(methods, timing, col_width, label_width=30):
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate benchmark results against ground truth")
-    parser.add_argument("benchmark_dir", nargs="?", default="output/benchmark",
-                        help="Directory containing benchmark .json files (default: output/benchmark)")
+    parser.add_argument("paths", nargs="*", default=["output/benchmark"],
+                        help="Directory with benchmark .json files, or one or more .json filepaths "
+                             "(default: output/benchmark)")
     parser.add_argument("-g", "--ground-truth", default="validation_data/ground_truth.json",
                         help="Path to ground truth JSON (default: validation_data/ground_truth.json)")
     parser.add_argument("-t", "--timing", action="store_true",
@@ -622,9 +632,9 @@ def main():
     gt = load_ground_truth(args.ground_truth)
     gt_images = gt["images"]
 
-    benchmarks = load_benchmarks(args.benchmark_dir)
+    benchmarks = load_benchmarks(args.paths)
     if not benchmarks:
-        print(f"No .json files found in {args.benchmark_dir}", file=sys.stderr)
+        print(f"No benchmark .json files found", file=sys.stderr)
         sys.exit(1)
 
     methods = list(benchmarks.keys())
