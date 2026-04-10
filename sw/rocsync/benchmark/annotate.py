@@ -10,6 +10,7 @@ Usage:
 """
 
 import argparse
+import copy
 import json
 import math
 import sys
@@ -20,62 +21,49 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from rocsync.vision import (
-    CameraType,
-    aruco_corners_coords,
-    board_size,
-    corner_dots,
-    dictionary,
-    led_size,
-    period,
-    process_frame,
-    visible_radius,
-)
+from rocsync.vision import CameraType, dictionary, led_size, process_frame
+from rocsync.board_profiles import BOARD_V1, PROFILES_BY_ARUCO
 from rocsync.benchmark.common import collect_images
 
 
 # ── Board geometry helpers ──────────────────────────────────────────────────
 
-def ring_led_positions():
-    """Return list of 100 (x, y) tuples for ring LEDs in rectified board coords."""
+def ring_led_positions(board):
+    """Return list of (x, y) tuples for ring LEDs in rectified board coords."""
     positions = []
-    for i in range(period):
-        angle = -(i / period + 0.25) * 2 * math.pi
-        x = int(board_size / 2 + visible_radius * math.cos(angle))
-        y = int(board_size / 2 + visible_radius * math.sin(angle))
+    for i in range(board.period):
+        angle = -(i / board.period + 0.25) * 2 * math.pi
+        x = int(board.board_size / 2 + board.visible_radius * math.cos(angle))
+        y = int(board.board_size / 2 + board.visible_radius * math.sin(angle))
         positions.append((x, y))
     return positions
 
 
-def counter_led_positions():
-    """Return list of 16 (x, y) tuples for counter LEDs in rectified board coords."""
-    y = int(53 / 250 * 640)
-    return [(int((65 + i * 8) / 250 * 640), y) for i in range(16)]
+def counter_led_positions(board):
+    """Return list of (x, y) tuples for counter LEDs in rectified board coords."""
+    coords = board.counter_led_coords[CameraType.RGB]
+    return [(int(p[0]), int(p[1])) for p in coords]
 
 
-def corner_led_positions():
-    """Return list of 4 (x, y) tuples for corner LEDs in rectified board coords."""
-    return [(int(p[0]), int(p[1])) for p in corner_dots]
+def corner_led_positions(board):
+    """Return list of (x, y) tuples for corner LEDs in rectified board coords."""
+    return [(int(p[0]), int(p[1])) for p in board.corner_dots]
 
 
-RING_POS = ring_led_positions()
-COUNTER_POS = counter_led_positions()
-CORNER_POS = corner_led_positions()
+def counter_bbox(counter_pos):
+    """Compute counter bounding box (x1, y1, x2, y2) with margin around LEDs."""
+    cx = [p[0] for p in counter_pos]
+    cy = [p[1] for p in counter_pos]
+    return (
+        min(cx) - led_size - 10,
+        min(cy) - led_size - 10,
+        max(cx) + led_size + 10,
+        max(cy) + led_size + 10,
+    )
 
-# Counter bounding box (x1, y1, x2, y2) with margin around LEDs
-_cx = [p[0] for p in COUNTER_POS]
-_cy = [p[1] for p in COUNTER_POS]
-COUNTER_BBOX = (
-    min(_cx) - led_size - 10,
-    min(_cy) - led_size - 10,
-    max(_cx) + led_size + 10,
-    max(_cy) + led_size + 10,
-)
 
-# ArUco region in rectified board coords
-ARUCO_X1, ARUCO_Y1 = 202, 202
-ARUCO_X2, ARUCO_Y2 = 437, 437
-ARUCO_IDS = [0, 21]  # known marker IDs to cycle through
+# Known ArUco marker IDs to cycle through
+ARUCO_IDS = [p.aruco_marker_id for p in PROFILES_BY_ARUCO.values()]
 
 # Hit-test radii (in board coordinates)
 HIT_CORNER = 20
@@ -97,30 +85,38 @@ class ImageAnnotation:
     Ring uses half-open semantics: ring_start = first ON LED,
     ring_end = first OFF LED.  ring_start == ring_end means undecodable.
     """
+    board: object = None  # BoardProfile (not serialized)
+
     aruco_visible: bool = False
     aruco_id: int = 0
 
     # Each corner: {"visible": bool, "position": [x, y]}
     # position is in *original image* coordinates (float)
-    corners: list = field(default_factory=lambda: [
-        {"visible": False, "position": list(p)}
-        for p in CORNER_POS
-    ])
+    corners: list = field(default_factory=list)
 
     # Homography: original image → rectified board (3×3, stored as list-of-lists)
     homography: list | None = None
 
     counter_visible: bool = False
-    counter_leds: list = field(default_factory=lambda: [False] * 16)
+    counter_leds: list = field(default_factory=list)
     counter_value: int = 0
 
     ring_start: int = 0  # first ON LED index
     ring_end: int = 0    # first OFF LED index (exclusive); == start → undecodable
 
+    def __post_init__(self):
+        if not self.corners and self.board is not None:
+            corner_pos = corner_led_positions(self.board)
+            self.corners = [
+                {"visible": False, "position": list(p)} for p in corner_pos
+            ]
+        if not self.counter_leds and self.board is not None:
+            self.counter_leds = [False] * self.board.counter_bits
+
     @classmethod
-    def from_stats(cls, stats):
+    def from_stats(cls, stats, board):
         """Pre-populate annotation from pipeline stats dict."""
-        ann = cls()
+        ann = cls(board=board)
 
         # Homography (original → rectified)
         H = stats.get("homography")
@@ -140,11 +136,11 @@ class ImageAnnotation:
         if corner_positions is not None and aruco_corners is not None:
             rough_H = cv2.getPerspectiveTransform(
                 np.array(aruco_corners, dtype=np.float32),
-                aruco_corners_coords,
+                board.aruco_corners_coords,
             )
             inv_rough = np.linalg.inv(rough_H)
             for i, pos in enumerate(corner_positions):
-                if i < 4 and pos is not None:
+                if i < len(ann.corners) and pos is not None:
                     pt = np.array([[pos]], dtype=np.float64)
                     orig_pt = cv2.perspectiveTransform(pt, inv_rough).reshape(2)
                     ann.corners[i]["visible"] = True
@@ -155,7 +151,8 @@ class ImageAnnotation:
         if counter_leds is not None:
             ann.counter_visible = True
             ann.counter_leds = list(counter_leds)
-            ann.counter_value = sum(2 ** (15 - i) for i in range(16) if counter_leds[i])
+            n = board.counter_bits
+            ann.counter_value = sum(2 ** (n - 1 - i) for i in range(n) if counter_leds[i])
 
         # Ring — read_ring returns inclusive (first ON, last ON).
         # Convert to half-open [start, end) in ascending index order.
@@ -164,8 +161,8 @@ class ImageAnnotation:
         if ring_step.get("success") and stats.get("timestamp"):
             ts = stats["timestamp"]
             counter_val = steps.get("counter_reading", {}).get("value", 0)
-            ann.ring_start = (ts[0] - counter_val * period) % period
-            ann.ring_end = (ts[1] - counter_val * period + 1) % period
+            ann.ring_start = (ts[0] - counter_val * board.period) % board.period
+            ann.ring_end = (ts[1] - counter_val * board.period + 1) % board.period
         elif stats.get("ring_leds") is not None:
             ann.ring_start = 0
             ann.ring_end = 0
@@ -173,7 +170,8 @@ class ImageAnnotation:
         return ann
 
     def recompute_counter(self):
-        self.counter_value = sum(2 ** (15 - i) for i in range(16) if self.counter_leds[i])
+        n = self.board.counter_bits
+        self.counter_value = sum(2 ** (n - 1 - i) for i in range(n) if self.counter_leds[i])
 
     def to_original(self, board_x, board_y):
         """Transform a point from rectified board coords to original image coords."""
@@ -223,22 +221,23 @@ class ImageAnnotation:
         return result
 
     @classmethod
-    def from_dict(cls, data):
-        ann = cls()
+    def from_dict(cls, data, board):
+        ann = cls(board=board)
         aruco = data.get("aruco", {})
         ann.aruco_visible = aruco.get("visible", False)
         ann.aruco_id = aruco.get("id", 0)
 
         ann.homography = data.get("homography")
 
+        corner_pos = corner_led_positions(board)
         for i, c in enumerate(data.get("corners", [])):
-            if i < 4:
+            if i < len(ann.corners):
                 if "position" in c:
                     pos = list(c["position"])
                 elif ann.homography is not None:
-                    pos = ann.to_original(*CORNER_POS[i])
+                    pos = ann.to_original(*corner_pos[i])
                 else:
-                    pos = list(CORNER_POS[i])
+                    pos = list(corner_pos[i])
                 ann.corners[i] = {
                     "visible": c.get("visible", False),
                     "position": pos,
@@ -247,8 +246,9 @@ class ImageAnnotation:
         counter = data.get("counter", {})
         ann.counter_visible = counter.get("visible", False)
         ann.counter_value = counter.get("value", 0)
+        n = board.counter_bits
         ann.counter_leds = [
-            bool(ann.counter_value & (2 ** (15 - i))) for i in range(16)
+            bool(ann.counter_value & (2 ** (n - 1 - i))) for i in range(n)
         ]
 
         ring = data.get("ring", {})
@@ -263,6 +263,7 @@ class Mode(Enum):
     IDLE = "idle"
     DRAGGING_CORNER = "dragging"
     RING_AWAITING_END = "ring_end"
+    ARUCO_CONFIRM = "aruco_confirm"  # board profile changed, Esc to revert
 
 
 # ── Display and interaction ─────────────────────────────────────────────────
@@ -299,6 +300,17 @@ class AnnotationTool:
         self.images = []
         self.current_idx = 0
 
+        # Board profile and derived geometry (set per-image)
+        self.board = BOARD_V1
+        self.ring_pos = ring_led_positions(self.board)
+        self.counter_pos = counter_led_positions(self.board)
+        self.corner_pos = corner_led_positions(self.board)
+        self.counter_box = counter_bbox(self.counter_pos)
+        self.aruco_x1 = int(self.board.aruco_corners_coords[0][0])
+        self.aruco_y1 = int(self.board.aruco_corners_coords[0][1])
+        self.aruco_x2 = int(self.board.aruco_corners_coords[2][0])
+        self.aruco_y2 = int(self.board.aruco_corners_coords[2][1])
+
         # Display state
         self.show_help = False
         self.left_panel_w = 0
@@ -319,6 +331,19 @@ class AnnotationTool:
         self._ring_start_candidate = None
         self._needs_redraw = True
         self._window_sized = False
+        self._aruco_snapshot = None   # (annotation, board) before board-changing ArUco cycle
+
+    def _set_board(self, board):
+        """Update board profile and recompute derived geometry."""
+        self.board = board
+        self.ring_pos = ring_led_positions(board)
+        self.counter_pos = counter_led_positions(board)
+        self.corner_pos = corner_led_positions(board)
+        self.counter_box = counter_bbox(self.counter_pos)
+        self.aruco_x1 = int(board.aruco_corners_coords[0][0])
+        self.aruco_y1 = int(board.aruco_corners_coords[0][1])
+        self.aruco_x2 = int(board.aruco_corners_coords[2][0])
+        self.aruco_y2 = int(board.aruco_corners_coords[2][1])
 
     # ── Main loop ───────────────────────────────────────────────────────
 
@@ -361,12 +386,21 @@ class AnnotationTool:
                 self.stats["rectified"] = None
                 self.stats["aruco_id"] = None
 
+            # Resolve board profile from pipeline detection or saved annotation
+            aruco_id = self.stats.get("aruco_id")
+            if rel_path in self.ground_truth["images"]:
+                saved_id = self.ground_truth["images"][rel_path].get("aruco", {}).get("id")
+                if saved_id is not None:
+                    aruco_id = saved_id
+            board = PROFILES_BY_ARUCO.get(aruco_id, BOARD_V1)
+            self._set_board(board)
+
             # Load existing annotation or create from pipeline
             if rel_path in self.ground_truth["images"]:
                 self.annotation = ImageAnnotation.from_dict(
-                    self.ground_truth["images"][rel_path])
+                    self.ground_truth["images"][rel_path], board)
             else:
-                self.annotation = ImageAnnotation.from_stats(self.stats)
+                self.annotation = ImageAnnotation.from_stats(self.stats, board)
                 # Use the pipeline homography for new annotations
                 H = self.stats.get("homography")
                 if H is not None:
@@ -376,17 +410,17 @@ class AnnotationTool:
             if self.annotation.homography is not None:
                 for i, c in enumerate(self.annotation.corners):
                     if not c["visible"]:
-                        c["position"] = self.annotation.to_original(*CORNER_POS[i])
+                        c["position"] = self.annotation.to_original(*self.corner_pos[i])
             else:
                 # No homography — place invisible corners in a centered square
                 # proportional to the board's corner layout.
                 img_h, img_w = image.shape[:2]
-                scale = 0.5 * min(img_w, img_h) / board_size
-                ox = (img_w - board_size * scale) / 2
-                oy = (img_h - board_size * scale) / 2
+                scale = 0.5 * min(img_w, img_h) / board.board_size
+                ox = (img_w - board.board_size * scale) / 2
+                oy = (img_h - board.board_size * scale) / 2
                 for i, c in enumerate(self.annotation.corners):
                     if not c["visible"]:
-                        bx, by = CORNER_POS[i]
+                        bx, by = self.corner_pos[i]
                         c["position"] = [ox + bx * scale, oy + by * scale]
 
             # Re-warp the rectified image using the annotation's homography
@@ -401,7 +435,7 @@ class AnnotationTool:
                 H = np.array(self.annotation.homography, dtype=np.float64)
                 mask = image[:, :, 2]
                 self.stats["rectified"] = cv2.warpPerspective(
-                    mask, H, (board_size, board_size))
+                    mask, H, (board.board_size, board.board_size))
 
             self.mode = Mode.IDLE
             self._ring_start_candidate = None
@@ -460,24 +494,33 @@ class AnnotationTool:
 
     def _process_key(self, key):
         if key in (13, 10, 32):  # Enter or Space
+            self._commit_aruco_change()
             return "accept"
         elif key == 83 or key == ord('d'):  # Right arrow
+            self._commit_aruco_change()
             return "skip"
         elif key == 81 or key == ord('a'):  # Left arrow
+            self._commit_aruco_change()
             return "back"
         elif key in (ord('n'), ord('N')):
+            self._commit_aruco_change()
             return "next_unannotated"
         elif key in (ord('b'), ord('B')):
+            self._commit_aruco_change()
             return "prev_unannotated"
         elif key in (ord('c'), ord('C'), 8, 127):  # C or Backspace
+            self._commit_aruco_change()
             return "clear"
         elif key in (ord('q'), ord('Q')):
+            self._commit_aruco_change()
             return "quit"
         elif key in (ord('h'), ord('H')):
             self.show_help = not self.show_help
             self._needs_redraw = True
         elif key == 27:  # Escape
-            if self.mode == Mode.RING_AWAITING_END:
+            if self.mode == Mode.ARUCO_CONFIRM:
+                self._revert_aruco_change()
+            elif self.mode == Mode.RING_AWAITING_END:
                 self.mode = Mode.IDLE
                 self._ring_start_candidate = None
                 self.status_msg = ""
@@ -493,7 +536,8 @@ class AnnotationTool:
         panel_x = x - self.left_panel_w
         bx = int(panel_x / self.board_scale)
         by = int(y / self.board_scale)
-        if bx < 0 or bx >= board_size or by < 0 or by >= board_size:
+        bs = self.board.board_size
+        if bx < 0 or bx >= bs or by < 0 or by >= bs:
             return None, None
         return bx, by
 
@@ -514,22 +558,22 @@ class AnnotationTool:
                 return "corner", i
 
         # 2. Counter LEDs (individual)
-        for i, (cx, cy) in enumerate(COUNTER_POS):
+        for i, (cx, cy) in enumerate(self.counter_pos):
             if (bx - cx) ** 2 + (by - cy) ** 2 <= HIT_COUNTER ** 2:
                 return "counter", i
 
         # 3. Counter bounding box (outside LED circles → toggle visibility)
-        x1, y1, x2, y2 = COUNTER_BBOX
+        x1, y1, x2, y2 = self.counter_box
         if x1 <= bx <= x2 and y1 <= by <= y2:
             return "counter_bbox", 0
 
         # 4. ArUco region
-        if ARUCO_X1 <= bx <= ARUCO_X2 and ARUCO_Y1 <= by <= ARUCO_Y2:
+        if self.aruco_x1 <= bx <= self.aruco_x2 and self.aruco_y1 <= by <= self.aruco_y2:
             return "aruco", 0
 
         # 5. Ring LEDs (nearest within radius)
         best_i, best_d = 0, float('inf')
-        for i, (rx, ry) in enumerate(RING_POS):
+        for i, (rx, ry) in enumerate(self.ring_pos):
             d = (bx - rx) ** 2 + (by - ry) ** 2
             if d < best_d:
                 best_d = d
@@ -554,6 +598,7 @@ class AnnotationTool:
         ox, oy = self._display_to_original(x, y)
         if ox is not None:
             if event == cv2.EVENT_LBUTTONDOWN:
+                self._commit_aruco_change()
                 idx = self._hit_test_corner_original(ox, oy)
                 if idx is not None:
                     self._drag_idx = idx
@@ -605,8 +650,8 @@ class AnnotationTool:
                 # Convert CW clicks to ascending [start, end):
                 # CW first ON  → ascending end (exclusive)
                 # CW first OFF → ascending start
-                self.annotation.ring_start = (idx + 1) % period
-                self.annotation.ring_end = (self._ring_start_candidate + 1) % period
+                self.annotation.ring_start = (idx + 1) % self.board.period
+                self.annotation.ring_end = (self._ring_start_candidate + 1) % self.board.period
                 self.mode = Mode.IDLE
                 self._ring_start_candidate = None
                 self.status_msg = ""
@@ -614,6 +659,8 @@ class AnnotationTool:
             return
 
         elem, idx = self._hit_test(bx, by)
+        if elem != "aruco":
+            self._commit_aruco_change()
         if elem == "corner":
             self._drag_idx = idx
             self._drag_start = (bx, by)
@@ -635,8 +682,9 @@ class AnnotationTool:
                 self._drag_started = True
                 self.mode = Mode.DRAGGING_CORNER
             if self._drag_started:
-                cbx = max(0, min(board_size - 1, bx))
-                cby = max(0, min(board_size - 1, by))
+                bs = self.board.board_size
+                cbx = max(0, min(bs - 1, bx))
+                cby = max(0, min(bs - 1, by))
                 self.annotation.corners[self._drag_idx]["position"] = \
                     self.annotation.to_original(cbx, cby)
                 self._needs_redraw = True
@@ -671,31 +719,107 @@ class AnnotationTool:
 
     def _cycle_aruco(self):
         ann = self.annotation
+
+        # Determine the new ArUco state
+        new_visible = ann.aruco_visible
+        new_id = ann.aruco_id
         if not ann.aruco_visible:
-            ann.aruco_visible = True
-            ann.aruco_id = ARUCO_IDS[0]
+            new_visible = True
+            new_id = ARUCO_IDS[0]
         else:
             try:
                 idx = ARUCO_IDS.index(ann.aruco_id)
                 if idx + 1 < len(ARUCO_IDS):
-                    ann.aruco_id = ARUCO_IDS[idx + 1]
+                    new_id = ARUCO_IDS[idx + 1]
                 else:
-                    ann.aruco_visible = False
+                    new_visible = False
             except ValueError:
-                ann.aruco_visible = False
+                new_visible = False
+
+        # Snapshot on first cycle; subsequent cycles update in-place
+        if self._aruco_snapshot is None:
+            self._aruco_snapshot = (copy.deepcopy(self.annotation), self.board)
+
+        # Check if the board profile changes
+        new_board = PROFILES_BY_ARUCO.get(new_id, self.board) if new_visible else self.board
+        board_changes = new_board is not self.board
+
+        if board_changes:
+            snap_ann, snap_board = self._aruco_snapshot
+            self._set_board(new_board)
+
+            if new_board is snap_board:
+                # Cycling back to the snapshot's board — restore full annotations
+                self.annotation = copy.deepcopy(snap_ann)
+                self.annotation.aruco_visible = new_visible
+                self.annotation.aruco_id = new_id
+            else:
+                # Different board — build fresh annotation
+                new_ann = ImageAnnotation(board=new_board)
+                new_ann.aruco_visible = new_visible
+                new_ann.aruco_id = new_id
+                # Carry over board-independent state
+                new_ann.homography = ann.homography
+                if new_board.period == ann.board.period:
+                    new_ann.ring_start = ann.ring_start
+                    new_ann.ring_end = ann.ring_end
+                # Place corners at the new board's default positions.
+                # If a homography is available, convert to original image coords.
+                new_corner_pos = corner_led_positions(new_board)
+                for i, c in enumerate(new_ann.corners):
+                    if new_ann.homography is not None:
+                        c["position"] = new_ann.to_original(*new_corner_pos[i])
+                    else:
+                        c["position"] = list(new_corner_pos[i])
+                    c["visible"] = False
+                self.annotation = new_ann
+
+            self.status_msg = f"Board changed to {new_board.name} — Esc to undo"
+        else:
+            ann.aruco_visible = new_visible
+            ann.aruco_id = new_id
+            self.status_msg = "ArUco changed — Esc to undo"
+
+        self.mode = Mode.ARUCO_CONFIRM
+        self._needs_redraw = True
+
+    def _commit_aruco_change(self):
+        """Discard ArUco snapshot, committing the board profile change."""
+        if self._aruco_snapshot is not None:
+            self._aruco_snapshot = None
+            if self.mode == Mode.ARUCO_CONFIRM:
+                self.mode = Mode.IDLE
+                self.status_msg = ""
+                self._needs_redraw = True
+
+    def _revert_aruco_change(self):
+        """Restore annotation and board profile from snapshot."""
+        if self._aruco_snapshot is None:
+            return
+        self.annotation, old_board = self._aruco_snapshot
+        self._aruco_snapshot = None
+        self._set_board(old_board)
+        self.mode = Mode.IDLE
+        self.status_msg = ""
         self._needs_redraw = True
 
     def _recompute_homography(self, original):
-        """Recompute homography and re-warp rectified image from all 4 visible corners."""
+        """Recompute homography and re-warp rectified image from all visible corners."""
         ann = self.annotation
+        board = self.board
         visible = [c for c in ann.corners if c["visible"]]
         if len(visible) < 4:
             return
-        src = np.array([c["position"] for c in ann.corners], dtype=np.float32)
-        H = cv2.getPerspectiveTransform(src, corner_dots)
+        src = np.array([c["position"] for c in ann.corners if c["visible"]], dtype=np.float32)
+        dst = np.array([board.corner_dots[i] for i, c in enumerate(ann.corners) if c["visible"]], dtype=np.float32)
+        if len(src) == 4:
+            H = cv2.getPerspectiveTransform(src, dst)
+        else:
+            H, _ = cv2.findHomography(src, dst)
         ann.homography = H.tolist()
         mask = original[:, :, 2]  # red channel
-        self.stats["rectified"] = cv2.warpPerspective(mask, H, (board_size, board_size))
+        bs = board.board_size
+        self.stats["rectified"] = cv2.warpPerspective(mask, H, (bs, bs))
 
     def _handle_ring_first_click(self, idx):
         """First ring click (CW first ON LED), then wait for CW first OFF LED."""
@@ -726,6 +850,7 @@ class AnnotationTool:
         cv2.addWeighted(overlay, 0.35, left, 0.65, 0, dst=left)
 
         # Right panel: rectified board with overlays
+        bs = self.board.board_size
         rectified = self.stats.get("rectified")
         if rectified is not None:
             if len(rectified.shape) == 2:
@@ -733,27 +858,29 @@ class AnnotationTool:
             else:
                 board_img = rectified.copy()
         else:
-            board_img = np.zeros((board_size, board_size, 3), dtype=np.uint8)
+            board_img = np.zeros((bs, bs, 3), dtype=np.uint8)
 
         # ArUco overlay (always shown)
+        ax1, ay1 = self.aruco_x1, self.aruco_y1
+        ax2, ay2 = self.aruco_x2, self.aruco_y2
         if ann.aruco_visible:
-            marker_size = ARUCO_X2 - ARUCO_X1
+            marker_size = ax2 - ax1
             marker = cv2.aruco.generateImageMarker(dictionary, ann.aruco_id, marker_size)
             marker_bgr = cv2.cvtColor(marker, cv2.COLOR_GRAY2BGR)
-            board_img[ARUCO_Y1:ARUCO_Y2, ARUCO_X1:ARUCO_X2] = cv2.addWeighted(
-                board_img[ARUCO_Y1:ARUCO_Y2, ARUCO_X1:ARUCO_X2], 0.5, marker_bgr, 0.5, 0)
+            board_img[ay1:ay2, ax1:ax2] = cv2.addWeighted(
+                board_img[ay1:ay2, ax1:ax2], 0.5, marker_bgr, 0.5, 0)
         else:
             # Grey box with diagonal cross
-            cv2.rectangle(board_img, (ARUCO_X1, ARUCO_Y1), (ARUCO_X2, ARUCO_Y2), COLOR_NOT_VIS, 2)
-            cv2.line(board_img, (ARUCO_X1, ARUCO_Y1), (ARUCO_X2, ARUCO_Y2), COLOR_NOT_VIS, 2)
-            cv2.line(board_img, (ARUCO_X2, ARUCO_Y1), (ARUCO_X1, ARUCO_Y2), COLOR_NOT_VIS, 2)
+            cv2.rectangle(board_img, (ax1, ay1), (ax2, ay2), COLOR_NOT_VIS, 2)
+            cv2.line(board_img, (ax1, ay1), (ax2, ay2), COLOR_NOT_VIS, 2)
+            cv2.line(board_img, (ax2, ay1), (ax1, ay2), COLOR_NOT_VIS, 2)
 
         # ArUco label
         if ann.aruco_visible:
             aruco_label = f"ArUco ID {ann.aruco_id}"
         else:
             aruco_label = "ArUco: none"
-        cv2.putText(board_img, aruco_label,(ARUCO_X1, ARUCO_Y1 - 8), font, 0.5, (128, 128, 128), 1)
+        cv2.putText(board_img, aruco_label, (ax1, ay1 - 8), font, 0.5, (128, 128, 128), 1)
 
         # Corner LEDs (positions stored in original image space, transform to board)
         for i, c in enumerate(ann.corners):
@@ -763,12 +890,12 @@ class AnnotationTool:
             cv2.putText(board_img, str(i), (cx + 14, cy + 5), font, 0.4, color, 1)
 
         # Counter bounding box
-        bx1, by1, bx2, by2 = COUNTER_BBOX
+        bx1, by1, bx2, by2 = self.counter_box
         bbox_color = COLOR_BOARD_TEXT if ann.counter_visible else COLOR_NOT_VIS
         cv2.rectangle(board_img, (bx1, by1), (bx2, by2), bbox_color, 1)
 
         # Counter LEDs
-        for i, (cx, cy) in enumerate(COUNTER_POS):
+        for i, (cx, cy) in enumerate(self.counter_pos):
             if not ann.counter_visible:
                 color = COLOR_NOT_VIS
             elif ann.counter_leds[i]:
@@ -785,7 +912,7 @@ class AnnotationTool:
         cv2.putText(board_img, counter_text, (bx1, by1 - 8), font, 0.5, COLOR_BOARD_TEXT, 1)
 
         # Ring LEDs
-        for i, (rx, ry) in enumerate(RING_POS):
+        for i, (rx, ry) in enumerate(self.ring_pos):
             if ann.ring_start == ann.ring_end:
                 color = COLOR_NOT_VIS
             else:
@@ -801,7 +928,7 @@ class AnnotationTool:
         font_scale, thickness = 0.6, (1 if is_annotated else 2)
         (tw, th), _ = cv2.getTextSize(annotation_label, font, font_scale, thickness)
         margin = 10
-        tx = board_size - tw - margin
+        tx = bs - tw - margin
         ty = th + margin
         annotation_color = (0, 255, 0) if is_annotated else (0, 0, 255)
         cv2.putText(board_img, annotation_label, (tx, ty), font, font_scale, annotation_color, thickness)
@@ -810,11 +937,11 @@ class AnnotationTool:
         h = TARGET_HEIGHT
         left_h, left_w = left.shape[:2]
         left_scaled = cv2.resize(left, (int(left_w * h / left_h), h))
-        board_scaled = cv2.resize(board_img, (int(board_size * h / board_size), h))
+        board_scaled = cv2.resize(board_img, (int(bs * h / bs), h))
 
         self.left_panel_w = left_scaled.shape[1]
         self.left_scale = h / left_h
-        self.board_scale = h / board_size
+        self.board_scale = h / bs
 
         # Status bar (3 rows: info, shortcuts, legend)
         row_h = 22

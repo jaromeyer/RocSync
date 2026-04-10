@@ -1,10 +1,7 @@
 """Shared utilities for RocSync benchmark tools."""
 
 from pathlib import Path
-
 import numpy as np
-
-from rocsync.vision import period
 
 STEP_ORDER = [
     "aruco_detection",
@@ -30,7 +27,7 @@ def ring_visible(image_data):
     return ring.get("start", 0) != ring.get("end", 0)
 
 
-def reconstruct_timestamp(image_data):
+def reconstruct_timestamp(image_data, board):
     """Reconstruct [start, end] timestamp from counter value and ring position.
 
     Returns [start, end] list or None if counter or ring is not visible.
@@ -39,8 +36,8 @@ def reconstruct_timestamp(image_data):
     ring = image_data.get("ring", {})
     if counter_value is None or ring.get("start", 0) == ring.get("end", 0):
         return None
-    start = ring["start"] + counter_value * period
-    end = ring["end"] + counter_value * period
+    start = ring["start"] + counter_value * board.period
+    end = ring["end"] + counter_value * board.period
     return [start, end]
 
 

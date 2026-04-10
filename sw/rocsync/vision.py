@@ -225,8 +225,8 @@ def read_counter(extracted_board, camera_type, board, draw_result=False, return_
             )
 
     if return_leds:
-        return counter, leds.flatten()
-    return counter
+        return counter.item(), leds.flatten()
+    return counter.item()
 
 
 def find_corners_convexhull(mask, frame_number, debug_dir=None):
@@ -274,7 +274,7 @@ def find_corners_dots(mask, frame_number, board, debug_dir=None):
     corner_dots = board.corner_dots
     points = blob_detector.detect(mask)
     if not points:
-        return
+        return None
     if debug_dir:
         debug_image = cv2.drawKeypoints(
             mask.copy(),
@@ -307,7 +307,7 @@ def find_corners_aruco(mask, frame_number, debug_dir=None, brightness_boost=None
         cv2.imwrite(f"{debug_dir}/aruco_{frame_number}.png", debug_image)
 
     if marker_ids is None:
-        return {}
+        return None
     return {id[0]: marker for id, marker in zip(marker_ids, markers)}
 
 
@@ -346,7 +346,6 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
                         break
             elif board.aruco_marker_id in markers:
                 aruco_corners = markers[board.aruco_marker_id]
-                board_size = board.board_size
 
             if aruco_corners is not None and board is not None:
                 if stats is not None:
@@ -355,6 +354,7 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
             else:
                 _finalize_stats(stats, total_start, False, None)
                 return False, None
+            board_size = board.board_size
 
             mask = image[:, :, 2]  # red channel
 
@@ -372,6 +372,8 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
                          count=len(corners) if corners is not None else 0)
 
             if corners is None:
+                if stats is not None:
+                    stats["rectified"] = None
                 _finalize_stats(stats, total_start, True, None)
                 return True, None
             if stats is not None:
@@ -383,6 +385,7 @@ def process_frame(image, camera_type, frame_number, board=None, debug_dir=None, 
                 cv2.getPerspectiveTransform(all_corners[s], board.corner_dots[s]),
                 rough_transformation_matrix,
             )
+
             t0 = time.perf_counter()
             pcb = cv2.warpPerspective(mask, transformation_matrix, (board_size, board_size))
             _record_step(stats, "fine_rectification", t0)

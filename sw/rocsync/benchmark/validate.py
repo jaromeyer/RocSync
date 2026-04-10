@@ -15,7 +15,8 @@ from pathlib import Path
 import cv2
 from tqdm import tqdm
 
-from rocsync.vision import CameraType, period, process_frame
+from rocsync.board_profiles import PROFILES_BY_ARUCO
+from rocsync.vision import CameraType, process_frame
 from rocsync.benchmark.common import STEP_ORDER, collect_images
 
 
@@ -28,6 +29,7 @@ def extract_pipeline_result(stats):
     steps = stats.get("steps", {})
 
     # -- ArUco --
+    aruco_id = stats.get("aruco_id", None)
     aruco_step = steps.get("aruco_detection", {})
     aruco_visible = aruco_step.get("success", False)
     aruco = {
@@ -35,6 +37,7 @@ def extract_pipeline_result(stats):
         "id": stats.get("aruco_id") if aruco_visible else None,
         "corners": stats.get("aruco_corners") if aruco_visible else None,
     }
+    board = PROFILES_BY_ARUCO[aruco_id] if aruco_id is not None else None
 
     # -- Corners --
     corner_positions = stats.get("corner_positions")
@@ -59,8 +62,8 @@ def extract_pipeline_result(stats):
         # read_ring returns inclusive end (last ON LED); convert to half-open
         # (first OFF LED) to match ground truth convention.
         ring = {
-            "start": timestamp[0] % period,
-            "end": (timestamp[1] + 1) % period,
+            "start": timestamp[0] % board.period if board is not None else timestamp[0],
+            "end": (timestamp[1] + 1) % board.period if board is not None else timestamp[1] + 1,
         }
     else:
         ring = {"start": 0, "end": 0}

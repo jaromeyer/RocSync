@@ -18,7 +18,8 @@ from pathlib import Path
 import cv2
 import numpy as np
 
-from rocsync.vision import aruco_corners_coords, corner_dots, led_size
+from rocsync.vision import led_size
+from rocsync.board_profiles import PROFILES_BY_ARUCO
 from rocsync.benchmark.common import (
     STEP_ORDER,
     confusion_metrics,
@@ -79,6 +80,14 @@ def load_ground_truth(path):
 
 # ── Geometry helpers ─────────────────────────────────────────────────────────
 
+def _board_for_gt(gt):
+    """Look up board profile from ground truth ArUco marker ID."""
+    aruco_id = gt.get("aruco", {}).get("id")
+    if aruco_id is not None and aruco_id in PROFILES_BY_ARUCO:
+        return PROFILES_BY_ARUCO[aruco_id]
+    return None
+
+
 def _gt_aruco_corners(gt):
     """Derive ground-truth ArUco corners in original image space.
 
@@ -88,8 +97,11 @@ def _gt_aruco_corners(gt):
     H = gt.get("homography")
     if H is None or not gt.get("aruco", {}).get("visible", False):
         return None
+    board = _board_for_gt(gt)
+    if board is None:
+        return None
     inv_H = np.linalg.inv(np.array(H, dtype=np.float64))
-    pts = np.array([aruco_corners_coords], dtype=np.float64)
+    pts = np.array([board.aruco_corners_coords], dtype=np.float64)
     return cv2.perspectiveTransform(pts, inv_H).reshape(4, 2)
 
 
@@ -97,14 +109,17 @@ def _gt_corner_positions(gt):
     """Derive ground-truth corner LED positions in original image space.
 
     Inverse-transforms the known board-space corner LED coordinates through
-    the ground-truth homography.  Returns a (4, 2) list or None.
+    the ground-truth homography.  Returns list of [x, y] or None.
     """
     H = gt.get("homography")
     if H is None:
         return None
+    board = _board_for_gt(gt)
+    if board is None:
+        return None
     inv_H = np.linalg.inv(np.array(H, dtype=np.float64))
-    pts = np.array([corner_dots], dtype=np.float64)
-    return cv2.perspectiveTransform(pts, inv_H).reshape(4, 2).tolist()
+    pts = np.array([board.corner_dots], dtype=np.float64)
+    return cv2.perspectiveTransform(pts, inv_H).reshape(-1, 2).tolist()
 
 
 def _pred_corner_positions_image(pred, gt):
@@ -236,14 +251,16 @@ def compute_corner_metrics(benchmark_images, gt_images):
         if pred is None:
             continue
 
+        board = _board_for_gt(gt)
         gt_corners = gt.get("corners", [])
         pred_corners = pred.get("corners", [])
         gt_positions = _gt_corner_positions(gt)
         pred_img = _pred_corner_positions_image(pred, gt)
+        n_corners = min(len(gt_corners), len(pred_corners))
 
-        for i in range(min(len(gt_corners), 4)):
+        for i in range(n_corners):
             gt_vis = gt_corners[i].get("visible", False)
-            pred_vis = i < len(pred_corners) and pred_corners[i].get("visible", False)
+            pred_vis = pred_corners[i].get("visible", False)
             pred_pos = pred_corners[i].get("position") if pred_vis else None
 
             # Image-space pixel error (on TPs where both are visible with positions)
@@ -254,9 +271,9 @@ def compute_corner_metrics(benchmark_images, gt_images):
 
             # Board-space detection + pixel error
             # Predicted positions are already in board space (from rough rectification)
-            if gt_vis and pred_vis and pred_pos is not None:
+            if gt_vis and pred_vis and pred_pos is not None and board is not None:
                 err_board = np.linalg.norm(
-                    np.array(pred_pos) - np.array(corner_dots[i]))
+                    np.array(pred_pos) - np.array(board.corner_dots[i]))
                 errors_board.append(float(err_board))
                 if err_board <= CORNER_BOARD_SPACE_THRESHOLD_PX:
                     tp_board += 1
@@ -346,9 +363,13 @@ def compute_overall_metrics(benchmark_images, gt_images):
         if not STEP_GT_POSITIVE["overall"](gt) or not STEP_PRED_POSITIVE["overall"](pred):
             continue
 
+        board = _board_for_gt(gt)
+        if board is None:
+            continue
+
         n_compared += 1
-        gt_ts = reconstruct_timestamp(gt)
-        pred_ts = reconstruct_timestamp(pred)
+        gt_ts = reconstruct_timestamp(gt, board)
+        pred_ts = reconstruct_timestamp(pred, board)
         if pred_ts == gt_ts:
             n_correct += 1
         if pred_ts is not None and gt_ts is not None:
