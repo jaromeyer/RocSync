@@ -48,19 +48,14 @@ def build_result(stats):
     aruco = {
         "visible": aruco_visible,
         "id": stats.get("aruco_id") if aruco_visible else None,
+        "corners": stats.get("aruco_corners") if aruco_visible else None,
     }
 
     # -- Corners --
     corner_positions = stats.get("corner_positions")
-    if corner_positions is not None:
-        corners = []
-        for pos in corner_positions:
-            if pos is not None:
-                corners.append({"visible": True, "state": True, "position": pos})
-            else:
-                corners.append({"visible": False, "state": None, "position": None})
-    else:
-        corners = [{"visible": False, "state": None, "position": None}] * 4
+    if corner_positions is None:
+        corner_positions = [None] * 4
+    corners = [{"visible": pos is not None, "position": pos} for pos in corner_positions]
 
     # -- Counter --
     counter_step = steps.get("counter_reading", {})
