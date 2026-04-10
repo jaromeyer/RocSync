@@ -26,7 +26,9 @@ from rocsync.benchmark.common import (
     ring_visible,
 )
 
-CORNER_MAX_ERROR_PX = 2.0
+CORNER_IMAGE_SPACE_THRESHOLD_PX = 3
+CORNER_BOARD_SPACE_THRESHOLD_PX = led_size
+LABEL_WIDTH_DEFAULT = 40
 
 
 # Map pipeline steps to ground truth visibility checks.
@@ -96,21 +98,25 @@ def _gt_corner_positions(gt):
     return cv2.perspectiveTransform(pts, inv_H).reshape(4, 2).tolist()
 
 
-def _pred_corners_to_board(pred, gt):
-    """Project predicted corner positions into board space via GT homography.
+def _pred_corner_positions_image(pred, gt):
+    """Transform predicted corner positions from board space to image space.
 
-    Returns a list of 4 board-space [x, y] positions (or None per corner).
+    The pipeline detects corners in the rough-rectified (board-space) image,
+    so positions need to be inverse-transformed through the GT homography to
+    get image-space coordinates for comparison with GT image-space positions.
+
+    Returns a list of 4 image-space [x, y] positions (or None per corner).
     """
     H = gt.get("homography")
     if H is None:
         return [None] * 4
-    H = np.array(H, dtype=np.float64)
+    inv_H = np.linalg.inv(np.array(H, dtype=np.float64))
     result = []
     for c in pred.get("corners", []):
         if c.get("visible") and c.get("position") is not None:
             pt = np.array([[c["position"]]], dtype=np.float64)
-            board_pt = cv2.perspectiveTransform(pt, H).reshape(2)
-            result.append(board_pt.tolist())
+            img_pt = cv2.perspectiveTransform(pt, inv_H).reshape(2)
+            result.append(img_pt.tolist())
         else:
             result.append(None)
     return result
@@ -143,15 +149,15 @@ def compute_step_detection(benchmark_images, gt_images, step):
             any_tp = False
 
             if gt_positions is not None:
+                pred_img = _pred_corner_positions_image(pred, gt)
                 for i in range(min(len(gt_corners), len(pred_corners), 4)):
                     gt_vis = gt_corners[i].get("visible", False)
                     pred_vis = pred_corners[i].get("visible", False)
-                    pred_pos = pred_corners[i].get("position")
 
-                    if gt_vis and pred_vis and pred_pos is not None:
+                    if gt_vis and pred_vis and pred_img[i] is not None:
                         err = np.linalg.norm(
-                            np.array(pred_pos) - np.array(gt_positions[i]))
-                        if err <= CORNER_MAX_ERROR_PX:
+                            np.array(pred_img[i]) - np.array(gt_positions[i]))
+                        if err <= CORNER_IMAGE_SPACE_THRESHOLD_PX:
                             any_tp = True
 
             if gt_any_visible and any_tp:
@@ -224,7 +230,7 @@ def compute_corner_metrics(benchmark_images, gt_images):
         gt_corners = gt.get("corners", [])
         pred_corners = pred.get("corners", [])
         gt_positions = _gt_corner_positions(gt)
-        pred_board = _pred_corners_to_board(pred, gt)
+        pred_img = _pred_corner_positions_image(pred, gt)
 
         for i in range(min(len(gt_corners), 4)):
             gt_vis = gt_corners[i].get("visible", False)
@@ -232,17 +238,18 @@ def compute_corner_metrics(benchmark_images, gt_images):
             pred_pos = pred_corners[i].get("position") if pred_vis else None
 
             # Image-space pixel error (on TPs where both are visible with positions)
-            if gt_vis and pred_vis and pred_pos is not None and gt_positions is not None:
+            if gt_vis and pred_vis and pred_img[i] is not None and gt_positions is not None:
                 err_img = np.linalg.norm(
-                    np.array(pred_pos) - np.array(gt_positions[i]))
+                    np.array(pred_img[i]) - np.array(gt_positions[i]))
                 errors_image.append(float(err_img))
 
             # Board-space detection + pixel error
-            if gt_vis and pred_vis and pred_board[i] is not None:
+            # Predicted positions are already in board space (from rough rectification)
+            if gt_vis and pred_vis and pred_pos is not None:
                 err_board = np.linalg.norm(
-                    np.array(pred_board[i]) - np.array(corner_dots[i]))
+                    np.array(pred_pos) - np.array(corner_dots[i]))
                 errors_board.append(float(err_board))
-                if err_board <= led_size:
+                if err_board <= CORNER_BOARD_SPACE_THRESHOLD_PX:
                     tp_board += 1
                 else:
                     fn_board += 1
@@ -411,18 +418,18 @@ def format_percent(val, width=10):
     return f"{val:.1%}".rjust(width)
 
 
-def print_header(methods, col_width, label_width=30):
+def print_header(methods, col_width, label_width=LABEL_WIDTH_DEFAULT, label=""):
     print(f"  {'':>{label_width}}", end="")
     for m in methods:
         print(f"  {m:>{col_width}}", end="")
     print()
-    print(f"  {'':>{label_width}}", end="")
+    print(f"    {label.upper():-^{label_width - 2}}", end="")
     for _ in methods:
         print(f"  {'-' * col_width}", end="")
     print()
 
 
-def _print_detection(methods, get_det, col_width, label_width=30):
+def _print_detection(methods, get_det, col_width, label_width=LABEL_WIDTH_DEFAULT):
     """Print TP/FP/FN/TN and derived rates from a detection dict."""
     for key, label in [("tp", "TP"), ("fp", "FP"), ("fn", "FN"), ("tn", "TN")]:
         print(f"  {label:>{label_width}}", end="")
@@ -439,16 +446,16 @@ def _print_detection(methods, get_det, col_width, label_width=30):
         print()
 
 
-def _print_error_stats(methods, get_stats, col_width, label_width=30):
+def _print_error_stats(methods, get_stats, col_width, label_width=LABEL_WIDTH_DEFAULT):
     """Print descriptive statistics (mean/median/std/min/max/n)."""
-    for stat in ["mean", "median", "std", "min", "max", "n"]:
+    for stat in ["mean", "std", "min", "median", "max", "n"]:
         print(f"  {stat:>{label_width}}", end="")
         for m in methods:
             print(f"  {format_value(get_stats(m).get(stat), col_width)}", end="")
         print()
 
 
-def _print_value_accuracy(methods, get_n, get_correct, label, col_width, label_width=30):
+def _print_value_accuracy(methods, get_n, get_correct, label, col_width, label_width=LABEL_WIDTH_DEFAULT):
     """Print a single value accuracy row (e.g. '5/7 (71%)')."""
     print(f"  {label:>{label_width}}", end="")
     for m in methods:
@@ -459,61 +466,58 @@ def _print_value_accuracy(methods, get_n, get_correct, label, col_width, label_w
     print()
 
 
-def print_report(methods, all_metrics, col_width, label_width=30):
+def print_report(methods, all_metrics, col_width, label_width=LABEL_WIDTH_DEFAULT):
     """Print the full evaluation report, grouped by pipeline step."""
 
     # ── ArUco detection ──────────────────────────────────────────────────
-    print(f"\n{'=' * 80}")
+    print(f"{'=' * 100}")
     print(f"  ARUCO DETECTION")
-    print(f"{'=' * 80}")
+    print(f"{'=' * 100}")
 
-    print(f"\n  Detection")
-    print_header(methods, col_width, label_width)
+    print_header(methods, col_width, label_width, "Detection")
     _print_detection(methods, lambda m: all_metrics[m]["aruco"]["detection"],
                      col_width, label_width)
 
-    print(f"\n  Corner error (px, image space)")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Corner error (px, image space)")
     _print_error_stats(methods, lambda m: all_metrics[m]["aruco"]["corner_error_px"],
                        col_width, label_width)
 
     # ── Corner LED detection ─────────────────────────────────────────────
-    print(f"\n{'=' * 80}")
+    print(f"{'=' * 100}")
     print(f"  CORNER LED DETECTION")
-    print(f"{'=' * 80}")
+    print(f"{'=' * 100}")
 
-    print(f"\n  Detection — image space (threshold: {CORNER_MAX_ERROR_PX}px)")
-    print_header(methods, col_width, label_width)
+    print_header(methods, col_width, label_width, f"Detection (thres: {CORNER_IMAGE_SPACE_THRESHOLD_PX}px in image space)")
     _print_detection(methods, lambda m: all_metrics[m]["corners"]["detection_image"],
                      col_width, label_width)
 
-    print(f"\n  Detection — board space (threshold: {led_size}px)")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, f"Detection (thres: {CORNER_BOARD_SPACE_THRESHOLD_PX}px in board space)")
     _print_detection(methods, lambda m: all_metrics[m]["corners"]["detection_board"],
                      col_width, label_width)
 
-    print(f"\n  Pixel error — image space")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Pixel error — image space")
     _print_error_stats(methods, lambda m: all_metrics[m]["corners"]["error_image_px"],
                        col_width, label_width)
 
-    print(f"\n  Pixel error — board space")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Pixel error — board space")
     _print_error_stats(methods, lambda m: all_metrics[m]["corners"]["error_board_px"],
                        col_width, label_width)
 
     # ── Counter reading ──────────────────────────────────────────────────
-    print(f"\n{'=' * 80}")
+    print(f"{'=' * 100}")
     print(f"  COUNTER READING")
-    print(f"{'=' * 80}")
+    print(f"{'=' * 100}")
 
-    print(f"\n  Detection")
-    print_header(methods, col_width, label_width)
+    print_header(methods, col_width, label_width, "Detection")
     _print_detection(methods, lambda m: all_metrics[m]["counter"]["detection"],
                      col_width, label_width)
 
-    print(f"\n  Value accuracy")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Value accuracy")
     _print_value_accuracy(
         methods,
         lambda m: all_metrics[m]["counter"]["value_compared"],
@@ -521,17 +525,16 @@ def print_report(methods, all_metrics, col_width, label_width=30):
         "counter.value correct", col_width, label_width)
 
     # ── Ring reading ─────────────────────────────────────────────────────
-    print(f"\n{'=' * 80}")
+    print(f"{'=' * 100}")
     print(f"  RING READING")
-    print(f"{'=' * 80}")
+    print(f"{'=' * 100}")
 
-    print(f"\n  Detection")
-    print_header(methods, col_width, label_width)
+    print_header(methods, col_width, label_width, "Detection")
     _print_detection(methods, lambda m: all_metrics[m]["ring"]["detection"],
                      col_width, label_width)
 
-    print(f"\n  Value accuracy")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Value accuracy")
     _print_value_accuracy(
         methods,
         lambda m: all_metrics[m]["ring"]["value_compared"],
@@ -544,30 +547,29 @@ def print_report(methods, all_metrics, col_width, label_width=30):
         "ring.end correct", col_width, label_width)
 
     # ── Overall ──────────────────────────────────────────────────────────
-    print(f"\n{'=' * 80}")
+    print(f"{'=' * 100}")
     print(f"  OVERALL (timestamp)")
-    print(f"{'=' * 80}")
+    print(f"{'=' * 100}")
 
-    print(f"\n  Detection")
-    print_header(methods, col_width, label_width)
+    print_header(methods, col_width, label_width, "Detection")
     _print_detection(methods, lambda m: all_metrics[m]["overall"]["detection"],
                      col_width, label_width)
 
-    print(f"\n  Timestamp accuracy")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Timestamp accuracy")
     _print_value_accuracy(
         methods,
         lambda m: all_metrics[m]["overall"]["timestamp_compared"],
         lambda m: all_metrics[m]["overall"]["timestamp_correct"],
         "timestamp exact match", col_width, label_width)
 
-    print(f"\n  Timestamp error (ms)")
-    print_header(methods, col_width, label_width)
+    print()
+    print_header(methods, col_width, label_width, "Timestamp error (ms)")
     for err_key, err_label in [("start", "start error"),
                                 ("end", "end error"),
                                 ("exposure", "exposure error")]:
-        print(f"  {err_label:>{label_width}}")
-        for stat in ["mean", "median", "std", "min", "max"]:
+        print(f"  {err_label.upper():>{label_width}}")
+        for stat in ["mean", "std", "min", "median", "max"]:
             print(f"  {'  ' + stat:>{label_width}}", end="")
             for m in methods:
                 val = all_metrics[m]["overall"]["timestamp_error"].get(err_key, {}).get(stat)
@@ -581,7 +583,7 @@ def print_timing(methods, timing, col_width, label_width=30):
         "positive": "POSITIVE ANNOTATIONS (per-step)",
         "negative": "NEGATIVE ANNOTATIONS (per-step)",
     }
-    stat_keys = ["mean", "median", "std", "min", "max"]
+    stat_keys = ["mean", "std", "min", "median", "max"]
 
     for subset_name in ["all", "positive", "negative"]:
         any_data = any(
@@ -591,9 +593,9 @@ def print_timing(methods, timing, col_width, label_width=30):
         if not any_data:
             continue
 
-        print(f"\n{'=' * 80}")
+        print(f"{'=' * 100}")
         print(f"  TIMING — {subset_labels[subset_name]} (ms)")
-        print(f"{'=' * 80}")
+        print(f"{'=' * 100}")
         print_header(methods, col_width, label_width)
 
         for step in STEP_ORDER + ["total"]:
