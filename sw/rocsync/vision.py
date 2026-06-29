@@ -380,7 +380,7 @@ def find_corners_aruco(
     
     init_mask = mask.copy()
 
-    if normalization_bounds is not None:
+    if normalization is not None:
         mask = cv2.normalize(mask, alpha=normalization[0], beta=normalization[1], norm_type=cv2.NORM_MINMAX)
     
     if gamma is not None:
