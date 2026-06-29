@@ -368,9 +368,34 @@ def find_corners_dots(mask, frame_number, debug_dir=None):
     return np.array(closest_points, dtype=np.float32)
 
 
-def find_corners_aruco(mask, frame_number, debug_dir=None, brightness_boost=None):
+def find_corners_aruco(
+    mask, 
+    frame_number, 
+    debug_dir=None, 
+    normalization=None, 
+    gamma=None, 
+    brightness_boost=None, 
+    debug_preprocessing=False
+):
+    
+    init_mask = mask.copy()
+
+    if normalization_bounds is not None:
+        mask = cv2.normalize(mask, alpha=normalization[0], beta=normalization[1], norm_type=cv2.NORM_MINMAX)
+    
+    if gamma is not None:
+        mask = np.clip(np.power(mask.astype(np.float32) / 255.0, gamma) * 255.0, 0, 255).astype(np.uint8)
+    
     if brightness_boost is not None:
         mask = np.clip(mask * brightness_boost, 0, 255).astype(np.uint8)
+
+    if debug_preprocessing:
+        deb = np.vstack((init_mask, mask))
+        cv2.imshow("Before and after preprocessing", cv2.resize(deb, (deb.shape[1]//8, deb.shape[0]//8)))
+        while True:
+            key = cv2.waitKey(0) & 0xFF
+            if key in [27, 13]:
+                break
 
     markers, marker_ids, _ = aruco_detector.detectMarkers(mask)
     if debug_dir:
@@ -386,15 +411,22 @@ def find_corners_aruco(mask, frame_number, debug_dir=None, brightness_boost=None
 
 
 def process_frame(
-    image, camera_type, frame_number, debug_dir=None, brightness_boost=None
+    image, 
+    camera_type, 
+    frame_number, 
+    debug_dir=None, 
+    normalization=None, 
+    gamma=None, 
+    brightness_boost=None, 
+    debug_preprocessing=False
 ):
-
     match camera_type:
         case CameraType.RGB:
             # First extract course PCB using ArUco marker
             aruco_corners = find_corners_aruco(
-                image, frame_number, debug_dir, brightness_boost
+                image, frame_number, debug_dir, normalization, gamma, brightness_boost, debug_preprocessing
             )
+
             if aruco_corners is None:
                 return False, None
 

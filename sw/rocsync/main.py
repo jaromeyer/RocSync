@@ -71,6 +71,19 @@ def parse_time(time_str: str) -> float:
 
     return h * 3600 + m * 60 + s
 
+def parse_norm(alpha: int | None = None, beta: int | None = None):
+
+    if alpha is None and beta is None:
+        return None
+    
+    if alpha is None:
+        return (0, beta)
+
+    if beta is None:
+        return (alpha, 255)
+    
+    return (alpha, beta)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -155,12 +168,39 @@ def main():
         action="store_true",
         help="recursively search for videos and images in directories",
     )
+    parser.add_argument(
+        "--alpha",
+        type=int,
+        default=None
+    )
+    parser.add_argument(
+        "--beta",
+        type=int,
+        default=None
+    )
+    parser.add_argument(
+        "--gamma",
+        type=float,
+        default=None
+    )
+    parser.add_argument(
+        "--brightness_boost",
+        type=float,
+        default=None
+    )
+    parser.add_argument(
+        "--debug_preprocessing",
+        action="store_true",
+        default=False
+    )
 
     args = parser.parse_args()
 
     # Parse time arguments
     start_time1, end_time1 = parse_time(args.start1), parse_time(args.end1)
     start_time2, end_time2 = parse_time(args.start2), parse_time(args.end2)
+
+    normalization_bounds = parse_norm(args.alpha, args.beta)
 
     files = set()
     for path in args.path:
@@ -244,6 +284,10 @@ def main():
                 end_time1,
                 start_time2,
                 end_time2,
+                normalization_bounds,
+                args.gamma,
+                args.brightness_boost,
+                args.debug_preprocessing
             )
             if statistics is not None:
                 ret = statistics.to_dict()

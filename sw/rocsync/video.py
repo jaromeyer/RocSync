@@ -77,7 +77,10 @@ def process_video_window(
     window_end: int,
     stride=None,
     debug_dir: str = None,
-    brightness_boost: int = None,
+    normalization: list[int] | None = None,
+    gamma: float | None = None, 
+    brightness_boost: int | None = None, 
+    debug_preprocessing: bool = False
 ):
     cap = cv2.VideoCapture(video_path)
 
@@ -115,7 +118,7 @@ def process_video_window(
             break
         if scan_window > 0 or frame_number % stride == 0:
             rocsync_detected, timestamp = process_frame(
-                frame, camera_type, frame_number, debug_dir, brightness_boost
+                frame, camera_type, frame_number, debug_dir, normalization, gamma, brightness_boost, debug_preprocessing
             )
             scan_window -= 1
             if timestamp is not None:
@@ -133,16 +136,19 @@ def process_video_window(
 
 
 def process_video(
-    video_path,
-    camera_type,
-    export_dir=None,
-    stride=None,
-    debug_dir=None,
-    window1_start=None,
-    window1_end=None,
-    window2_start=None,
-    window2_end=None,
+    video_path, 
+    camera_type, 
+    export_dir=None, 
+    stride=None, 
+    debug_dir=None, 
+    window1_start=None, 
+    window1_end=None, 
+    window2_start=None, 
+    window2_end=None, 
+    normalization=None,
+    gamma=None,
     brightness_boost=None,
+    debug_preprocessing=False
 ):
     # Get video metadata
     cap = cv2.VideoCapture(video_path, cv2.CAP_FFMPEG)
@@ -178,29 +184,13 @@ def process_video(
         window2_end = max(0, (expected_duration / 1000) + window2_end)
 
     # Analyze frames
-    timestamps = process_video_window(
-        video_path,
-        camera_type,
-        window1_start,
-        window1_end,
-        stride,
-        debug_dir,
-        brightness_boost,
-    )
+    timestamps = process_video_window(video_path, camera_type, window1_start, window1_end, stride, debug_dir, normalization, gamma, brightness_boost, debug_preprocessing)
 
     if (
         window2_start > window1_end or window2_end < window1_start
     ):  # check if window2 is not overlapping with window1
         # TODO: better window checking
-        timestamps2 = process_video_window(
-            video_path,
-            camera_type,
-            window2_start,
-            window2_end,
-            stride,
-            debug_dir,
-            brightness_boost,
-        )
+        timestamps2 = process_video_window(video_path, camera_type, window2_start, window2_end, stride, debug_dir, normalization, gamma, brightness_boost, debug_preprocessing)
         timestamps = {**timestamps, **timestamps2}
 
     if len(timestamps) < 2:
