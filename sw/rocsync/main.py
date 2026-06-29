@@ -171,27 +171,32 @@ def main():
     parser.add_argument(
         "--alpha",
         type=int,
-        default=None
+        default=None,
+        help="lower bound for image normalization. If BETA is specified but ALPHA is not, then ALPHA defaults to 0, otherwise no normalization is performed."
     )
     parser.add_argument(
         "--beta",
         type=int,
-        default=None
+        default=None,
+        help="upper bound for image normalization. If ALPHA is specified but BETA is not, then BETA defaults to 255, otherwise no normalization is performed."
     )
     parser.add_argument(
         "--gamma",
         type=float,
-        default=None
+        default=None,
+        help="applies gamma correction to the normalized image pixel values. Values below 1 brighten the image, while values above 1 darken it. Defaults to None"
     )
     parser.add_argument(
         "--brightness_boost",
         type=float,
-        default=None
+        default=None,
+        help="brightness boost multiplies the pixel values of the normalized and gamma corrected image with the provided value."
     )
     parser.add_argument(
         "--debug_preprocessing",
         action="store_true",
-        default=False
+        default=False,
+        help="displays the image before and after preprocessing. This helps to adjust values before running the entire synchronization. Press Enter or ESC to display the next image."
     )
 
     args = parser.parse_args()
