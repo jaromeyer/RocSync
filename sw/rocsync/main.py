@@ -8,11 +8,10 @@ import cv2
 import numpy as np
 from tqdm import tqdm
 
-from rocsync.printer import *
+from rocsync.ftk import process_ftk_recording
+from rocsync.printer import errprint, succprint, warnprint
 from rocsync.video import process_video
 from rocsync.vision import CameraType, process_frame
-
-import subprocess
 
 
 class NpEncoder(json.JSONEncoder):
@@ -72,69 +71,18 @@ def parse_time(time_str: str) -> float:
 
     return h * 3600 + m * 60 + s
 
+def parse_norm(alpha: int | None = None, beta: int | None = None):
 
-def sync_video(
-    video_path: str,
-    stats: dict,
-    offset: float = 0,
-    output_file: str = "synced.mp4",
-    frame_rate: int = 30,
-    compensate_drift: bool = True,
-) -> subprocess.Popen:
-    cut_time = stats["first_frame"] * (-1 / 1000) + offset  # in seconds
-    speed_factor = stats["speed_factor"]
+    if alpha is None and beta is None:
+        return None
+    
+    if alpha is None:
+        return (0, beta)
 
-    # Check if nvenc is available for speed up
-    nvenc_available = False
-    if compensate_drift:
-        try:
-            cmd = "ffmpeg -hide_banner -encoders | grep hevc_nvenc"
-            encoders = subprocess.check_output(cmd, shell=True).decode("utf-8")
-            if "hevc_nvenc" not in encoders:
-                raise subprocess.CalledProcessError(1, cmd)
-            else:
-                nvenc_available = True
-        except subprocess.CalledProcessError:
-            warnprint(
-                "hevc_nvenc not available, encoding will be very slow. Install NVIDIA drivers and ffmpeg with nvenc support or disable drift compensation."
-            )
-
-    ffmpeg_command = [
-        "ffmpeg",
-        "-ss",
-        str(cut_time),
-        "-i",
-        video_path,
-    ]
-
-    if compensate_drift:
-        ffmpeg_command += [
-            "-c:v",
-            "hevc_nvenc" if nvenc_available else "libx265",
-            "-crf",
-            "0",
-            "-filter_complex",
-            f'"setpts=PTS*{speed_factor}"',
-            "-r",
-            str(frame_rate),
-        ]
-    else:
-        ffmpeg_command += [
-            "-c:v",
-            "copy",
-        ]
-    ffmpeg_command += [
-        "-y",
-        output_file,
-    ]
-
-    cmd_str = " ".join(ffmpeg_command)
-    print(cmd_str)
-
-    process = subprocess.Popen(cmd_str, shell=True)
-    stdout, sterr = process.communicate()
-
-    return process
+    if beta is None:
+        return (alpha, 255)
+    
+    return (alpha, beta)
 
 
 def main():
@@ -184,28 +132,6 @@ def main():
         help="do not ask for confirmation when processing multiple files",
     )
     parser.add_argument(
-        "--sync_video",
-        action="store_true",
-        help="sync and cut video to predicted timestamps",
-    )
-    parser.add_argument(
-        "--synced_folder",
-        type=str,
-        default="synced",
-        help="folder to store synced videos (default: synced)",
-    )
-    parser.add_argument(
-        "--compensate_video_drift",
-        action="store_true",
-        help="whether to compensate for video drift (very slow)",
-    )
-    parser.add_argument(
-        "--fps",
-        type=int,
-        default=None,
-        help="desired FPS for time-synced videos, if not provided the FPS will be determined from the videos",
-    )
-    parser.add_argument(
         "--debug",
         type=str,
         metavar="DIRECTORY",
@@ -242,12 +168,44 @@ def main():
         action="store_true",
         help="recursively search for videos and images in directories",
     )
+    parser.add_argument(
+        "--alpha",
+        type=int,
+        default=None,
+        help="lower bound for image normalization. If BETA is specified but ALPHA is not, then ALPHA defaults to 0, otherwise no normalization is performed."
+    )
+    parser.add_argument(
+        "--beta",
+        type=int,
+        default=None,
+        help="upper bound for image normalization. If ALPHA is specified but BETA is not, then BETA defaults to 255, otherwise no normalization is performed."
+    )
+    parser.add_argument(
+        "--gamma",
+        type=float,
+        default=None,
+        help="applies gamma correction to the normalized image pixel values. Values below 1 brighten the image, while values above 1 darken it. Defaults to None"
+    )
+    parser.add_argument(
+        "--brightness_boost",
+        type=float,
+        default=None,
+        help="brightness boost multiplies the pixel values of the normalized and gamma corrected image with the provided value."
+    )
+    parser.add_argument(
+        "--debug_preprocessing",
+        action="store_true",
+        default=False,
+        help="displays the image before and after preprocessing. This helps to adjust values before running the entire synchronization. Press Enter or ESC to display the next image."
+    )
 
     args = parser.parse_args()
 
     # Parse time arguments
     start_time1, end_time1 = parse_time(args.start1), parse_time(args.end1)
     start_time2, end_time2 = parse_time(args.start2), parse_time(args.end2)
+
+    normalization_bounds = parse_norm(args.alpha, args.beta)
 
     files = set()
     for path in args.path:
@@ -265,15 +223,15 @@ def main():
             errprint(f"Invalid path: {path}")
             return
 
-    videos = [f for f in files if f.suffix.lower() in [".mp4", ".avi", ".mov"]]
-    images = [f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]]
+    videos = sorted([f for f in files if f.suffix.lower() in [".mp4", ".avi", ".mov"]])
+    images = sorted([f for f in files if f.suffix.lower() in [".png", ".jpg", ".jpeg"]])
+    ftk_recordings = sorted([f for f in files if f.suffix.lower() == ".csv"])
 
-    videos = sorted(videos)
-    images = sorted(images)
-
-    if len(videos) + len(images) > 1:
-        print(f"Found {len(videos)} videos and {len(images)} images:")
-        for file in videos + images:
+    if len(videos) + len(images) + len(ftk_recordings) > 1:
+        print(
+            f"Found {len(videos)} videos, {len(images)} images, and {len(ftk_recordings)} ftk recordings:"
+        )
+        for file in videos + images + ftk_recordings:
             print(f"    {file}")
         while True and not args.yes:
             response = input("Do you want to continue (Y/n): ").strip().lower()
@@ -293,16 +251,17 @@ def main():
         warnprint(f"Exported frames will be stored in {args.export_frames}")
 
     result = {}
-    if args.output:
-        output_path = pathlib.Path(args.output)
-        output_path.parent.mkdir(parents=True, exist_ok=True)
+    output_path = pathlib.Path(args.output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
 
-        if output_path.exists():
-            with output_path.open("r") as file:
-                result = json.load(file)
-            print(f"Loaded previous results from {args.output}")
+    if output_path.exists():
+        with output_path.open("r") as file:
+            result = json.load(file)
+        print(f"Loaded previous results from {args.output}")
 
-    for file in tqdm(videos + images, desc="Processing files", position=0):
+    for file in tqdm(
+        videos + images + ftk_recordings, desc="Processing files", position=0
+    ):
         if str(file) in result:
             print(f"Skipping {file}, already processed.")
             continue
@@ -318,8 +277,9 @@ def main():
             name, _ = os.path.splitext(os.path.basename(file))
             export_dir = mkdir_unique(name, args.export_frames)
 
+        ret = None
         if file in videos:
-            ret = process_video(
+            statistics = process_video(
                 file,
                 CameraType(args.camera_type),
                 export_dir,
@@ -329,69 +289,28 @@ def main():
                 end_time1,
                 start_time2,
                 end_time2,
+                normalization_bounds,
+                args.gamma,
+                args.brightness_boost,
+                args.debug_preprocessing
             )
-            if ret is not None:
-                result[str(file)] = ret.to_dict()
-            else:
-                errprint(f"Error: Unable to time-sync {file}.")
+            if statistics is not None:
+                ret = statistics.to_dict()
+
         elif file in images:
             ret = process_image(file, CameraType(args.camera_type), debug_dir)
-            if ret is not None:
-                result[str(file)] = ret
-            else:
-                errprint(f"Error: Unable to time-sync {file}.")
+        elif file in ftk_recordings:
+            ret = process_ftk_recording(file, debug_dir)
+
+        if ret is not None:
+            result[str(file)] = ret
+        else:
+            errprint(f"Error: Unable to time-sync {file}.")
 
         # Save result to file after every video to avoid data loss
-        if args.output:
-            with output_path.open("w") as f:
-                json.dump(result, f, indent=4, cls=NpEncoder)
-            print(f"Result written to {args.output}")
-
-    if args.sync_video:
-        output_path = pathlib.Path(args.output)
-        with open(output_path, "r") as file:
-            stats = json.load(file)
-
-        expected_fps = (
-            int(round(list(stats.values())[0]["expected_fps"]))
-            if args.fps is None
-            else args.fps
-        )
-        print(f"Syncing all videos to {expected_fps} FPS")
-
-        processes = []
-        for file in stats:
-            if stats[file]:
-                # Check if the output file already exists
-                video_name, _ = os.path.splitext(os.path.basename(file))
-                video_folder = os.path.dirname(file)
-                output_folder = os.path.join(video_folder, args.synced_folder)
-                output_file = os.path.join(output_folder, f"{video_name}.mp4")
-                os.makedirs(output_folder, exist_ok=True)
-
-                if os.path.exists(output_file):
-                    try:
-                        vid = cv2.VideoCapture(output_file)
-                        if not vid.isOpened():
-                            raise ValueError("Could not open video file")
-                    except Exception as e:
-                        pass
-                    else:
-                        print(f"Skipping {file}, already synced.")
-                        continue
-
-                processes.append(
-                    sync_video(
-                        file,
-                        stats[file],
-                        output_file=output_file,
-                        frame_rate=expected_fps,
-                        compensate_drift=args.compensate_video_drift,
-                    )
-                )
-
-        for p in processes:
-            p.wait()
+        with output_path.open("w") as f:
+            json.dump(result, f, indent=4, cls=NpEncoder)
+        print(f"Result written to {args.output}")
 
 
 if __name__ == "__main__":

@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rocsync"
+version = "0.1.0"
+authors = [{ name = "Jaro Meyer", email = "jaro.meyer@protonmail.com" }]
+description = "RocSync: Millisecond-Accurate Temporal Synchronization for Heterogeneous Camera Systems"
+readme = "README.md"
+requires-python = ">=3.10"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = ["matplotlib", "numpy", "opencv-python", "scikit-learn", "tqdm"]
+
+[project.urls]
+"Homepage" = "https://github.com/jaromeyer/rocsync"
+
+[project.scripts]
+rocsync = "rocsync.main:main"
+rocsync-align = "rocsync.helpers.align:main"
+
+[tool.setuptools]
+# This replaces find_packages()
+packages = { find = {} }

@@ -16,10 +16,11 @@ camera_formats = {".mp4", ".mov", ".avi", ".mkv"}
 
 @dataclass
 class Config:
-    dataset_folder: str                   # root folder containing camera videos and 'time sync/'
-    time_sync_json_path: str             # path to time_synchronization_*.json
-    from_camera: str                     # camera that defines the local time
-    time_string: str                     # time in that camera's local time (HH:MM:SS.mmm)
+    dataset_folder: str  # root folder containing camera videos and 'time sync/'
+    time_sync_json_path: str  # path to time_synchronization_*.json
+    from_camera: str  # camera that defines the local time
+    time_string: str  # time in that camera's local time (HH:MM:SS.mmm)
+
 
 def get_screen_size():
     """
@@ -28,6 +29,7 @@ def get_screen_size():
     """
     try:
         import tkinter as tk
+
         root = tk.Tk()
         root.withdraw()
         w = root.winfo_screenwidth()
@@ -37,6 +39,7 @@ def get_screen_size():
     except Exception:
         return 1920, 1080
 
+
 def _auto_find_time_sync_json(dataset_folder: Path) -> Path:
     """
     Look for 'time sync/time_synchronization_*.json' inside dataset_folder.
@@ -45,9 +48,7 @@ def _auto_find_time_sync_json(dataset_folder: Path) -> Path:
     base = dataset_folder / "time sync"
     candidates = sorted(base.glob("time_synchronization_*.json"))
     if not candidates:
-        raise FileNotFoundError(
-            f"No time_synchronization_*.json found under: {base}"
-        )
+        raise FileNotFoundError(f"No time_synchronization_*.json found under: {base}")
     return candidates[0]
 
 
@@ -56,7 +57,9 @@ def _parse_timecode_to_milliseconds(timecode: str) -> int:
     'HH:MM:SS.mmm' -> milliseconds since 00:00:00.000
     """
     dt = datetime.strptime(timecode, "%H:%M:%S.%f")
-    delta = (dt.hour * 3600 + dt.minute * 60 + dt.second) * 1000 + dt.microsecond // 1000
+    delta = (
+        dt.hour * 3600 + dt.minute * 60 + dt.second
+    ) * 1000 + dt.microsecond // 1000
     return delta
 
 
@@ -153,7 +156,9 @@ def compute_global_time_from_camera(
     return float(global_ms)
 
 
-def validate_moment_in_overlap(global_ms: float, time_sync_data: Dict[str, dict]) -> None:
+def validate_moment_in_overlap(
+    global_ms: float, time_sync_data: Dict[str, dict]
+) -> None:
     """
     Check that the chosen global moment lies inside the COMMON temporal overlap of all cameras:
         global_ms >= max(first_frame_i)
@@ -234,7 +239,7 @@ def main(cfg: Config) -> None:
     print(f"[INFO] Using time sync JSON: {cfg.time_sync_json_path}")
     print(f"[INFO] From-camera: {cfg.from_camera}")
     print(f"[INFO] Local time in that camera: {cfg.time_string}")
-    
+
     screen_w, screen_h = get_screen_size()
     # Load time sync JSON
     with open(cfg.time_sync_json_path, "r", encoding="utf-8") as f:
@@ -266,7 +271,9 @@ def main(cfg: Config) -> None:
     time_defining_camera_data = time_sync_data[matching_key]
 
     # Convert local camera time -> global ms
-    global_ms = compute_global_time_from_camera(cfg.time_string, time_defining_camera_data)
+    global_ms = compute_global_time_from_camera(
+        cfg.time_string, time_defining_camera_data
+    )
     print(
         f"[INFO] Local time '{cfg.time_string}' in '{cfg.from_camera}' "
         f"maps to global time: {global_ms:.2f} ms ({_ms_to_timecode(global_ms)})"
@@ -274,10 +281,12 @@ def main(cfg: Config) -> None:
 
     # Validate that this moment lies in the common overlap of all cameras
     validate_moment_in_overlap(global_ms, time_sync_data)
-    print("[INFO] Moment lies inside the common overlap of all cameras. Extracting frames...")
+    print(
+        "[INFO] Moment lies inside the common overlap of all cameras. Extracting frames..."
+    )
 
     # For each camera, extract and show the frame corresponding to this global time
-        # Pre-extract frames for each camera for this global time
+    # Pre-extract frames for each camera for this global time
     frames_info = []  # list of (camera_basename, frame)
     for camera_rel_path, cam_sync_data in tqdm(
         time_sync_data.items(), desc="Extracting frames for each camera"
@@ -307,13 +316,15 @@ def main(cfg: Config) -> None:
         camera_basename, frame = frames_info[idx]
 
         # --- Resize so width <= 500 px while keeping aspect ratio ---
-        max_width = 500
+        max_width = 1000
         h, w = frame.shape[:2]
         if w > max_width:
             scale = max_width / float(w)
             new_w = int(w * scale)
             new_h = int(h * scale)
-            frame_display = cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+            frame_display = cv2.resize(
+                frame, (new_w, new_h), interpolation=cv2.INTER_AREA
+            )
             h, w = new_h, new_w
         else:
             frame_display = frame.copy()
@@ -360,7 +371,6 @@ def main(cfg: Config) -> None:
 
     cv2.destroyAllWindows()
     print("[INFO] Done. You’ve inspected this moment across all cameras.")
-
 
 
 if __name__ == "__main__":

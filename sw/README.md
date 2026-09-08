@@ -2,14 +2,18 @@
 
 This folder contains the Python application for detecting and decoding the RocSync device in videos and images where it is visible.
 
-### How it works:
-
+## How it works:
 1. **Find ArUco marker**: Detect the ArUco marker to determine the approximate position and orientation.
 2. **Coarse homographic reprojection**: Use the detected marker's corners to perform a coarse homographic reprojection of the image.
 3. **Locate corner LEDs**: Identify the corner LEDs in the reprojected image.
 4. **Accurate reprojection**: Use the corner LEDs to refine the reprojection for higher accuracy.
 5. **Decode LEDs**: Decode the circle and binary counter LEDs by thresholding their general areas to obtain an exact timestamp.
 6. **Timestamp fitting**: If the input was a video, perform robust linear regression on all extracted timestamps to reject outliers and estimate timestamps for all frames.
+
+## TODO
+- [ ] Add back support for rev1 (currently only rev2 is supported)
+- [ ] Speed up processing (e.g., removing quantile computation and using precomputed mask for LED thresholding)
+- [ ] Merge **ftk** branch and add support for **rev2**
 
 ## Installation
 To install RocSync as a Python module, run the following commands:
@@ -22,8 +26,10 @@ pip install ./RocSync/sw
 ## Usage
 ```
 $ rocsync -h
-usage: rocsync [-h] [-c {rgb,ir}] [-s N] [-e DIRECTORY] [-o FILE] [--debug DIRECTORY] PATH [PATH ...]
-
+usage: rocsync [-h] [-c {rgb,ir}] [-s N] [-e DIRECTORY] [-o FILE] [-y] [--debug DIRECTORY] [--start1 START1] [--end1 END1] [--start2 START2] [--end2 END2] [--recurse_in_dir] [--alpha ALPHA] [--beta BETA]                
+               [--gamma GAMMA] [--brightness_boost BRIGHTNESS_BOOST] [--debug_preprocessing]                                                                                                                               
+               PATH [PATH ...]                                                                                                                                                                                             
+                                                                                                                                                                                                                           
 Extract timestamps from images and videos showing the RocSync device.
 
 positional arguments:
@@ -31,29 +37,27 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  -c, --camera_type {rgb,ir}
+  -c {rgb,ir}, --camera_type {rgb,ir}
                         specify the type of camera (default: rgb)
-  -s, --stride N        scan every N-th frame only (default: same as framerate, only applies to videos)
-  -e, --export_frames DIRECTORY
+  -s N, --stride N      scan every N-th frame only (default: same as framerate, only applies to videos)
+  -e DIRECTORY, --export_frames DIRECTORY
                         directory to store all raw frames as PNGs with timestamp (only applies to videos)
-  -o, --output FILE     JSON file to store results (default: output.json)
-  -y, --yes             automatically run yes for all prompts (potentially overwrites existing files)
+  -o FILE, --output FILE
+                        JSON file to store results
+  -y, --yes             do not ask for confirmation when processing multiple files
   --debug DIRECTORY     directory to store debug images (very slow)
-
-  --start1 WINDOW1_START_TIME 
-                        specify optional start timestamp for first search window in format hh:mm:ss.ms (default: 00:00:00.0)
-  --end1 WINDOW1_END_TIME 
-                        specify optional end timestamp for first search window in format hh:mm:ss.ms (default: end of file)
-
-  --start2 WINDOW2_START_TIME 
-                        specify optional start timestamp for second search window in format hh:mm:ss.ms (default: none)
-  --end2 WINDOW2_END_TIME 
-                        specify optional end timestamp for second search window in format hh:mm:ss.ms (default:none)
-
-  --sync_video          automatically time-sync the videos using the estimated timestamps (requires ffmpeg)
-  --synced_folder FOLDER 
-                        output folder for time-synced videos
-  --fps FPS             desired FPS for time-synced videos (default: desired FPS determined from input videos)
+  --start1 START1       start time of first window to search, in hh:mm:ss.ms format
+  --end1 END1           end time window of first window to search, in hh:mm:ss.ms format
+  --start2 START2       start time window of second window to search, in hh:mm:ss.ms format
+  --end2 END2           end time window of second window to search, in hh:mm:ss.ms format
+  --recurse_in_dir      recursively search for videos and images in directories
+  --alpha ALPHA         lower bound for image normalization. If BETA is specified but ALPHA is not, then ALPHA defaults to 0, otherwise no normalization is performed.
+  --beta BETA           upper bound for image normalization. If ALPHA is specified but BETA is not, then BETA defaults to 255, otherwise no normalization is performed.
+  --gamma GAMMA         applies gamma correction to the normalized image pixel values. Values below 1 brighten the image, while values above 1 darken it. Defaults to None
+  --brightness_boost BRIGHTNESS_BOOST
+                        brightness boost multiplies the pixel values of the normalized and gamma corrected image with the provided value.
+  --debug_preprocessing
+                        displays the image before and after preprocessing. This helps to adjust values before running the entire synchronization. Press Enter or ESC to display the next image.
   ```
 
 

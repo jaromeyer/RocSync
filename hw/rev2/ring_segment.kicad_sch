@@ -1,0 +1,5636 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "68766345-2d9c-4f12-8990-ed302b949bcd")
+	(paper "A4")
+	(lib_symbols
+		(symbol "Device:C"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0.254)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "C"
+				(at 0.635 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "C"
+				(at 0.635 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" ""
+				(at 0.9652 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Unpolarized capacitor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "cap capacitor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "C_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "C_0_1"
+				(polyline
+					(pts
+						(xy -2.032 0.762) (xy 2.032 0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -2.032 -0.762) (xy 2.032 -0.762)
+					)
+					(stroke
+						(width 0.508)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "C_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.794)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:LED"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "D"
+				(at 0 2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "LED"
+				(at 0 -2.54 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Light emitting diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "LED diode"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "LED* LED_SMD:* LED_THT:*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "LED_0_1"
+				(polyline
+					(pts
+						(xy -3.048 -0.762) (xy -4.572 -2.286) (xy -3.81 -2.286) (xy -4.572 -2.286) (xy -4.572 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.778 -0.762) (xy -3.302 -2.286) (xy -2.54 -2.286) (xy -3.302 -2.286) (xy -3.302 -1.524)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 0) (xy 1.27 0)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -1.27 -1.27) (xy -1.27 1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 1.27 -1.27) (xy 1.27 1.27) (xy -1.27 0) (xy 1.27 -1.27)
+					)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "LED_1_1"
+				(pin passive line
+					(at -3.81 0 0)
+					(length 2.54)
+					(name "K"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 3.81 0 180)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Device:R"
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "R"
+				(at 2.032 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "R"
+				(at 0 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at -1.778 0 90)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" "~"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "R res resistor"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "R_*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "R_0_1"
+				(rectangle
+					(start -1.016 -2.54)
+					(end 1.016 2.54)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "R_1_1"
+				(pin passive line
+					(at 0 3.81 270)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 1.27)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "custom_symbols:TLC59283"
+			(pin_names
+				(offset 1.016)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "U"
+				(at -13.97 38.1 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Value" "TLC59283"
+				(at -13.97 35.56 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+				)
+			)
+			(property "Footprint" "Package_DFN_QFN:Texas_RGE0024C_VQFN-24-1EP_4x4mm_P0.5mm_EP2.1x2.1mm"
+				(at -13.97 40.64 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(justify left)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 55.626 29.718 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "16-Channel, Constant-Current LED Driver with Pre-Charge FET"
+				(at 17.272 42.672 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "PWM LED driver QFN"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_fp_filters" "QFN*5x5mm*"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "TLC59283_0_1"
+				(rectangle
+					(start -13.97 34.29)
+					(end 13.97 -10.16)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(pin input line
+					(at -17.78 7.62 0)
+					(length 3.81)
+					(name "BLANK"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "18"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -17.78 5.08 0)
+					(length 3.81)
+					(name "LAT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -17.78 2.54 0)
+					(length 3.81)
+					(name "SCLK"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "24"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin input line
+					(at -17.78 -5.08 0)
+					(length 3.81)
+					(name "IREF"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "20"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 5.08 38.1 270)
+					(length 3.81)
+					(name "VCC"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "21"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 30.48 180)
+					(length 3.81)
+					(name "OUT0"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 27.94 180)
+					(length 3.81)
+					(name "OUT1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 25.4 180)
+					(length 3.81)
+					(name "OUT2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 22.86 180)
+					(length 3.81)
+					(name "OUT3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 20.32 180)
+					(length 3.81)
+					(name "OUT4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 17.78 180)
+					(length 3.81)
+					(name "OUT5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 15.24 180)
+					(length 3.81)
+					(name "OUT6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 12.7 180)
+					(length 3.81)
+					(name "OUT7"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 10.16 180)
+					(length 3.81)
+					(name "OUT8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 7.62 180)
+					(length 3.81)
+					(name "OUT9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 5.08 180)
+					(length 3.81)
+					(name "OUT10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 2.54 180)
+					(length 3.81)
+					(name "OUT11"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 0 180)
+					(length 3.81)
+					(name "OUT12"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 -2.54 180)
+					(length 3.81)
+					(name "OUT13"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 -5.08 180)
+					(length 3.81)
+					(name "OUT14"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "16"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(symbol "TLC59283_1_1"
+				(pin input line
+					(at -17.78 0 0)
+					(length 3.81)
+					(name "SIN"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "23"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at -17.78 -2.54 0)
+					(length 3.81)
+					(name "SOUT"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "19"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at -2.54 -13.97 90)
+					(length 3.81)
+					(name "GND"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "22"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin power_in line
+					(at 2.54 -13.97 90)
+					(length 3.81)
+					(name "PowerPAD"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "25"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin output line
+					(at 17.78 -7.62 180)
+					(length 3.81)
+					(name "OUT15"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "17"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:+5V"
+			(power)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#PWR"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "+5V"
+				(at 0 3.556 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"+5V\""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "+5V_0_1"
+				(polyline
+					(pts
+						(xy -0.762 1.27) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 2.54) (xy 0.762 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "+5V_1_1"
+				(pin power_in line
+					(at 0 0 90)
+					(length 0)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:+BATT"
+			(power)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#PWR"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "+BATT"
+				(at 0 3.556 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"+BATT\""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "global power battery"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "+BATT_0_1"
+				(polyline
+					(pts
+						(xy -0.762 1.27) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 2.54) (xy 0.762 1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 2.54)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "+BATT_1_1"
+				(pin power_in line
+					(at 0 0 90)
+					(length 0)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "power:GND"
+			(power)
+			(pin_numbers
+				(hide yes)
+			)
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(property "Reference" "#PWR"
+				(at 0 -6.35 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Value" "GND"
+				(at 0 -3.81 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(property "ki_keywords" "global power"
+				(at 0 0 0)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+					(hide yes)
+				)
+			)
+			(symbol "GND_0_1"
+				(polyline
+					(pts
+						(xy 0 0) (xy 0 -1.27) (xy 1.27 -1.27) (xy 0 -2.54) (xy -1.27 -1.27) (xy 0 -1.27)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "GND_1_1"
+				(pin power_in line
+					(at 0 0 270)
+					(length 0)
+					(name "~"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+	)
+	(text "R_IREF configured for 20 mA sink current"
+		(exclude_from_sim no)
+		(at 56.388 106.934 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+				(color 249 0 0 1)
+			)
+		)
+		(uuid "66227c3a-5367-4cd6-9028-9272f739fcb3")
+	)
+	(junction
+		(at 168.91 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "12b47fc8-036e-47cb-8f6b-3d7d44d97c96")
+	)
+	(junction
+		(at 240.03 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "18a111e4-2551-4433-a8be-a23237125543")
+	)
+	(junction
+		(at 118.11 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "2201614a-fcab-42e7-9e0a-e3be12f37d2c")
+	)
+	(junction
+		(at 189.23 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "28100ebe-d98c-4da2-9d61-9f5f5f4cd3f3")
+	)
+	(junction
+		(at 179.07 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "3d08ea60-18cb-4289-8d6f-af494a059c93")
+	)
+	(junction
+		(at 128.27 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "430a22f9-0cd5-4beb-aa87-a424341637fe")
+	)
+	(junction
+		(at 107.95 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "56391206-9999-44dd-8374-ed561aad6995")
+	)
+	(junction
+		(at 250.19 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6520fc01-da7a-49c3-9d8e-a0abb00e8070")
+	)
+	(junction
+		(at 148.59 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "662906d0-0a3b-4c28-8b04-8df5c83582ef")
+	)
+	(junction
+		(at 209.55 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "6fe37150-8ba3-46b1-a6e4-df6287068c12")
+	)
+	(junction
+		(at 199.39 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "7d0e425b-ef9d-4fe8-88c0-a319437b2301")
+	)
+	(junction
+		(at 158.75 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "951b2dc9-7651-4aa1-b157-4399042974f4")
+	)
+	(junction
+		(at 138.43 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "b6e3f7fe-3177-461f-a43c-cbf794717dbf")
+	)
+	(junction
+		(at 74.93 95.25)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "c8b78bc1-64a7-4f47-9d44-b7747e977db1")
+	)
+	(junction
+		(at 229.87 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "d851ab78-81c0-4489-9998-8a6bb85d22e8")
+	)
+	(junction
+		(at 219.71 33.02)
+		(diameter 0)
+		(color 0 0 0 0)
+		(uuid "fa8ced81-d611-4198-9df3-23131e19ef26")
+	)
+	(wire
+		(pts
+			(xy 199.39 73.66) (xy 199.39 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "039d7783-f816-4d8f-8f11-525af46d9c8d")
+	)
+	(wire
+		(pts
+			(xy 128.27 55.88) (xy 95.25 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "06e73319-9c34-4ce2-b64f-27347438a190")
+	)
+	(wire
+		(pts
+			(xy 189.23 71.12) (xy 189.23 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "080822c5-a939-4a2d-9579-7168975a12f2")
+	)
+	(wire
+		(pts
+			(xy 199.39 33.02) (xy 209.55 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "09f35d95-4538-400a-91ad-11750f53b121")
+	)
+	(wire
+		(pts
+			(xy 128.27 48.26) (xy 128.27 55.88)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0b30e4da-206a-40ce-b534-9e800d07776f")
+	)
+	(wire
+		(pts
+			(xy 179.07 48.26) (xy 179.07 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "11de70d8-ae12-4c8d-812d-a7d3fbc5dfa1")
+	)
+	(wire
+		(pts
+			(xy 138.43 48.26) (xy 138.43 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "16fcc61e-9a48-4745-83db-d50318f0d765")
+	)
+	(wire
+		(pts
+			(xy 74.93 95.25) (xy 80.01 95.25)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1c6f8279-c97e-4cac-b2eb-42da09e1f4ae")
+	)
+	(wire
+		(pts
+			(xy 219.71 48.26) (xy 219.71 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1de96ed5-efa5-4a69-a12c-0088a791a732")
+	)
+	(wire
+		(pts
+			(xy 229.87 81.28) (xy 229.87 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "1ebe1b6a-ae48-4870-84a6-115d439729fc")
+	)
+	(wire
+		(pts
+			(xy 250.19 86.36) (xy 250.19 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "20dec32e-1302-4dba-a64f-28010af22539")
+	)
+	(wire
+		(pts
+			(xy 107.95 50.8) (xy 95.25 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "22a2ad31-70e0-44ac-aded-4739781906e8")
+	)
+	(wire
+		(pts
+			(xy 260.35 48.26) (xy 260.35 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2522ae00-9e8c-4b29-b720-b5776a48d5c5")
+	)
+	(wire
+		(pts
+			(xy 158.75 48.26) (xy 158.75 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2cc9cdd7-4a64-40ae-a655-a395091ca2e8")
+	)
+	(wire
+		(pts
+			(xy 240.03 48.26) (xy 240.03 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "32b18dbe-8720-4b23-8109-dfb5f8ee61ac")
+	)
+	(wire
+		(pts
+			(xy 107.95 33.02) (xy 118.11 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3636112f-285e-4f6a-9b22-2df0cbd6513a")
+	)
+	(wire
+		(pts
+			(xy 95.25 76.2) (xy 209.55 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3b0e5a31-4cf5-482a-9e6e-362fc4219a8f")
+	)
+	(wire
+		(pts
+			(xy 168.91 48.26) (xy 168.91 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "40fc3716-4374-4591-81de-496a1dbb880f")
+	)
+	(wire
+		(pts
+			(xy 118.11 53.34) (xy 95.25 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "44aec5b5-1df6-4594-a6b1-e13f33614703")
+	)
+	(wire
+		(pts
+			(xy 158.75 33.02) (xy 168.91 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "46f3dbec-552c-4649-aea2-888a90e1c2cc")
+	)
+	(wire
+		(pts
+			(xy 118.11 48.26) (xy 118.11 53.34)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "493434ff-6f09-4ea0-831e-73084e73b120")
+	)
+	(wire
+		(pts
+			(xy 95.25 86.36) (xy 250.19 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4aabbc3c-1e99-41aa-b564-463ee87a5dfb")
+	)
+	(wire
+		(pts
+			(xy 250.19 33.02) (xy 260.35 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4abf13b8-8cdc-4e45-8371-97d0085dd1aa")
+	)
+	(wire
+		(pts
+			(xy 179.07 68.58) (xy 95.25 68.58)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5a5356f1-7c93-4c5c-b02d-70ff0105dc74")
+	)
+	(wire
+		(pts
+			(xy 158.75 63.5) (xy 95.25 63.5)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6b5b3176-5fb7-42fe-8760-83d028568c03")
+	)
+	(wire
+		(pts
+			(xy 148.59 33.02) (xy 158.75 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6d285cf5-775f-4c5a-a234-8862ca613c2e")
+	)
+	(wire
+		(pts
+			(xy 95.25 71.12) (xy 189.23 71.12)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6df34e50-6ba8-450a-87fd-e70936a820c2")
+	)
+	(wire
+		(pts
+			(xy 168.91 33.02) (xy 179.07 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6f5f04fb-408d-4cb3-8826-9b72f410e882")
+	)
+	(wire
+		(pts
+			(xy 53.34 73.66) (xy 59.69 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "6ffb1146-efef-4394-93f7-78f3badb2907")
+	)
+	(wire
+		(pts
+			(xy 53.34 81.28) (xy 59.69 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "75631cea-c3bf-4247-a8f7-cb7f2627eea5")
+	)
+	(wire
+		(pts
+			(xy 107.95 48.26) (xy 107.95 50.8)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "75652c9a-5e67-4e20-9878-ef04cb81a42b")
+	)
+	(wire
+		(pts
+			(xy 138.43 33.02) (xy 148.59 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "824a6f4f-d49d-4e6d-8be7-f1db1594385d")
+	)
+	(wire
+		(pts
+			(xy 138.43 58.42) (xy 95.25 58.42)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "85a58d60-2b6c-42a6-ad63-8c183642dfb1")
+	)
+	(wire
+		(pts
+			(xy 219.71 33.02) (xy 229.87 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "876e3fdb-d78f-4b84-adeb-3e76900e80f9")
+	)
+	(wire
+		(pts
+			(xy 53.34 78.74) (xy 59.69 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "94b6cfde-389d-4c9a-8478-7519c56e51de")
+	)
+	(wire
+		(pts
+			(xy 118.11 33.02) (xy 128.27 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "951db606-71af-4e0f-97be-924c0fc05fdc")
+	)
+	(wire
+		(pts
+			(xy 95.25 81.28) (xy 229.87 81.28)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a1ea7ffb-d4d9-4f5a-accd-1e2160da2645")
+	)
+	(wire
+		(pts
+			(xy 229.87 33.02) (xy 240.03 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a5a84fb1-9d93-4f57-80ab-28e424562b53")
+	)
+	(wire
+		(pts
+			(xy 240.03 83.82) (xy 95.25 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "a8f635cd-5b78-4a0a-a2ca-482e5967ecbc")
+	)
+	(wire
+		(pts
+			(xy 54.61 93.98) (xy 54.61 97.79)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "adb0410b-59dd-425f-913f-51fa6ada5ea5")
+	)
+	(wire
+		(pts
+			(xy 148.59 48.26) (xy 148.59 60.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "afb7c062-1732-488c-a295-aba07b5e34b2")
+	)
+	(wire
+		(pts
+			(xy 59.69 86.36) (xy 54.61 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "b6b7f7ef-631d-438a-b636-a58e038edd37")
+	)
+	(wire
+		(pts
+			(xy 53.34 83.82) (xy 59.69 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ba392781-9a86-4b98-871d-c12dabd6fe04")
+	)
+	(wire
+		(pts
+			(xy 82.55 43.18) (xy 82.55 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ba6fb862-a678-4803-8515-078515a1114a")
+	)
+	(wire
+		(pts
+			(xy 53.34 76.2) (xy 59.69 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c2ca39a8-2206-44bd-a029-679480cb16f1")
+	)
+	(wire
+		(pts
+			(xy 189.23 33.02) (xy 199.39 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "caef40e1-779f-41d0-80ad-6c2e0d219f55")
+	)
+	(wire
+		(pts
+			(xy 82.55 33.02) (xy 107.95 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d0ec3fba-7476-498c-80f3-cdcc9f26a5ad")
+	)
+	(wire
+		(pts
+			(xy 209.55 33.02) (xy 219.71 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d7de6568-9f14-4b8c-ac66-09476e3dd58e")
+	)
+	(wire
+		(pts
+			(xy 240.03 33.02) (xy 250.19 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "d98af112-622c-4815-bf37-fc06d58cfbe2")
+	)
+	(wire
+		(pts
+			(xy 219.71 78.74) (xy 95.25 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "e95ad321-42de-45db-80a7-bcbffc3ea59e")
+	)
+	(wire
+		(pts
+			(xy 148.59 60.96) (xy 95.25 60.96)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ebebb93f-a148-409c-9a12-3bfefb8699e1")
+	)
+	(wire
+		(pts
+			(xy 128.27 33.02) (xy 138.43 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ec33105d-887f-472f-8529-4ce172fbced0")
+	)
+	(wire
+		(pts
+			(xy 209.55 76.2) (xy 209.55 48.26)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "eed2466c-7c8c-4c8b-b747-0bce3a42d0a4")
+	)
+	(wire
+		(pts
+			(xy 179.07 33.02) (xy 189.23 33.02)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f4e6a175-8e7a-4b9a-a5fb-69c60b0eb5c5")
+	)
+	(wire
+		(pts
+			(xy 95.25 73.66) (xy 199.39 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f6085b05-8cd0-48e3-930e-f5540da5f474")
+	)
+	(wire
+		(pts
+			(xy 168.91 66.04) (xy 95.25 66.04)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fb0f3ed3-2522-45b8-839a-d501a678324a")
+	)
+	(wire
+		(pts
+			(xy 260.35 88.9) (xy 95.25 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "fdc22ebd-0156-464b-a02c-6d55c05e981f")
+	)
+	(hierarchical_label "DIN"
+		(shape input)
+		(at 53.34 81.28 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "4004c910-0a7a-475f-9735-d330761a9d7d")
+	)
+	(hierarchical_label "DOUT"
+		(shape output)
+		(at 53.34 83.82 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "63533b1e-e067-4183-8288-96c912840cc8")
+	)
+	(hierarchical_label "CLK"
+		(shape input)
+		(at 53.34 78.74 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "9a28cba4-78ef-4f6e-af6d-d83c411e40ef")
+	)
+	(hierarchical_label "BLANK"
+		(shape input)
+		(at 53.34 73.66 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "d6940057-1ae9-407b-8ed2-f2d386406f32")
+	)
+	(hierarchical_label "LAT"
+		(shape input)
+		(at 53.34 76.2 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right)
+		)
+		(uuid "ef95368c-2e17-452e-8214-bbc9ad2d93b3")
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 138.43 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "035846f7-cf69-467d-9e8c-2e7e862f4d6c")
+		(property "Reference" "D4"
+			(at 132.08 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 134.62 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 138.43 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 138.43 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 138.43 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4ac570e1-1cf3-4d46-aa4f-9b1c352759e8")
+		)
+		(pin "2"
+			(uuid "b1260a20-ca10-4e7d-b8b0-9f6cf779b2b4")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D84")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D52")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D68")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D4")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D36")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D20")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 107.95 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "092b9700-7a41-4164-8f19-b995560b76fd")
+		(property "Reference" "D101"
+			(at 101.6 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 104.14 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 107.95 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.95 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 107.95 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "4063a006-7e5a-487f-83dd-81e615483c3f")
+		)
+		(pin "2"
+			(uuid "d3067b87-59ce-42a9-95f2-c9cacf1f1310")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D181")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D149")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D165")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D101")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D133")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D117")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+5V")
+		(at 107.95 33.02 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "11c9ed6e-84f6-4f5b-83c4-1b64b8d4ee1a")
+		(property "Reference" "#PWR07"
+			(at 107.95 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "VCC"
+			(at 107.95 27.94 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 107.95 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 107.95 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+5V\""
+			(at 107.95 33.02 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "ee3b9e28-b373-4f2c-90c5-79fe912c1f73")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "#PWR027")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "#PWR017")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "#PWR022")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "#PWR07")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "#PWR012")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "#PWR01")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 189.23 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "121cf9ce-fc76-4368-b477-b6849cc9d626")
+		(property "Reference" "D109"
+			(at 182.88 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 185.42 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 189.23 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 189.23 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 189.23 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "c7c5efb9-c512-4edb-b416-c2b72bee7609")
+		)
+		(pin "2"
+			(uuid "323334ce-7145-4ff9-8af7-edcc6ecb720a")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D189")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D157")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D173")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D109")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D141")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D125")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 138.43 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1731eaa8-69ff-4634-a7d2-592eef6cc390")
+		(property "Reference" "D104"
+			(at 132.08 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 134.62 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 138.43 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 138.43 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 138.43 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "082e829a-bf3a-400c-8d87-e4f8ce80775b")
+		)
+		(pin "2"
+			(uuid "e8dd3af1-23b6-4879-96b7-95658eebe56e")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D184")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D152")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D168")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D104")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D136")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D120")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 168.91 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "1ccdcdbd-1f34-49c6-a70a-d55f41c5d477")
+		(property "Reference" "D107"
+			(at 162.56 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 165.1 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 168.91 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 168.91 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 168.91 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "724fc41a-2823-462a-a96f-0b47822a50b7")
+		)
+		(pin "2"
+			(uuid "aac52fcf-4170-4110-9caf-ff213d1dc469")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D187")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D155")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D171")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D107")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D139")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D123")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 54.61 97.79 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "23591d01-6ca3-42cc-aacd-9bef1fb2697e")
+		(property "Reference" "#PWR034"
+			(at 54.61 104.14 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 54.61 102.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 54.61 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 54.61 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 54.61 97.79 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "10f7c0c7-d230-4daf-b533-00237ffacdd1")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "#PWR055")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "#PWR047")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "#PWR051")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "#PWR034")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "#PWR043")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "#PWR039")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 118.11 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "29c3a619-3638-4d91-b155-a1d317353930")
+		(property "Reference" "D2"
+			(at 111.76 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 114.3 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 118.11 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 118.11 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 118.11 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "45a56e15-af48-4a0e-ae61-c9c29da3f171")
+		)
+		(pin "2"
+			(uuid "5881d6b1-cf7e-499f-a14c-727bafede7b7")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D82")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D50")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D66")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D2")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D34")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 240.03 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "2a80d8fc-a812-4f0c-a440-7192e5441804")
+		(property "Reference" "D114"
+			(at 233.68 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 236.22 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 240.03 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 240.03 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 240.03 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "fa7b7d9e-c56d-4e38-96e8-3516557805ee")
+		)
+		(pin "2"
+			(uuid "9bd5831e-81e4-4992-8d66-52298110850c")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D194")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D162")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D178")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D114")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D146")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D130")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 168.91 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "2f5d04a4-bddd-4196-84be-0b72bea98cdb")
+		(property "Reference" "D7"
+			(at 162.56 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 165.1 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 168.91 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 168.91 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 168.91 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2474d4a2-93ca-4ca6-a846-d134e2bf1e91")
+		)
+		(pin "2"
+			(uuid "57d77de1-5cbb-46aa-98db-25f3126569f6")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D87")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D55")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D71")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D7")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D39")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D23")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 158.75 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "3970e496-6293-4314-9a03-222bac876ee4")
+		(property "Reference" "D106"
+			(at 152.4 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 154.94 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 158.75 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 158.75 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 158.75 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2dfa601a-f74a-4350-a51d-b663f621a4ae")
+		)
+		(pin "2"
+			(uuid "5ab849a4-46c9-4cc5-bb7c-c2f951e32407")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D186")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D154")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D170")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D106")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D138")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D122")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 39.37 58.42 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3d100c78-b98c-407f-ae79-d3b2cc8e761c")
+		(property "Reference" "#PWR033"
+			(at 39.37 64.77 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 39.37 63.5 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 39.37 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 39.37 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 39.37 58.42 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "1744a53d-606d-44c4-80a7-2b65d51f9135")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "#PWR054")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "#PWR046")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "#PWR050")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "#PWR033")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "#PWR042")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "#PWR037")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 199.39 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "3edc7603-c0ad-4d3e-8ae2-e75c21f1d88b")
+		(property "Reference" "D10"
+			(at 193.04 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 195.58 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 199.39 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 199.39 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 199.39 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d7a55088-145a-43ba-9d54-16e406f57425")
+		)
+		(pin "2"
+			(uuid "d1983af3-1f4a-4c38-809d-82d7246c9a95")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D90")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D58")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D74")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D10")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D42")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D26")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 54.61 90.17 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "418d9eb7-a8fc-4540-b668-96dab6b7c7c6")
+		(property "Reference" "R7"
+			(at 57.15 88.8999 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "2.7k"
+			(at 57.15 91.4399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Resistor_SMD:R_0402_1005Metric"
+			(at 56.388 90.17 90)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 54.61 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Resistor"
+			(at 54.61 90.17 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "f267391c-1f26-48eb-a849-fa4b0a4035b8")
+		)
+		(pin "1"
+			(uuid "f8cba759-00de-43d6-9765-132ed3697cfb")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "R12")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "R10")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "R11")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "R7")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "R9")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "R8")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 158.75 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "52fb6f7e-bf4a-46b4-8975-9cc25f79954f")
+		(property "Reference" "D6"
+			(at 152.4 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 154.94 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 158.75 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 158.75 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 158.75 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "19511c07-912f-42bf-b677-046c5c45d8b7")
+		)
+		(pin "2"
+			(uuid "28d800df-f905-442c-a8a1-6d693b9ce17d")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D86")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D54")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D70")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D6")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D38")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D22")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 219.71 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "58aac9bb-d085-47a3-91a4-a7716eeb153f")
+		(property "Reference" "D12"
+			(at 213.36 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 215.9 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 219.71 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 219.71 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 219.71 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "cdc72c36-950d-4e5c-9240-a01fad5e34a7")
+		)
+		(pin "2"
+			(uuid "c2eef4eb-5d26-489b-b532-6fb54e46aba2")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D92")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D60")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D76")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D12")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D44")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D28")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 250.19 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6be18d2d-d9c9-4124-9ba7-841e8ffc6a4e")
+		(property "Reference" "D15"
+			(at 243.84 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 246.38 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 250.19 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 250.19 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 250.19 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6a9e428f-c61e-4fcd-b58b-8f876d2fd4fb")
+		)
+		(pin "2"
+			(uuid "14561b5b-0667-4fc9-80a4-968251aad731")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D95")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D63")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D79")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D15")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D47")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D31")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 229.87 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6ca90f1c-4b75-4318-b21d-75a4d20634b6")
+		(property "Reference" "D13"
+			(at 223.52 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 226.06 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 229.87 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 229.87 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 229.87 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "b1921832-6a29-402f-be45-6e97d3cfbaef")
+		)
+		(pin "2"
+			(uuid "f7661f51-319c-4a4c-9ae8-440696e335d6")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D93")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D61")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D77")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D13")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D45")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D29")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 209.55 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "6f8c9ec3-0b8d-4845-a6bf-84e193c6b7e1")
+		(property "Reference" "D11"
+			(at 203.2 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 205.74 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 209.55 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 209.55 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 209.55 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "86798629-27cf-4267-885e-ecb380e5c8f1")
+		)
+		(pin "2"
+			(uuid "88c08974-b41d-44ff-9c76-679ba591d9f4")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D91")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D59")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D75")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D11")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D43")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D27")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 128.27 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7047c6ce-e23d-40c5-90c6-a5efb816bbad")
+		(property "Reference" "D3"
+			(at 121.92 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 124.46 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 128.27 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 128.27 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 128.27 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "00e9fbdb-2792-4c49-90d0-0222de2c2d6d")
+		)
+		(pin "2"
+			(uuid "85416874-9097-4e75-b8fe-d260932a4a9d")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D83")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D51")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D67")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D3")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D35")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D19")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 148.59 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "75645559-82c6-4b03-8b44-f4dddd65964b")
+		(property "Reference" "D5"
+			(at 142.24 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 144.78 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 148.59 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 148.59 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 148.59 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "2a27f9e6-be8b-40a6-acf7-f8f4c9a03a7e")
+		)
+		(pin "2"
+			(uuid "66886c50-4bc0-48fc-90f1-b578fd50bc3e")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D85")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D53")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D69")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D5")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D37")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D21")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:+BATT")
+		(at 39.37 50.8 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7a4d7539-d6ce-4765-bdac-a029c7308c6b")
+		(property "Reference" "#PWR032"
+			(at 39.37 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "VCC"
+			(at 39.37 45.72 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 39.37 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 39.37 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"+BATT\""
+			(at 39.37 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7255e5c0-33bc-441b-9ee2-aafbb3828191")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "#PWR053")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "#PWR045")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "#PWR049")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "#PWR032")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "#PWR041")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "#PWR036")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "custom_symbols:TLC59283")
+		(at 77.47 81.28 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "7ab032c6-8d4f-4413-8a27-fa7feb27b952")
+		(property "Reference" "U3"
+			(at 84.7441 41.91 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "TLC59283"
+			(at 84.7441 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Package_DFN_QFN:Texas_RGE0024C_VQFN-24-1EP_4x4mm_P0.5mm_EP2.1x2.1mm_ThermalVias"
+			(at 63.5 40.64 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 133.096 51.562 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "16-Channel, Constant-Current LED Driver with Pre-Charge FET"
+			(at 94.742 38.608 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "5"
+			(uuid "55eb93b7-fbea-4d61-bea1-e5ff8a63431f")
+		)
+		(pin "13"
+			(uuid "2ca6b3e1-8174-4131-9d27-49415c4a9329")
+		)
+		(pin "15"
+			(uuid "da97a0ee-0bed-45af-8b99-8c342801edc7")
+		)
+		(pin "23"
+			(uuid "4ffccf9c-9bbf-4118-900c-d202e494f57b")
+		)
+		(pin "3"
+			(uuid "78d5cb56-32d5-4e8b-b974-8ea7db1518df")
+		)
+		(pin "17"
+			(uuid "55b55ab2-e9c3-4e54-a9d6-26aa129cf73c")
+		)
+		(pin "4"
+			(uuid "c9ff5e18-f7c3-404b-96d8-0f3b160ab7d6")
+		)
+		(pin "12"
+			(uuid "c2ddb8ed-cf82-406e-af90-59f2c858b054")
+		)
+		(pin "9"
+			(uuid "bbf93bc1-58ca-4774-8cbb-041b47603fdf")
+		)
+		(pin "6"
+			(uuid "5b47045e-bf8e-4236-a27f-58a1e3ce218f")
+		)
+		(pin "11"
+			(uuid "8f1aa1a0-9818-4e65-98bb-c819a52402d4")
+		)
+		(pin "8"
+			(uuid "c11422e1-aa41-4391-aa05-8bb52c4dd81c")
+		)
+		(pin "18"
+			(uuid "9ef96b5d-b8e4-4b56-a029-4e3bb4244f75")
+		)
+		(pin "21"
+			(uuid "17cfadb6-727b-4720-9333-a844b4177483")
+		)
+		(pin "14"
+			(uuid "3e675f80-496a-417d-81ee-c26f1e63dd91")
+		)
+		(pin "22"
+			(uuid "313b52e3-8dbd-455b-851a-da2911ab1de1")
+		)
+		(pin "2"
+			(uuid "e011b824-33c1-4d1c-8a25-eecc5ed4d760")
+		)
+		(pin "24"
+			(uuid "c220ed71-b956-42cf-ab1f-6c8104bc9355")
+		)
+		(pin "1"
+			(uuid "244bdcd2-526f-432e-9a25-5ec0de7d11b2")
+		)
+		(pin "7"
+			(uuid "c0ed2acb-0bb2-4339-91a3-f207269f9ca1")
+		)
+		(pin "25"
+			(uuid "3caf4470-b912-4a82-8535-66f27a2e73e3")
+		)
+		(pin "19"
+			(uuid "3b432930-e1a0-4c29-bb7e-0064dd9f5acc")
+		)
+		(pin "10"
+			(uuid "b1f70c50-e0a5-4dd7-9e22-a5b4afd13a12")
+		)
+		(pin "16"
+			(uuid "e5b8d4a1-1ac9-43b8-b406-e97dc2f1028a")
+		)
+		(pin "20"
+			(uuid "09f0e4de-b39b-4d42-ab53-b810f0283fec")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "U8")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "U6")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "U7")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "U3")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "U5")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "U4")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 219.71 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "7c36c51a-30cb-45c4-ac89-c7c21903f095")
+		(property "Reference" "D112"
+			(at 213.36 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 215.9 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 219.71 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 219.71 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 219.71 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "370e9b64-74dd-4f38-bb7d-11453b27b48e")
+		)
+		(pin "2"
+			(uuid "a95fbf53-6b87-45fc-a752-d885370700cc")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D192")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D160")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D176")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D112")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D144")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D128")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 179.07 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "8369f6dc-03bb-4923-8ce4-4d5a963778e2")
+		(property "Reference" "D8"
+			(at 172.72 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 175.26 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 179.07 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 179.07 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 179.07 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "be8e9a3b-e30b-4342-b57a-d3fc19ccede5")
+		)
+		(pin "2"
+			(uuid "e2ae481c-9a0c-42ba-9096-478275986c5b")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D88")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D56")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D72")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D8")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D40")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D24")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 260.35 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "87e8a189-3c24-41bb-b61f-5147bdacdf0f")
+		(property "Reference" "D16"
+			(at 254 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 256.54 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 260.35 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 260.35 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 260.35 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "93dcb272-6691-493f-9a90-facb7d7d6275")
+		)
+		(pin "2"
+			(uuid "2b1d058c-f545-4582-8365-be0f96cc188d")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D96")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D64")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D80")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D16")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D48")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D32")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 229.87 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "897046bc-5fb8-4fdd-9594-e273ecc04b3f")
+		(property "Reference" "D113"
+			(at 223.52 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 226.06 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 229.87 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 229.87 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 229.87 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "651b6a27-7bcd-4ebb-a255-0e4a37716082")
+		)
+		(pin "2"
+			(uuid "fb657b17-a21b-4f76-83cc-02678754cc5b")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D193")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D161")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D177")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D113")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D145")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D129")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 209.55 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9c39dc0e-95d0-40ff-82d9-9d9702130c79")
+		(property "Reference" "D111"
+			(at 203.2 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 205.74 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 209.55 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 209.55 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 209.55 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "759f8964-f83c-4460-aa4f-547195de92b6")
+		)
+		(pin "2"
+			(uuid "1dd451e3-b6f0-43ef-a773-4a33dab4cd66")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D191")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D159")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D175")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D111")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D143")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D127")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 148.59 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "9d22c398-0b60-49e9-80e9-75bf332fc987")
+		(property "Reference" "D105"
+			(at 142.24 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 144.78 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 148.59 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 148.59 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 148.59 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "3880e806-7f72-4a1f-821b-e77aacf5e6b6")
+		)
+		(pin "2"
+			(uuid "5af0df9d-ca1d-43ac-adc4-526abdfa9502")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D185")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D153")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D169")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D105")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D137")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D121")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 128.27 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a297a535-4344-4a31-9fbe-cd822477be38")
+		(property "Reference" "D103"
+			(at 121.92 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 124.46 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 128.27 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 128.27 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 128.27 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "7329887b-c42c-4546-922d-64992af211e8")
+		)
+		(pin "2"
+			(uuid "1a833223-7970-4158-9c6b-fa8485654153")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D183")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D151")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D167")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D103")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D135")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D119")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 250.19 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a5cc862d-4887-4ccc-a4d0-7160f14c1f39")
+		(property "Reference" "D115"
+			(at 243.84 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 246.38 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 250.19 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 250.19 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 250.19 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "21784c11-4240-472c-a121-94fb42a994d0")
+		)
+		(pin "2"
+			(uuid "e048c87d-6ca8-4df8-b150-3a1c4d89198f")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D195")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D163")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D179")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D115")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D147")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D131")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 39.37 54.61 180)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "afb7452e-a007-440e-ab31-64bcbb227e96")
+		(property "Reference" "C8"
+			(at 43.18 53.3399 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Value" "0.1uf"
+			(at 43.18 55.8799 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(property "Footprint" "Capacitor_SMD:C_0402_1005Metric"
+			(at 38.4048 50.8 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 39.37 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Unpolarized capacitor"
+			(at 39.37 54.61 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "2"
+			(uuid "0f241aa1-184e-4720-bf11-ad7d71c2f1b4")
+		)
+		(pin "1"
+			(uuid "7d296dc0-890c-4aca-956d-960800e473af")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "C13")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "C11")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "C12")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "C8")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "C10")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "C9")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 118.11 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "bdae078f-6e71-4d9d-8c44-8f60ae808811")
+		(property "Reference" "D102"
+			(at 111.76 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 114.3 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 118.11 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 118.11 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 118.11 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "d4418343-d85e-4d77-a3ab-26009e006cef")
+		)
+		(pin "2"
+			(uuid "9716e530-2fe1-49d9-bc81-cf6fc66643cf")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D182")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D150")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D166")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D102")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D134")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D118")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 189.23 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "c1c9d380-ea45-451a-90ed-616475611a5a")
+		(property "Reference" "D9"
+			(at 182.88 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 185.42 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 189.23 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 189.23 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 189.23 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "cc8c91a7-3153-406c-9031-a9e169aa2875")
+		)
+		(pin "2"
+			(uuid "d87c3d91-70a4-4375-84f5-a0c090531534")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D89")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D57")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D73")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D9")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D41")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D25")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 199.39 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "cebd8c44-8f4b-4b74-883d-0da4d3b59aad")
+		(property "Reference" "D110"
+			(at 193.04 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 195.58 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 199.39 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 199.39 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 199.39 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "6b444e5f-bb61-4602-bf5e-bb235762b8c7")
+		)
+		(pin "2"
+			(uuid "347a446c-9b80-49b6-a8d1-9a37dc0e1164")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D190")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D158")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D174")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D110")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D142")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D126")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 260.35 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "eeadfd66-dc8b-413e-8e72-413b2bdc0afb")
+		(property "Reference" "D116"
+			(at 254 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 256.54 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 260.35 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 260.35 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 260.35 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "e5ec694e-7b7b-46fd-871b-6037ea0b8f19")
+		)
+		(pin "2"
+			(uuid "9fd16927-45e3-41dc-908b-46488c1c61cc")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D196")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D164")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D180")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D116")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D148")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D132")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 107.95 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "f889d2c2-51ff-4c3b-b4ea-72587d8eb42d")
+		(property "Reference" "D1"
+			(at 101.6 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 104.14 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 107.95 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 107.95 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 107.95 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "de54127e-2d4f-4319-8020-197f7ff7560d")
+		)
+		(pin "2"
+			(uuid "929bc9bf-3a48-4754-b2af-cb28c1dd99c2")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D81")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D49")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D65")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D1")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D33")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 179.07 44.45 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "fb424f3c-54ad-4474-9edd-29c94584e38e")
+		(property "Reference" "D108"
+			(at 172.72 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "IR LED"
+			(at 175.26 46.0375 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:XYC-HIR76C-LX4"
+			(at 179.07 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 179.07 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 179.07 44.45 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "f458fa87-0a19-465b-8cc3-27884e1eae1c")
+		)
+		(pin "2"
+			(uuid "dd9ad392-3172-41dd-9fa0-7fca2a79375b")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D188")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D156")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D172")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D108")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D140")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D124")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "Device:LED")
+		(at 240.03 36.83 90)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fc58781e-38fd-498f-9cf4-1d24cb1f66d6")
+		(property "Reference" "D14"
+			(at 233.68 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Value" "LED"
+			(at 236.22 38.4175 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" "custom_footprints:HL-A-3528"
+			(at 240.03 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" "~"
+			(at 240.03 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Light emitting diode"
+			(at 240.03 36.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "8afe5c3e-13f1-406e-88f5-f3e791d45128")
+		)
+		(pin "2"
+			(uuid "5536d01c-1a1d-420c-b925-756d6f47a8d0")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "D94")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "D62")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "D78")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "D14")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "D46")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "D30")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(symbol
+		(lib_id "power:GND")
+		(at 74.93 95.25 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(uuid "fc8b94dd-7609-4b0b-9556-41b54067cb2e")
+		(property "Reference" "#PWR035"
+			(at 74.93 101.6 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Value" "GND"
+			(at 74.93 100.33 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Footprint" ""
+			(at 74.93 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Datasheet" ""
+			(at 74.93 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(property "Description" "Power symbol creates a global label with name \"GND\" , ground"
+			(at 74.93 95.25 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(hide yes)
+			)
+		)
+		(pin "1"
+			(uuid "a21c2d78-6ecb-4166-90eb-227f274f63a8")
+		)
+		(instances
+			(project "RocSync_testing"
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/4ae57f6c-9ea3-47a4-b112-d4246b1f581b"
+					(reference "#PWR056")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/8b2fd4ae-9b72-4541-831a-6357de30d317"
+					(reference "#PWR048")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/b929d2f4-d94a-4c71-8002-937fd95f35c2"
+					(reference "#PWR052")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/c562b757-3ab9-485a-b1f7-77ad48bb550d"
+					(reference "#PWR035")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/d571ef15-873e-4aa9-84c2-4d8f0bc45575"
+					(reference "#PWR044")
+					(unit 1)
+				)
+				(path "/87eb1497-7a96-426c-864e-6da44b79208d/f09812dd-0894-45ab-841a-aa47db1913a8"
+					(reference "#PWR040")
+					(unit 1)
+				)
+			)
+		)
+	)
+)

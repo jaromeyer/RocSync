@@ -1,28 +1,31 @@
 import argparse
-from concurrent.futures import ThreadPoolExecutor
-from dataclasses import dataclass
 import json
 import os
+from concurrent.futures import ThreadPoolExecutor
+from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
-from typing import Optional, List
+from typing import List, Optional
 
 import cv2
 import numpy as np
-from datetime import datetime
 from tqdm import tqdm
 
 # -------------------------
 # Config & CLI
 # -------------------------
 
+
 @dataclass
 class Config:
-    dataset_folder: str                   # root folder containing subfolders with raw and internal calibration videos
-    time_sync_json_path: str              # path to time sync json
-    clips_to_extract_json: str            # path to clips json
+    dataset_folder: str  # root folder containing subfolders with raw and internal calibration videos
+    time_sync_json_path: str  # path to time sync json
+    clips_to_extract_json: str  # path to clips json
     target_fps: float
-    from_raw_camera_time_of_camera: Optional[str] = None  # camera basename used to define clip timecodes (optional)
-    only_specified: bool = False          # if True, only process from_raw_camera_time_of_camera
+    from_raw_camera_time_of_camera: Optional[str] = (
+        None  # camera basename used to define clip timecodes (optional)
+    )
+    only_specified: bool = False  # if True, only process from_raw_camera_time_of_camera
 
 
 def _auto_find_time_sync_json(dataset_folder: Path) -> Path:
@@ -34,9 +37,7 @@ def _auto_find_time_sync_json(dataset_folder: Path) -> Path:
     base = dataset_folder / "time sync"
     candidates = sorted(base.glob("time_synchronization_*.json"))
     if not candidates:
-        raise FileNotFoundError(
-            f"No time_synchronization_*.json found under: {base}"
-        )
+        raise FileNotFoundError(f"No time_synchronization_*.json found under: {base}")
     return candidates[0]
 
 
@@ -117,6 +118,7 @@ def build_arg_parser() -> argparse.ArgumentParser:
 # Main logic
 # -------------------------
 
+
 def main(config: Config) -> None:
     print(f"Processing dataset folder: {config.dataset_folder}")
 
@@ -131,7 +133,7 @@ def main(config: Config) -> None:
     # Use provided time sync JSON path
     time_sync_json_path = config.time_sync_json_path
 
-    with open(time_sync_json_path, 'r', encoding='utf-8') as f:
+    with open(time_sync_json_path, "r", encoding="utf-8") as f:
         time_sync_data = json.load(f)
 
     # Adjust keys to reflect relative raw video paths (same logic as original,
@@ -145,8 +147,10 @@ def main(config: Config) -> None:
     if config.from_raw_camera_time_of_camera is not None:
         matching_key = next(
             (
-                k for k in time_sync_data
-                if os.path.splitext(os.path.basename(k))[0] == config.from_raw_camera_time_of_camera
+                k
+                for k in time_sync_data
+                if os.path.splitext(os.path.basename(k))[0]
+                == config.from_raw_camera_time_of_camera
             ),
             None,
         )
@@ -172,7 +176,10 @@ def main(config: Config) -> None:
             camera_basename = os.path.splitext(os.path.basename(camera))[0]
 
             # If --only-specified is set, skip all other cameras
-            if config.only_specified and config.from_raw_camera_time_of_camera is not None:
+            if (
+                config.only_specified
+                and config.from_raw_camera_time_of_camera is not None
+            ):
                 if camera_basename != config.from_raw_camera_time_of_camera:
                     continue
 
@@ -212,6 +219,7 @@ def main(config: Config) -> None:
 # Clip + helpers
 # -------------------------
 
+
 class Clip:
     def __init__(
         self,
@@ -230,9 +238,7 @@ class Clip:
         self.start_string_formatted = self._parse_timecode_to_string_formatted(
             start_string
         )
-        self.end_string_formatted = self._parse_timecode_to_string_formatted(
-            end_string
-        )
+        self.end_string_formatted = self._parse_timecode_to_string_formatted(end_string)
 
     def _convert_to_real_time(
         self,
@@ -256,9 +262,8 @@ class Clip:
     def _parse_timecode_to_milliseconds(timecode: str) -> int:
         dt = datetime.strptime(timecode, "%H:%M:%S.%f")
         delta = (
-            (dt.hour * 3600 + dt.minute * 60 + dt.second) * 1000
-            + dt.microsecond // 1000
-        )
+            dt.hour * 3600 + dt.minute * 60 + dt.second
+        ) * 1000 + dt.microsecond // 1000
         return delta
 
     @staticmethod
@@ -281,7 +286,7 @@ def _parse_clips_to_extract_json(
     first_frame_time: float = None,
     speed_factor: float = None,
 ) -> List[Clip]:
-    with open(path, 'r', encoding='utf-8') as f:
+    with open(path, "r", encoding="utf-8") as f:
         clips_raw = json.load(f)
 
     clips: List[Clip] = []
@@ -325,11 +330,9 @@ def _get_frames_to_extract(
     i = 0
     for t in tqdm(target_timestamps, desc="Matching timestamps"):
         # Move i forward while the next actual timestamp is closer to t
-        while (
-            i + 1 < len(actual_timestamps)
-            and abs(actual_timestamps[i + 1] - t)
-            < abs(actual_timestamps[i] - t)
-        ):
+        while i + 1 < len(actual_timestamps) and abs(
+            actual_timestamps[i + 1] - t
+        ) < abs(actual_timestamps[i] - t):
             i += 1
         frames_to_extract.append(i)
 
@@ -346,8 +349,7 @@ def _get_theoretical_timestamps_of_all_frames(time_sync_data: dict) -> List[floa
     n_frames = time_sync_data["n_frames"]
 
     return [
-        first_frame + n * (last_frame - first_frame) / n_frames
-        for n in range(n_frames)
+        first_frame + n * (last_frame - first_frame) / n_frames for n in range(n_frames)
     ]
 
 
@@ -355,9 +357,8 @@ def _get_theoretical_timestamps_of_all_frames(time_sync_data: dict) -> List[floa
 # Frame extraction & PNG writing
 # -------------------------
 
-def _save_frames_as_png(
-    video_path: str, frames: List[int], output_folder: str
-) -> None:
+
+def _save_frames_as_png(video_path: str, frames: List[int], output_folder: str) -> None:
     """
     Assumes frames is sorted ascendingly.
     """
